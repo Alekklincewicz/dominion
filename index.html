@@ -681,7 +681,7 @@ let DG={
   allies:[],enemies:[],sel:null,nations:{},busy:false,
   map:null,sentiments:{},territories:[],
   statDeltas:{influence:0,economy:0,military:0,resources:0,land:0},
-  history:[],collateral:[],dpsCollapsed:false
+  history:[],collateral:[],chatHistory:[],dpsCollapsed:false
 };
 
 DNS.forEach(n=>{DG.nations[n.id]={...n,cs:{...n.stats}};DG.sentiments[n.id]=0;});
@@ -1284,7 +1284,16 @@ async function dSubmit(){
   document.getElementById('dlog').scrollTop=99999;
   try{
     const r=await dCallAI(move);td.remove();
-    DG._lastResult=r;dApply(r);
+    DG._lastResult=r;
+    // Record this turn as factual history for future AI calls
+    const n=DG.playerNation,s=DG.cs;
+    DG.chatHistory.push(
+      {role:'user',content:`Turn ${DG.turn} — MOVE: "${move}" | INF:${Math.round(s.influence)} ECO:${Math.round(s.economy)} MIL:${Math.round(s.military)} RES:${Math.round(s.resources)} | Allies:${DG.allies.map(id=>DG.nations[id]?.name||id).join(',')||'None'} | Enemies:${DG.enemies.map(id=>DG.nations[id]?.name||id).join(',')||'None'} | Territories:${DG.territories.map(id=>DG.nations[id]?.name||id).join(',')||'None'}`},
+      {role:'assistant',content:r.narrative+(r.sideEffect&&r.sideEffect.trim()?' '+r.sideEffect:'')}
+    );
+    // Keep last 12 messages (6 turns) to stay within token budget
+    if(DG.chatHistory.length>12)DG.chatHistory=DG.chatHistory.slice(-12);
+    dApply(r);
     worldEvent();
     sentimentDrift();
     DG.history.push({turn:DG.turn,...DG.cs});
@@ -1337,7 +1346,7 @@ RULES: Territory conquest requires target military<40 AND your military>70, OR c
   const resp=await fetch('/api/ai',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({messages:[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}]})
+    body:JSON.stringify({messages:[{role:'system',content:sysPrompt},...DG.chatHistory,{role:'user',content:userPrompt}]})
   });
   if(!resp.ok){
     let detail='';

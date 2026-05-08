@@ -886,18 +886,25 @@ function initMap(){
   });
   DG.map=map;
   map.on('load',()=>{
-    map.setFog({color:'#111a30','high-color':'#1a2848','horizon-blend':0.06,'space-color':'#04070f','star-intensity':0.7});
     map.addSource('countries',{type:'vector',url:'mapbox://mapbox.country-boundaries-v1'});
-    const gameISOs=['US','CN','RU','DE','IN','BR','GB','FR','JP','TR','IR','AU','SA','NG','ZA','MX','ID','KR','AR','PK','CA','UA','PL','IT','ES','NL','SE','RO','GR','IL','AE','IQ','QA','VN','TH','PH','MY','KZ','BD','TW','KP','MM','ET','KE','DZ','MA','CD','GH','AO','CO','CL','VE','PE'];
-    map.addLayer({id:'country-fills',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':buildColorExpr(),'fill-opacity':['case',['in',['get','iso_3166_1'],['literal',gameISOs]],0.80,0.50]}});
-    map.addLayer({id:'country-borders',type:'line',source:'countries','source-layer':'country_boundaries',paint:{'line-color':buildBorderExpr(),'line-width':['case',['in',['get','iso_3166_1'],['literal',gameISOs]],1.2,0.8],'line-opacity':0.95}});
-    map.addLayer({id:'game-nation-rim',type:'line',source:'countries','source-layer':'country_boundaries',paint:{'line-color':'#8ab4cc','line-width':['case',['in',['get','iso_3166_1'],['literal',gameISOs]],0.6,0],'line-opacity':0.5}});
-    map.addLayer({id:'country-hover',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':'#ffffff','fill-opacity':['case',['boolean',['feature-state','hover'],false],0.15,0]}});
-    map.addLayer({id:'territory-overlay',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':DG.playerNation?.color||'#e0a82a','fill-opacity':['case',['in',['get','iso_3166_1'],['literal',[]]],0.4,0]}});
-    map.addLayer({id:'territory-glow',type:'line',source:'countries','source-layer':'country_boundaries',paint:{'line-color':DG.playerNation?.color||'#e0a82a','line-width':['case',['in',['get','iso_3166_1'],['literal',[]]],2.5,0],'line-opacity':0.7,'line-blur':2}});
+    // Transparent hit area for mouse events over all countries
+    map.addLayer({id:'country-hit',type:'fill',source:'countries','source-layer':'country_boundaries',
+      paint:{'fill-color':'#000000','fill-opacity':0}});
+    // Hover highlight
+    map.addLayer({id:'country-hover',type:'fill',source:'countries','source-layer':'country_boundaries',
+      paint:{'fill-color':'#ffffff','fill-opacity':['case',['boolean',['feature-state','hover'],false],0.10,0]}});
+    // Player + territory: subtle gold fill
+    map.addLayer({id:'player-fill',type:'fill',source:'countries','source-layer':'country_boundaries',
+      paint:{'fill-color':'#e0a82a','fill-opacity':['case',['in',['get','iso_3166_1'],['literal',[]]],0.16,0]}});
+    // Player + territory: gold outline
+    map.addLayer({id:'player-outline',type:'line',source:'countries','source-layer':'country_boundaries',
+      paint:{'line-color':'#e0a82a','line-width':['case',['in',['get','iso_3166_1'],['literal',[]]],2.5,0],'line-opacity':0.95,'line-blur':0.3}});
+    // Selected country: white outline
+    map.addLayer({id:'selected-outline',type:'line',source:'countries','source-layer':'country_boundaries',
+      paint:{'line-color':'#ffffff','line-width':['case',['in',['get','iso_3166_1'],['literal',[]]],1.8,0],'line-opacity':0.90}});
 
     let hoverId=null;
-    map.on('mousemove','country-fills',e=>{
+    map.on('mousemove','country-hit',e=>{
       if(e.features.length>0){
         if(hoverId!==null)map.setFeatureState({source:'countries',sourceLayer:'country_boundaries',id:hoverId},{hover:false});
         hoverId=e.features[0].id;
@@ -909,16 +916,16 @@ function initMap(){
           const s=DG.nations[nation.id]?.cs;
           const sent=DG.sentiments[nation.id]||0;
           const isT=DG.territories.includes(nation.id);
-          tp.innerHTML='<b>'+nation.name+'</b> &nbsp;·&nbsp; '+getSentimentLabel(sent)+' &nbsp;·&nbsp; MIL:'+Math.round(s?.military||0)+' ECO:'+Math.round(s?.economy||0)+(isT?' &nbsp;⚑':' ');
+          tp.innerHTML='<b>'+nation.name+'</b> &nbsp;·&nbsp; '+getSentimentLabel(sent)+' &nbsp;·&nbsp; MIL:'+Math.round(s?.military||0)+' ECO:'+Math.round(s?.economy||0)+(isT?' &nbsp;⚑':'');
           tp.style.display='block';
         }else tp.style.display='none';
       }
     });
-    map.on('mouseleave','country-fills',()=>{
+    map.on('mouseleave','country-hit',()=>{
       if(hoverId!==null)map.setFeatureState({source:'countries',sourceLayer:'country_boundaries',id:hoverId},{hover:false});
       hoverId=null;document.getElementById('dtp').style.display='none';
     });
-    map.on('click','country-fills',e=>{
+    map.on('click','country-hit',e=>{
       if(e.features.length>0){
         const iso=e.features[0].properties.iso_3166_1;
         const nation=DNS.find(n=>n.iso===iso);
@@ -926,7 +933,6 @@ function initMap(){
           if(!DG.nations[nation.id]?.cs)DG.nations[nation.id]={...nation,cs:{...nation.stats}};
           dInspect(nation.id);
           map.flyTo({center:nation.center,zoom:3.5,duration:800});
-          // auto-open inspector on mobile
           if(window.innerWidth<=680)togglePanel('drp');
         }
       }
@@ -946,50 +952,22 @@ function updateLegend(){
   el.innerHTML=h;
 }
 
-function updateTerritoryLayers(){
-  if(!DG.map||!DG.map.isStyleLoaded())return;
-  const isoList=DG.territories.map(id=>DG.nations[id]?.iso).filter(Boolean);
-  const pc=DG.playerNation?.color||'#e0a82a';
-  try{
-    DG.map.setPaintProperty('territory-overlay','fill-color',pc);
-    DG.map.setPaintProperty('territory-overlay','fill-opacity',['case',['in',['get','iso_3166_1'],['literal',isoList]],0.4,0]);
-    DG.map.setPaintProperty('territory-glow','line-color',pc);
-    DG.map.setPaintProperty('territory-glow','line-width',['case',['in',['get','iso_3166_1'],['literal',isoList]],2.5,0]);
-  }catch(e){}
-}
-
-function getAllISOs(){return DNS.map(n=>n.iso);}
-
-function buildColorExpr(){
-  const s=['match',['get','iso_3166_1']];
-  const pc=DG.playerNation?.color||'#e0a82a';
-  DNS.forEach(n=>{s.push(n.iso,(DG.territories&&DG.territories.includes(n.id))?pc:n.color);});
-  s.push('#3d5868');return s;
-}
-
-function buildBorderExpr(){
-  const s=['match',['get','iso_3166_1']];
-  const pc=DG.playerNation?.color||'#e0a82a';
-  (DG.territories||[]).forEach(id=>{const n=DG.nations[id];if(n)s.push(n.iso,pc);});
-  DG.allies.forEach(id=>{const n=DG.nations[id];if(n)s.push(n.iso,'#22d882');});
-  DG.enemies.forEach(id=>{const n=DG.nations[id];if(n)s.push(n.iso,'#ff3355');});
-  if(DG.playerNation)s.push(DG.playerNation.iso,pc);
-  if(DG.sel){const sn=DG.nations[DG.sel];if(sn)s.push(sn.iso,'#ffffff');}
-  s.push('#506a80');return s;
-}
-
 function highlightPlayer(){
   if(!DG.map||!DG.map.isStyleLoaded())return;
   try{
-    DG.map.setPaintProperty('country-fills','fill-color',buildColorExpr());
-    DG.map.setPaintProperty('country-borders','line-color',buildBorderExpr());
-    DG.map.setPaintProperty('country-borders','line-width',['match',['get','iso_3166_1'],
-      ...(DG.playerNation?[DG.playerNation.iso,2]:[]),
-      ...(DG.territories||[]).flatMap(id=>[DG.nations[id]?.iso,2.2]).filter(Boolean),
-      ...(DG.sel&&DG.sel!==DG.playerNation?.id?[DG.nations[DG.sel]?.iso,1.5]:[]).filter(Boolean),
-      0.8
-    ]);
-    updateTerritoryLayers();updateLegend();
+    const goldISOs=[
+      ...(DG.playerNation?[DG.playerNation.iso]:[]),
+      ...(DG.territories||[]).map(id=>DG.nations[id]?.iso).filter(Boolean)
+    ];
+    const selISO=(DG.sel&&DG.nations[DG.sel]&&DG.sel!==DG.playerNation?.id&&!DG.territories.includes(DG.sel))
+      ?[DG.nations[DG.sel].iso]:[];
+    DG.map.setPaintProperty('player-fill','fill-opacity',
+      ['case',['in',['get','iso_3166_1'],['literal',goldISOs]],0.16,0]);
+    DG.map.setPaintProperty('player-outline','line-width',
+      ['case',['in',['get','iso_3166_1'],['literal',goldISOs]],2.5,0]);
+    DG.map.setPaintProperty('selected-outline','line-width',
+      ['case',['in',['get','iso_3166_1'],['literal',selISO]],1.8,0]);
+    updateLegend();
   }catch(e){}
 }
 

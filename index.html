@@ -881,8 +881,13 @@ function dApplySentimentEffects(targetId,delta){
 function initMap(){
   mapboxgl.accessToken=MAPBOX_TOKEN;
   const map=new mapboxgl.Map({
-    container:'mapbox-container',style:'mapbox://styles/mapbox/dark-v11',
+    container:'mapbox-container',
+    style:'mapbox://styles/mapbox/standard',
     projection:'globe',center:[20,20],zoom:1.4,attributionControl:false
+  });
+  map.on('style.load',()=>{
+    map.setConfigProperty('basemap','lightPreset','day');
+    map.setConfigProperty('basemap','colorTheme',{name:'Monochrome'});
   });
   DG.map=map;
   map.on('load',()=>{

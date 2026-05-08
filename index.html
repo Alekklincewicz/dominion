@@ -888,9 +888,11 @@ function initMap(){
   map.on('load',()=>{
     map.setFog({color:'#111a30','high-color':'#1a2848','horizon-blend':0.06,'space-color':'#04070f','star-intensity':0.7});
     map.addSource('countries',{type:'vector',url:'mapbox://mapbox.country-boundaries-v1'});
-    map.addLayer({id:'country-fills',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':buildColorExpr(),'fill-opacity':0.62}});
-    map.addLayer({id:'country-borders',type:'line',source:'countries','source-layer':'country_boundaries',paint:{'line-color':buildBorderExpr(),'line-width':['case',['in',['get','iso_3166_1'],['literal',getAllISOs()]],1.2,0.6],'line-opacity':0.9}});
-    map.addLayer({id:'country-hover',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':'#ffffff','fill-opacity':['case',['boolean',['feature-state','hover'],false],0.12,0]}});
+    const gameISOs=['US','CN','RU','DE','IN','BR','GB','FR','JP','TR','IR','AU','SA','NG','ZA','MX','ID','KR','AR','PK','CA','UA','PL','IT','ES','NL','SE','RO','GR','IL','AE','IQ','QA','VN','TH','PH','MY','KZ','BD','TW','KP','MM','ET','KE','DZ','MA','CD','GH','AO','CO','CL','VE','PE'];
+    map.addLayer({id:'country-fills',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':buildColorExpr(),'fill-opacity':['case',['in',['get','iso_3166_1'],['literal',gameISOs]],0.80,0.50]}});
+    map.addLayer({id:'country-borders',type:'line',source:'countries','source-layer':'country_boundaries',paint:{'line-color':buildBorderExpr(),'line-width':['case',['in',['get','iso_3166_1'],['literal',gameISOs]],1.2,0.8],'line-opacity':0.95}});
+    map.addLayer({id:'game-nation-rim',type:'line',source:'countries','source-layer':'country_boundaries',paint:{'line-color':'#8ab4cc','line-width':['case',['in',['get','iso_3166_1'],['literal',gameISOs]],0.6,0],'line-opacity':0.5}});
+    map.addLayer({id:'country-hover',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':'#ffffff','fill-opacity':['case',['boolean',['feature-state','hover'],false],0.15,0]}});
     map.addLayer({id:'territory-overlay',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':DG.playerNation?.color||'#e0a82a','fill-opacity':['case',['in',['get','iso_3166_1'],['literal',[]]],0.4,0]}});
     map.addLayer({id:'territory-glow',type:'line',source:'countries','source-layer':'country_boundaries',paint:{'line-color':DG.playerNation?.color||'#e0a82a','line-width':['case',['in',['get','iso_3166_1'],['literal',[]]],2.5,0],'line-opacity':0.7,'line-blur':2}});
 
@@ -962,7 +964,7 @@ function buildColorExpr(){
   const s=['match',['get','iso_3166_1']];
   const pc=DG.playerNation?.color||'#e0a82a';
   DNS.forEach(n=>{s.push(n.iso,(DG.territories&&DG.territories.includes(n.id))?pc:n.color);});
-  s.push('#1e2d50');return s;
+  s.push('#3d5868');return s;
 }
 
 function buildBorderExpr(){
@@ -973,7 +975,7 @@ function buildBorderExpr(){
   DG.enemies.forEach(id=>{const n=DG.nations[id];if(n)s.push(n.iso,'#ff3355');});
   if(DG.playerNation)s.push(DG.playerNation.iso,pc);
   if(DG.sel){const sn=DG.nations[DG.sel];if(sn)s.push(sn.iso,'#ffffff');}
-  s.push('#253060');return s;
+  s.push('#506a80');return s;
 }
 
 function highlightPlayer(){
@@ -985,7 +987,7 @@ function highlightPlayer(){
       ...(DG.playerNation?[DG.playerNation.iso,2]:[]),
       ...(DG.territories||[]).flatMap(id=>[DG.nations[id]?.iso,2.2]).filter(Boolean),
       ...(DG.sel&&DG.sel!==DG.playerNation?.id?[DG.nations[DG.sel]?.iso,1.5]:[]).filter(Boolean),
-      0.3
+      0.8
     ]);
     updateTerritoryLayers();updateLegend();
   }catch(e){}
@@ -1261,7 +1263,12 @@ async function dSubmit(){
     showResultModal(r);
     if(document.getElementById('chart-panel').classList.contains('show'))drawChart();
   }catch(e){
-    td.remove();dLog('wn','Intelligence failure — move could not be resolved.');console.error(e);
+    td.remove();
+    const msg=e.message||String(e);
+    if(msg.includes('404'))dLog('wn','⚠ API not reachable — deploy to Vercel first, or set DEEPSEEK_KEY in environment.');
+    else if(msg.includes('500')||msg.includes('DEEPSEEK_KEY'))dLog('wn','⚠ Server error — add DEEPSEEK_KEY in Vercel → Project → Settings → Environment Variables.');
+    else dLog('wn','⚠ Intelligence failure: '+msg.slice(0,120));
+    console.error(e);
   }
   DG.busy=false;el.disabled=false;el.value='';
   dWC(el);document.getElementById('dexb').textContent='EXECUTE →';
@@ -1304,10 +1311,18 @@ RULES: Territory conquest requires target military<40 AND your military>70, OR c
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({messages:[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}]})
   });
-  if(!resp.ok)throw new Error('API error '+resp.status);
+  if(!resp.ok){
+    let detail='';
+    try{const e=await resp.json();detail=e.error||'';}catch(_){try{detail=await resp.text();}catch(_){}}
+    throw new Error('HTTP '+resp.status+(detail?' — '+detail:''));
+  }
   const data=await resp.json();
-  const txt=data.choices[0].message.content.replace(/```json|```/g,'').trim();
-  return JSON.parse(txt);
+  const raw=data.choices?.[0]?.message?.content;
+  if(!raw)throw new Error('Empty response from AI');
+  // Extract JSON even if surrounded by markdown or prose
+  const match=raw.match(/\{[\s\S]*\}/);
+  if(!match)throw new Error('No JSON found in AI response');
+  return JSON.parse(match[0]);
 }
 
 function dApply(r){

@@ -174,8 +174,8 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
   background:rgba(7,10,26,0.96);border:1px solid var(--border2);
   border-radius:2px;padding:5px 10px;
   font-family:var(--font-mono);font-size:10px;color:var(--text);
-  display:none;z-index:20;white-space:nowrap;top:10px;left:10px;
-  letter-spacing:1px;
+  display:none;z-index:20;white-space:nowrap;
+  letter-spacing:1px;max-width:320px;
 }
 #dlig{position:absolute;bottom:10px;left:10px;pointer-events:none;z-index:15;display:flex;flex-direction:column;gap:3px;}
 .ltag{
@@ -187,6 +187,16 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 .ltag.owned{color:var(--amber);border-color:var(--amber-dim);}
 .ltag.allied{color:var(--green);border-color:rgba(34,216,130,0.35);}
 .ltag.enemy{color:var(--red);border-color:rgba(255,51,85,0.35);}
+/* Territory widget */
+.ter-entry{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-bottom:1px solid rgba(25,33,61,0.5);}
+.ter-entry:last-child{border-bottom:none;}
+.ter-name{color:var(--amber);font-family:var(--font-mono);font-size:10px;letter-spacing:1px;}
+.ter-home{color:var(--cyan);font-family:var(--font-mono);font-size:10px;letter-spacing:1px;}
+.ter-stats{color:var(--text-dim);font-size:9px;margin-top:2px;}
+.ter-view{font-size:8px;color:var(--cyan);background:none;border:1px solid rgba(0,200,255,0.3);border-radius:2px;
+  font-family:var(--font-mono);letter-spacing:1px;padding:2px 6px;cursor:pointer;text-transform:uppercase;flex-shrink:0;}
+.ter-view:hover{border-color:var(--cyan);color:#fff;}
+.ter-empty{padding:8px 10px;font-size:10px;color:var(--text-dim);}
 
 /* Mobile panel buttons (hidden on desktop) */
 .mob-btn{
@@ -574,6 +584,8 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       </div>
       <div class="pl">Diplomatic Ties</div>
       <div id="drel"></div>
+      <div class="pt" onclick="toggleSection('dter')">Empire <span class="toggle-icon" id="ter-icon">▼</span></div>
+      <div id="dter"></div>
       <div class="pl">Operational Log</div>
       <div id="dlog"></div>
     </div>
@@ -898,6 +910,40 @@ function dUpdateRelations(){
   });
   if(!enemies.length)html+='<div style="font-size:10px;color:var(--text-dim);">None established</div>';
   el.innerHTML=html;
+  dUpdateTerritories();
+}
+
+function dUpdateTerritories(){
+  const el=document.getElementById('dter');
+  if(!el||!DG.playerNation)return;
+  const icon=document.getElementById('ter-icon');
+  const territories=DG.territories||[];
+  if(icon)icon.textContent=territories.length?'('+territories.length+') ▼':'▼';
+  if(!territories.length){
+    el.innerHTML='<div class="ter-empty">No territories acquired</div>';
+    return;
+  }
+  let html='';
+  // Home nation first
+  const home=DG.playerNation;
+  const hs=DG.cs||home.stats;
+  html+=`<div class="ter-entry"><div><div class="ter-home">▶ ${home.name}</div><div class="ter-stats">MIL:${Math.round(hs.military||0)} ECO:${Math.round(hs.economy||0)} RES:${Math.round(hs.resources||0)}</div></div><button class="ter-view" onclick="flyToNation('${home.id}')">VIEW</button></div>`;
+  // Acquired territories
+  territories.forEach(id=>{
+    if(!DG.nations[id]){const src=DNS.find(x=>x.id===id);if(src)DG.nations[id]={...src,cs:{...src.stats}};}
+    const n=DG.nations[id];if(!n)return;
+    const s=n.cs||n.stats;
+    html+=`<div class="ter-entry"><div><div class="ter-name">⚑ ${n.name}</div><div class="ter-stats">MIL:${Math.round(s.military||0)} ECO:${Math.round(s.economy||0)} RES:${Math.round(s.resources||0)}</div></div><button class="ter-view" onclick="flyToNation('${id}')">VIEW</button></div>`;
+  });
+  el.innerHTML=html;
+}
+
+function flyToNation(id){
+  const n=DG.nations[id]||DNS.find(x=>x.id===id);
+  if(!n||!DG.map)return;
+  DG.map.flyTo({center:n.center,zoom:3.5,duration:800});
+  dInspect(id);
+  if(window.innerWidth<=680)togglePanel('drp');
 }
 
 function dApplySentimentEffects(targetId,delta){
@@ -963,12 +1009,20 @@ function initMap(){
         const nation=DNS.find(n=>n.iso===iso);
         const tp=document.getElementById('dtp');
         if(nation){
-          const s=DG.nations[nation.id]?.cs;
+          if(!DG.nations[nation.id]?.cs)DG.nations[nation.id]={...nation,cs:{...nation.stats}};
+          const s=DG.nations[nation.id].cs;
           const sent=DG.sentiments[nation.id]||0;
           const isT=DG.territories.includes(nation.id);
-          tp.innerHTML='<b>'+nation.name+'</b> &nbsp;·&nbsp; '+getSentimentLabel(sent)+' &nbsp;·&nbsp; MIL:'+Math.round(s?.military||0)+' ECO:'+Math.round(s?.economy||0)+(isT?' &nbsp;⚑':'');
+          const isP=DG.playerNation&&nation.id===DG.playerNation.id;
+          tp.innerHTML='<b>'+(isP?'▶ ':isT?'⚑ ':'')+nation.name+'</b> &nbsp;·&nbsp; '+getSentimentLabel(sent)+' &nbsp;·&nbsp; MIL:'+Math.round(s.military||0)+' ECO:'+Math.round(s.economy||0);
+          // Follow cursor, offset so it doesn't cover the pointer
+          const rect=document.getElementById('dmap').getBoundingClientRect();
+          const x=e.originalEvent.clientX-rect.left+14;
+          const y=e.originalEvent.clientY-rect.top+14;
+          tp.style.left=Math.min(x,rect.width-tp.offsetWidth-20)+'px';
+          tp.style.top=Math.min(y,rect.height-tp.offsetHeight-10)+'px';
           tp.style.display='block';
-        }else tp.style.display='none';
+        }else{tp.style.display='none';}
       }
     });
     map.on('mouseleave','country-hit',()=>{
@@ -1007,7 +1061,7 @@ function highlightPlayer(){
   try{
     const goldISOs=[
       ...(DG.playerNation?[DG.playerNation.iso]:[]),
-      ...(DG.territories||[]).map(id=>DG.nations[id]?.iso).filter(Boolean)
+      ...(DG.territories||[]).map(id=>DG.nations[id]?.iso||DNS.find(x=>x.id===id)?.iso).filter(Boolean)
     ];
     const selISO=(DG.sel&&DG.nations[DG.sel]&&DG.sel!==DG.playerNation?.id&&!DG.territories.includes(DG.sel))
       ?[DG.nations[DG.sel].iso]:[];
@@ -1379,8 +1433,10 @@ function dApply(r){
   (r.territoryGained||[]).forEach(id=>{
     if(!DG.territories.includes(id)){
       DG.territories.push(id);
+      // Ensure nation record exists for map highlighting and territory panel
+      if(!DG.nations[id]){const src=DNS.find(x=>x.id===id);if(src)DG.nations[id]={...src,cs:{...src.stats}};}
       const tn=DG.nations[id];
-      if(tn){tn.cs.land=Math.max(5,tn.cs.land-30);tn.cs.military=Math.max(5,tn.cs.military-25);tn.cs.economy=Math.max(5,tn.cs.economy-15);dApplySentimentEffects(id,-60);}
+      if(tn){tn.cs.land=Math.max(5,(tn.cs?.land||50)-30);tn.cs.military=Math.max(5,(tn.cs?.military||50)-25);tn.cs.economy=Math.max(5,(tn.cs?.economy||50)-15);dApplySentimentEffects(id,-60);}
     }
   });
   (r.territoryLost||[]).forEach(id=>{DG.territories=DG.territories.filter(t=>t!==id);});

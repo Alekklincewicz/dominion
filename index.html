@@ -192,14 +192,14 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 .mob-btn{
   display:none;position:absolute;z-index:30;
   background:rgba(7,10,26,0.92);border:1px solid var(--border2);
-  border-radius:2px;padding:5px 10px;
-  font-family:var(--font-mono);font-size:9px;letter-spacing:2px;
+  border-radius:2px;padding:6px 12px;
+  font-family:var(--font-mono);font-size:10px;letter-spacing:2px;
   color:var(--text-mid);cursor:pointer;text-transform:uppercase;
   transition:all .15s;
 }
 .mob-btn:hover{color:var(--text);border-color:var(--cyan);}
-#mob-left-btn{bottom:50px;left:10px;}
-#mob-right-btn{bottom:50px;right:10px;}
+#mob-right-btn{top:8px;right:8px;}
+#mob-map-max{top:8px;left:8px;}
 
 /* Mobile backdrop */
 #panel-bd{
@@ -434,22 +434,57 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
   .sp:nth-child(n+4){display:none;}
   .tb{padding:2px 6px;font-size:9px;}
 
+  /* Vertical stack: status panel top, globe strip bottom */
+  #dm{flex-direction:column;}
+
+  /* Left panel always visible, full width, scrollable */
   #dlp{
-    position:absolute;left:0;top:0;bottom:0;z-index:25;
-    transform:translateX(-100%);transition:transform .28s;
-    box-shadow:4px 0 24px rgba(0,0,0,0.6);width:200px;
+    width:100%;flex-shrink:0;
+    height:46vh;overflow-y:auto;
+    border-right:none;border-bottom:1px solid var(--border2);
+    position:relative;transform:none!important;box-shadow:none!important;
   }
-  #dlp.open{transform:translateX(0);}
+  /* Larger text for readability */
+  #dlp .pl{font-size:9px;letter-spacing:3px;padding:8px 12px 4px;}
+  #dlp .pt{font-size:9px;letter-spacing:3px;padding:8px 12px;}
+  #dlp .pn{font-size:16px;letter-spacing:4px;padding:6px 12px 2px;}
+  #dlp .pb-label{font-size:10px;}
+  #dlp .pb-val{font-size:11px;}
+  .le{font-size:11px;line-height:1.6;}
+  .rt{font-size:11px;padding:3px 8px;}
+  .rtag{font-size:10px;padding:2px 7px;}
+
+  /* Map strip at bottom, compact */
+  #dmap{
+    flex:none;height:36vh;width:100%;position:relative;
+    border-top:1px solid var(--border2);
+  }
+  /* Map maximized state */
+  #dmap.map-max{
+    position:fixed!important;inset:0!important;
+    height:100dvh!important;width:100vw!important;
+    z-index:50!important;border:none!important;
+  }
+  #dmap.map-max #mob-map-max{background:rgba(7,10,26,0.92);border-color:var(--red);color:var(--red);}
+
+  /* Intel panel slides in from right over full screen */
   #drp{
-    position:absolute;right:0;top:0;bottom:0;z-index:25;
+    position:fixed;right:0;top:0;bottom:0;z-index:45;
+    width:82vw;max-width:340px;
     transform:translateX(100%);transition:transform .28s;
-    box-shadow:-4px 0 24px rgba(0,0,0,0.6);width:220px;
+    box-shadow:-6px 0 32px rgba(0,0,0,0.75);
   }
   #drp.open{transform:translateX(0);}
+
   .mob-btn{display:block;}
-  #dbot{padding:6px 10px;}
-  #dmi{font-size:11px;}
-  #dexb{padding:8px 10px;font-size:10px;}
+  #dbot{padding:8px 12px;}
+  #dmi{font-size:13px;padding:8px 10px;}
+  #dexb{padding:10px 12px;font-size:11px;letter-spacing:2px;}
+  #dwct{font-size:10px;}
+  label{font-size:10px;letter-spacing:2px;}
+
+  /* Backdrop covers full screen on mobile */
+  #panel-bd{position:fixed;z-index:40;}
 }
 @media(max-width:460px){
   .ocard{padding:20px;}
@@ -548,8 +583,8 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <div id="mapbox-container"></div>
       <div id="dtp"></div>
       <div id="dlig"></div>
-      <button class="mob-btn" id="mob-left-btn" onclick="togglePanel('dlp')">◀ STATUS</button>
       <button class="mob-btn" id="mob-right-btn" onclick="togglePanel('drp')">INTEL ▶</button>
+      <button class="mob-btn" id="mob-map-max" onclick="toggleMapMax()">⛶ EXPAND</button>
     </div>
 
     <!-- Right Panel -->
@@ -762,10 +797,20 @@ function toggleSection(id){
   }
 }
 
+function toggleMapMax(){
+  const map=document.getElementById('dmap');
+  const btn=document.getElementById('mob-map-max');
+  const isMax=map.classList.toggle('map-max');
+  btn.textContent=isMax?'✕ CLOSE':'⛶ EXPAND';
+  if(DG.map)setTimeout(()=>DG.map.resize(),50);
+}
+
 function togglePanel(id){
   const panel=document.getElementById(id);
   const bd=document.getElementById('panel-bd');
   const wasOpen=panel.classList.contains('open');
+  // On mobile, only drp slides in (dlp is always visible)
+  if(window.innerWidth<=680&&id==='dlp')return;
   document.getElementById('dlp').classList.remove('open');
   document.getElementById('drp').classList.remove('open');
   if(!wasOpen){panel.classList.add('open');bd.classList.add('show');}

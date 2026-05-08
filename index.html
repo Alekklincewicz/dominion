@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DOMINION — Strategic Command</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Share+Tech+Mono&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#04060e;--bg1:#070a1a;--bg2:#0b0f22;--bg3:#111830;
+  --border:#19213d;--border2:#253060;
+  --amber:#e0a82a;--amber-dim:#6e5010;--amber-faint:rgba(224,168,42,0.08);
+  --cyan:#00c8ff;--cyan-dim:rgba(0,200,255,0.18);
+  --green:#22d882;--green-dim:rgba(34,216,130,0.12);
+  --red:#ff3355;--red-dim:rgba(255,51,85,0.12);
+  --purple:#9966ff;
+  --text:#b8cbff;--text-mid:#5a6e9a;--text-dim:#32406a;
+  --font-mono:'Share Tech Mono','Courier New',monospace;
+  --font-sans:'Inter',sans-serif;
+  --font-serif:'Crimson Pro',Georgia,serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--bg1);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+body{margin:0;background:var(--bg0);overflow:hidden;}
+
+#dr{
+  font-family:var(--font-sans);
+  background:var(--bg0);
+  color:var(--text);
+  display:flex;flex-direction:column;
+  height:100dvh;min-height:580px;
+  position:relative;overflow:hidden;
+}
+
+/* Subtle scanlines */
+#dr::after{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.03) 3px,rgba(0,0,0,0.03) 4px);
+}
+
+/* ── HEADER ── */
+#dh{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;height:46px;
+  background:var(--bg1);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;gap:8px;
+  position:relative;
+}
+#dh::after{
+  content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 0%,var(--amber-dim) 30%,var(--amber-dim) 70%,transparent 100%);
+}
+.dh-brand{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.dh-emblem{
+  width:26px;height:26px;border:1px solid var(--amber-dim);border-radius:3px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--amber-faint);
+  font-size:11px;color:var(--amber);font-family:var(--font-mono);
+}
+#dh h1{
+  font-family:var(--font-mono);font-size:14px;letter-spacing:7px;
+  color:var(--amber);font-weight:400;white-space:nowrap;
+}
+.hst{
+  display:flex;gap:5px;align-items:center;flex-wrap:wrap;
+  flex:1;justify-content:center;
+}
+.sp{
+  background:var(--bg2);border:1px solid var(--border);border-radius:2px;
+  padding:3px 8px;font-family:var(--font-mono);font-size:10px;
+  color:var(--text-dim);display:flex;gap:4px;align-items:center;
+  letter-spacing:1px;white-space:nowrap;
+}
+.sp b{color:var(--text);font-weight:400;}
+.sp .delta{font-size:9px;margin-left:1px;}
+.sp .delta.up{color:var(--green);}
+.sp .delta.down{color:var(--red);}
+.tb{
+  background:var(--amber-faint);border:1px solid var(--amber-dim);
+  color:var(--amber);border-radius:2px;
+  padding:3px 9px;font-family:var(--font-mono);font-size:10px;
+  letter-spacing:2px;white-space:nowrap;
+}
+.chbtn{
+  background:var(--bg2);border:1px solid var(--border);
+  color:var(--text-mid);border-radius:2px;
+  padding:3px 8px;font-family:var(--font-mono);font-size:9px;
+  letter-spacing:1px;cursor:pointer;transition:all .15s;text-transform:uppercase;
+}
+.chbtn:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* ── MAIN LAYOUT ── */
+#dm{display:flex;flex:1;overflow:hidden;min-height:0;position:relative;}
+
+/* ── LEFT PANEL ── */
+#dlp{
+  width:196px;flex-shrink:0;
+  border-right:1px solid var(--border);
+  background:var(--bg1);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.pt{
+  cursor:pointer;font-family:var(--font-mono);font-size:8px;
+  letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;
+  padding:7px 10px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  user-select:none;background:var(--bg2);
+}
+.pt:hover{color:var(--text-mid);}
+.pt .toggle-icon{font-size:9px;transition:transform .25s;color:var(--text-dim);}
+.pt.collapsed .toggle-icon{transform:rotate(-90deg);}
+.pt.collapsed{border-bottom-color:transparent;}
+.pl{
+  font-family:var(--font-mono);font-size:8px;letter-spacing:3px;
+  color:var(--text-dim);text-transform:uppercase;
+  padding:6px 10px;border-bottom:1px solid var(--border);
+  background:var(--bg2);display:flex;justify-content:space-between;align-items:center;
+}
+#dps{
+  padding:10px;border-bottom:1px solid var(--border);
+  overflow:hidden;transition:max-height .3s,padding .3s,opacity .3s;
+  max-height:280px;opacity:1;
+}
+#dps.collapsed{max-height:0;padding:0 10px;opacity:0;border-bottom-color:transparent;}
+.pn{
+  font-family:var(--font-mono);font-size:11px;color:var(--amber);
+  margin-bottom:9px;letter-spacing:2px;text-transform:uppercase;
+}
+.sr{display:flex;align-items:center;margin-bottom:6px;gap:5px;}
+.sl{font-family:var(--font-mono);font-size:8px;color:var(--text-dim);width:56px;flex-shrink:0;letter-spacing:1px;text-transform:uppercase;}
+.sbw{flex:1;height:3px;background:var(--bg0);position:relative;overflow:visible;}
+.sb{height:100%;transition:width .5s;position:relative;min-width:2px;}
+.sb::after{content:'';position:absolute;right:-1px;top:-3px;width:2px;height:9px;background:inherit;opacity:0.5;}
+.sbs{position:absolute;height:100%;top:0;left:0;transition:width .5s;opacity:0.5;}
+.sbs.gain{background:var(--green);}
+.sbs.loss{background:var(--red);}
+.sv{font-family:var(--font-mono);font-size:10px;width:34px;text-align:right;letter-spacing:1px;}
+.sd{font-size:8px;margin-left:2px;}
+.sd.pos{color:var(--green);}
+.sd.neg{color:var(--red);}
+#drel{padding:6px 10px;font-size:10px;color:var(--text-dim);max-height:130px;overflow-y:auto;border-bottom:1px solid var(--border);}
+#dlog{flex:1;overflow-y:auto;padding:2px 0;}
+.le{padding:5px 10px;font-size:10px;line-height:1.5;border-bottom:1px solid rgba(25,33,61,0.6);color:var(--text-dim);}
+.le.pl{color:var(--cyan);font-family:var(--font-mono);font-size:10px;}
+.le.rs{color:var(--text);}
+.le.wn{color:var(--amber);}
+.le.ps{color:var(--green);}
+.le.spy{color:var(--red);font-style:italic;font-size:10px;}
+.lt{font-family:var(--font-mono);font-size:8px;letter-spacing:2px;color:var(--amber-dim);padding:5px 10px 3px;text-transform:uppercase;}
+
+/* ── MAP ── */
+#dmap{flex:1;position:relative;min-width:0;}
+#mapbox-container{width:100%;height:100%;}
+#dtp{
+  position:absolute;pointer-events:none;
+  background:rgba(7,10,26,0.96);border:1px solid var(--border2);
+  border-radius:2px;padding:5px 10px;
+  font-family:var(--font-mono);font-size:10px;color:var(--text);
+  display:none;z-index:20;white-space:nowrap;top:10px;left:10px;
+  letter-spacing:1px;
+}
+#dlig{position:absolute;bottom:10px;left:10px;pointer-events:none;z-index:15;display:flex;flex-direction:column;gap:3px;}
+.ltag{
+  background:rgba(4,6,14,0.88);border:1px solid var(--border);
+  border-radius:2px;padding:2px 7px;
+  font-family:var(--font-mono);font-size:8px;color:var(--text-dim);
+  letter-spacing:1px;text-transform:uppercase;
+}
+.ltag.owned{color:var(--amber);border-color:var(--amber-dim);}
+.ltag.allied{color:var(--green);border-color:rgba(34,216,130,0.35);}
+.ltag.enemy{color:var(--red);border-color:rgba(255,51,85,0.35);}
+
+/* Mobile panel buttons (hidden on desktop) */
+.mob-btn{
+  display:none;position:absolute;z-index:30;
+  background:rgba(7,10,26,0.92);border:1px solid var(--border2);
+  border-radius:2px;padding:5px 10px;
+  font-family:var(--font-mono);font-size:9px;letter-spacing:2px;
+  color:var(--text-mid);cursor:pointer;text-transform:uppercase;
+  transition:all .15s;
+}
+.mob-btn:hover{color:var(--text);border-color:var(--cyan);}
+#mob-left-btn{bottom:50px;left:10px;}
+#mob-right-btn{bottom:50px;right:10px;}
+
+/* Mobile backdrop */
+#panel-bd{
+  display:none;position:absolute;inset:0;
+  background:rgba(4,6,14,0.65);z-index:24;
+}
+#panel-bd.show{display:block;}
+
+/* ── RIGHT PANEL ── */
+#drp{
+  width:222px;flex-shrink:0;
+  border-left:1px solid var(--border);
+  background:var(--bg1);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+#dci{flex:1;overflow-y:auto;padding:10px;}
+.cie{
+  color:var(--text-dim);font-family:var(--font-mono);font-size:9px;
+  text-align:center;margin-top:32px;line-height:2.2;
+  letter-spacing:1px;text-transform:uppercase;
+}
+.cin{font-family:var(--font-mono);font-size:13px;margin-bottom:2px;color:var(--text);letter-spacing:2px;text-transform:uppercase;}
+.cir{font-family:var(--font-mono);font-size:8px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.cis{font-size:10px;margin-bottom:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.sent{font-family:var(--font-mono);font-size:9px;padding:2px 7px;border-radius:2px;letter-spacing:1px;text-transform:uppercase;}
+.sent.positive{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,216,130,0.3);}
+.sent.neutral{background:rgba(90,110,154,0.12);color:var(--text-mid);border:1px solid rgba(90,110,154,0.2);}
+.sent.negative{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,51,85,0.3);}
+.at2{
+  font-family:var(--font-mono);font-size:8px;letter-spacing:3px;
+  color:var(--text-dim);text-transform:uppercase;
+  margin:10px 0 6px;border-top:1px solid var(--border);padding-top:8px;
+}
+.ac{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:2px;padding:8px 8px 8px 12px;
+  margin-bottom:5px;cursor:pointer;transition:all .15s;
+  position:relative;overflow:hidden;
+}
+.ac::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:2px;background:var(--border2);transition:background .15s;
+}
+.ac:hover{background:var(--bg3);}
+.ac.rd::before{background:rgba(255,51,85,0.5);}
+.ac.gd::before{background:rgba(224,168,42,0.5);}
+.ac.gn::before{background:rgba(34,216,130,0.5);}
+.ac:hover{border-color:var(--border2);}
+.ac:hover.rd{border-color:rgba(255,51,85,0.3);}
+.ac:hover.gd{border-color:var(--amber-dim);}
+.ac:hover.gn{border-color:rgba(34,216,130,0.25);}
+.ac h4{font-family:var(--font-mono);font-size:9px;font-weight:400;margin-bottom:3px;color:var(--text-mid);letter-spacing:2px;text-transform:uppercase;}
+.ac.rd h4{color:var(--red);}
+.ac.gd h4{color:var(--amber);}
+.ac.gn h4{color:var(--green);}
+.ac p{font-size:10px;color:var(--text-dim);line-height:1.4;}
+.rb{display:inline-block;font-family:var(--font-mono);font-size:9px;padding:2px 7px;border-radius:2px;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase;}
+.ra{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,216,130,0.3);}
+.re{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,51,85,0.3);}
+.rn{background:rgba(90,110,154,0.12);color:var(--text-mid);border:1px solid rgba(90,110,154,0.2);}
+
+/* ── BOTTOM INPUT ── */
+#dbot{
+  border-top:1px solid var(--border);background:var(--bg1);
+  padding:8px 12px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0;
+  position:relative;
+}
+#dbot::before{
+  content:'';position:absolute;top:-1px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--amber-dim),transparent);
+}
+#dmiw{flex:1;position:relative;}
+#dmiw label{
+  display:block;font-family:var(--font-mono);font-size:8px;
+  letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;
+}
+#dmi{
+  width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:2px;
+  color:var(--text);font-family:var(--font-mono);font-size:12px;
+  padding:8px 76px 8px 10px;outline:none;resize:none;
+  transition:border-color .15s;line-height:1.5;letter-spacing:0.5px;
+}
+#dmi:focus{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,200,255,0.06);}
+#dmi::placeholder{color:var(--text-dim);font-size:11px;}
+#dwct{position:absolute;bottom:9px;right:10px;font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:1px;}
+#dwct.ov{color:var(--red);}
+#dexb{
+  background:var(--amber-faint);color:var(--amber);
+  border:1px solid var(--amber-dim);border-radius:2px;
+  padding:8px 14px;font-family:var(--font-mono);font-size:11px;
+  letter-spacing:2px;cursor:pointer;white-space:nowrap;
+  height:38px;align-self:flex-end;text-transform:uppercase;
+  transition:all .15s;
+}
+#dexb:hover:not(:disabled){background:rgba(224,168,42,0.14);border-color:var(--amber);}
+#dexb:disabled{background:var(--bg2);color:var(--text-dim);border-color:var(--border);cursor:not-allowed;}
+
+/* ── OVERLAYS ── */
+.overlay{
+  position:absolute;inset:0;background:rgba(4,6,14,0.96);
+  z-index:50;display:flex;align-items:center;justify-content:center;
+}
+.ocard{
+  background:var(--bg1);border:1px solid var(--border2);
+  border-radius:4px;padding:30px;text-align:center;
+  max-width:420px;width:92%;position:relative;
+}
+.ocard::before,.ocard::after{content:'';position:absolute;width:14px;height:14px;}
+.ocard::before{top:-1px;left:-1px;border-top:2px solid var(--amber);border-left:2px solid var(--amber);}
+.ocard::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--amber);border-right:2px solid var(--amber);}
+.ocard h2{font-family:var(--font-mono);font-size:26px;color:var(--amber);letter-spacing:10px;margin-bottom:4px;font-weight:400;}
+.ocard .tl{font-family:var(--font-mono);color:var(--text-dim);font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:18px;}
+.ocard .rl{
+  text-align:left;background:var(--bg2);border:1px solid var(--border);
+  border-radius:2px;padding:12px 14px;margin-bottom:14px;
+  font-size:11px;color:var(--text-dim);line-height:1.9;
+}
+.ocard .rl li{margin-left:14px;}
+.nrev{background:var(--bg2);border:1px solid var(--amber-dim);border-radius:2px;padding:10px 14px;margin-bottom:14px;display:none;text-align:left;}
+.nrev .nl{font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:3px;}
+.nrev .nn{font-family:var(--font-mono);font-size:17px;color:var(--amber);font-weight:400;letter-spacing:3px;text-transform:uppercase;}
+.nrev .nd{font-size:11px;color:var(--text-dim);margin-top:3px;}
+.abtn{
+  background:transparent;color:var(--cyan);border:1px solid rgba(0,200,255,0.3);
+  border-radius:2px;padding:9px;font-family:var(--font-mono);font-size:11px;
+  letter-spacing:2px;cursor:pointer;width:100%;margin-bottom:8px;
+  text-transform:uppercase;transition:all .15s;
+}
+.abtn:hover{background:var(--cyan-dim);border-color:var(--cyan);}
+.sbtn{
+  background:var(--amber-faint);color:var(--amber);
+  border:1px solid var(--amber-dim);border-radius:2px;padding:10px;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:2px;
+  cursor:pointer;width:100%;text-transform:uppercase;transition:all .15s;
+}
+.sbtn:hover:not(:disabled){background:rgba(224,168,42,0.14);border-color:var(--amber);}
+.sbtn:disabled{background:var(--bg2);color:var(--text-dim);border-color:var(--border);cursor:not-allowed;}
+.fs{font-family:var(--font-mono);font-size:54px;font-weight:400;color:var(--amber);margin:10px 0;letter-spacing:4px;}
+.sn{color:var(--text-dim);font-family:var(--font-mono);font-size:10px;line-height:1.85;margin-bottom:14px;letter-spacing:0.5px;}
+
+/* Thinking dots */
+.thk{display:inline-flex;gap:4px;align-items:center;}
+.thk span{width:3px;height:3px;background:var(--amber);border-radius:50%;animation:bl 1.2s infinite;}
+.thk span:nth-child(2){animation-delay:.2s;}
+.thk span:nth-child(3){animation-delay:.4s;}
+@keyframes bl{0%,100%{opacity:.12}50%{opacity:1}}
+
+/* ── RESULT MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(4,6,14,0.9);
+  z-index:100;display:flex;align-items:center;justify-content:center;
+  animation:fo .2s;
+}
+.modal-content{
+  background:var(--bg1);border:1px solid var(--border2);border-radius:4px;
+  padding:22px;max-width:520px;width:94%;max-height:90vh;
+  overflow-y:auto;position:relative;animation:su .2s;
+}
+.modal-content::before,.modal-content::after{content:'';position:absolute;width:12px;height:12px;}
+.modal-content::before{top:-1px;left:-1px;border-top:2px solid var(--amber);border-left:2px solid var(--amber);}
+.modal-content::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--amber);border-right:2px solid var(--amber);}
+.modal-close{
+  position:absolute;top:10px;right:12px;background:none;border:none;
+  color:var(--text-dim);font-family:var(--font-mono);font-size:13px;
+  cursor:pointer;padding:3px 7px;border-radius:2px;transition:all .15s;
+}
+.modal-close:hover{color:var(--text);background:var(--bg2);}
+.modal-nation{font-family:var(--font-mono);font-size:17px;color:var(--amber);margin-bottom:2px;font-weight:400;letter-spacing:4px;text-transform:uppercase;}
+.modal-turn{font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:14px;}
+.modal-narrative{
+  color:var(--text);font-size:13px;line-height:1.75;
+  margin-bottom:14px;padding:12px;background:var(--bg2);
+  border-radius:2px;border-left:2px solid var(--cyan);
+}
+.modal-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px;}
+.modal-stat{padding:8px;background:var(--bg2);border-radius:2px;border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-stat-name{font-family:var(--font-mono);font-size:8px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;}
+.modal-stat-val{font-family:var(--font-mono);font-size:14px;font-weight:400;color:var(--text);}
+.modal-stat-delta{font-family:var(--font-mono);font-size:11px;margin-left:4px;}
+.modal-stat-delta.up{color:var(--green);}
+.modal-stat-delta.down{color:var(--red);}
+.modal-section{margin-bottom:10px;}
+.modal-section-title{font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:5px;}
+.modal-tags{display:flex;flex-wrap:wrap;gap:4px;}
+.modal-tag{
+  padding:3px 8px;border-radius:2px;font-family:var(--font-mono);
+  font-size:9px;letter-spacing:1px;text-transform:uppercase;
+}
+.modal-tag.good{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,216,130,0.3);}
+.modal-tag.bad{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,51,85,0.3);}
+.modal-tag.neutral{background:rgba(90,110,154,0.12);color:var(--text-mid);border:1px solid rgba(90,110,154,0.2);}
+.modal-spy{
+  background:rgba(255,51,85,0.06);border:1px solid rgba(255,51,85,0.2);
+  border-radius:2px;padding:9px;color:var(--red);
+  font-family:var(--font-mono);font-size:10px;letter-spacing:0.5px;
+  line-height:1.6;margin-top:10px;
+}
+.modal-chart-toggle{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:var(--font-mono);font-size:9px;letter-spacing:2px;
+  color:var(--cyan);cursor:pointer;margin-top:10px;
+  background:var(--cyan-dim);padding:5px 11px;border-radius:2px;
+  border:1px solid rgba(0,200,255,0.2);text-transform:uppercase;transition:all .15s;
+}
+.modal-chart-toggle:hover{background:rgba(0,200,255,0.22);}
+
+/* ── CHART ── */
+#chart-panel{
+  position:absolute;bottom:60px;left:10px;z-index:18;
+  background:var(--bg1);border:1px solid var(--border2);border-radius:3px;
+  padding:12px;display:none;width:280px;
+}
+#chart-panel.show{display:block;}
+.chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.chart-title{font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;}
+.chart-close{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:12px;padding:2px 5px;font-family:var(--font-mono);}
+.chart-close:hover{color:var(--text);}
+#chart-canvas{width:100%;height:160px;}
+
+@keyframes fo{from{opacity:0}to{opacity:1}}
+@keyframes su{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  #dlp{width:178px;}
+  #drp{width:200px;}
+}
+@media(max-width:680px){
+  #dh h1{font-size:12px;letter-spacing:4px;}
+  .hst{gap:3px;}
+  .sp{padding:2px 5px;font-size:9px;}
+  .sp:nth-child(n+4){display:none;}
+  .tb{padding:2px 6px;font-size:9px;}
+
+  #dlp{
+    position:absolute;left:0;top:0;bottom:0;z-index:25;
+    transform:translateX(-100%);transition:transform .28s;
+    box-shadow:4px 0 24px rgba(0,0,0,0.6);width:200px;
+  }
+  #dlp.open{transform:translateX(0);}
+  #drp{
+    position:absolute;right:0;top:0;bottom:0;z-index:25;
+    transform:translateX(100%);transition:transform .28s;
+    box-shadow:-4px 0 24px rgba(0,0,0,0.6);width:220px;
+  }
+  #drp.open{transform:translateX(0);}
+  .mob-btn{display:block;}
+  #dbot{padding:6px 10px;}
+  #dmi{font-size:11px;}
+  #dexb{padding:8px 10px;font-size:10px;}
+}
+@media(max-width:460px){
+  .ocard{padding:20px;}
+  .ocard h2{font-size:20px;letter-spacing:7px;}
+  .modal-content{padding:16px;}
+}
+</style>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+</head>
+<body>
+<div id="dr">
+
+  <!-- Result Modal -->
+  <div class="modal-overlay" id="result-modal" style="display:none;">
+    <div class="modal-content" id="modal-content"></div>
+  </div>
+
+  <!-- Chart -->
+  <div id="chart-panel">
+    <div class="chart-header">
+      <span class="chart-title">Operational Trend</span>
+      <button class="chart-close" onclick="toggleChart()">✕</button>
+    </div>
+    <canvas id="chart-canvas"></canvas>
+  </div>
+
+  <!-- Start Screen -->
+  <div class="overlay" id="dsto">
+    <div class="ocard">
+      <h2>DOMINION</h2>
+      <div class="tl">Strategic Command · 20 Turns</div>
+      <div class="rl"><ul>
+        <li>Lead a randomly assigned nation for 20 turns</li>
+        <li>20-word limit per directive — every word counts</li>
+        <li>Click any country on the globe to inspect &amp; strategize</li>
+        <li>AI resolves each move with Machiavellian realism</li>
+        <li>Final score normalized for starting position — underdogs rewarded</li>
+      </ul></div>
+      <div class="nrev" id="dnrev">
+        <div class="nl">Assigned Nation</div>
+        <div class="nn" id="drname"></div>
+        <div class="nd" id="drdesc"></div>
+      </div>
+      <button class="abtn" onclick="dAssign()">▶ Roll Nation Assignment</button>
+      <button class="sbtn" id="dstartbtn" onclick="dStart()" disabled>Begin Campaign</button>
+    </div>
+  </div>
+
+  <!-- Game Over -->
+  <div class="overlay" id="dsov" style="display:none;">
+    <div class="ocard">
+      <h2>DEBRIEF</h2>
+      <div id="dslbl" style="font-family:var(--font-mono);color:var(--text-dim);font-size:9px;letter-spacing:3px;margin-bottom:2px;text-transform:uppercase;"></div>
+      <div class="fs" id="dfsc"></div>
+      <div class="sn" id="dsbrk"></div>
+      <button class="sbtn" onclick="location.reload()">New Campaign</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div id="dh">
+    <div class="dh-brand">
+      <div class="dh-emblem">⬡</div>
+      <h1>DOMINION</h1>
+    </div>
+    <div class="hst">
+      <div class="sp">INF <b id="dhi">—</b><span class="delta" id="dhid" style="display:none;"></span></div>
+      <div class="sp">ECO <b id="dhe">—</b><span class="delta" id="dhed" style="display:none;"></span></div>
+      <div class="sp">MIL <b id="dhm">—</b><span class="delta" id="dhmd" style="display:none;"></span></div>
+      <div class="sp">RES <b id="dhr">—</b><span class="delta" id="dhrd" style="display:none;"></span></div>
+      <div class="sp">LND <b id="dhl">—</b><span class="delta" id="dhld" style="display:none;"></span></div>
+      <div class="tb">TURN <span id="dht">1</span>/20</div>
+      <button class="chbtn" id="chart-btn" onclick="toggleChart()" style="display:none;">CHART</button>
+    </div>
+  </div>
+
+  <!-- Main Area -->
+  <div id="dm">
+    <div id="panel-bd" onclick="closePanels()"></div>
+
+    <!-- Left Panel -->
+    <div id="dlp">
+      <div class="pt" onclick="toggleSection('dps')">Nation Status <span class="toggle-icon">▼</span></div>
+      <div id="dps">
+        <div class="pn" id="dpnn">—</div>
+        <div id="dpbars"></div>
+      </div>
+      <div class="pl">Diplomatic Ties</div>
+      <div id="drel"></div>
+      <div class="pl">Operational Log</div>
+      <div id="dlog"></div>
+    </div>
+
+    <!-- Map -->
+    <div id="dmap">
+      <div id="mapbox-container"></div>
+      <div id="dtp"></div>
+      <div id="dlig"></div>
+      <button class="mob-btn" id="mob-left-btn" onclick="togglePanel('dlp')">◀ STATUS</button>
+      <button class="mob-btn" id="mob-right-btn" onclick="togglePanel('drp')">INTEL ▶</button>
+    </div>
+
+    <!-- Right Panel -->
+    <div id="drp">
+      <div class="pl">Country Inspector</div>
+      <div id="dci"><div class="cie">Select target on globe<br>to view intel &amp;<br>strategic options</div></div>
+    </div>
+  </div>
+
+  <!-- Bottom -->
+  <div id="dbot">
+    <div id="dmiw">
+      <label>Directive · 20 words max</label>
+      <textarea id="dmi" rows="2" placeholder="e.g. Forge alliance with Germany, threaten neighbors, expand naval power to control trade routes..." oninput="dWC(this)" onkeydown="dKeyDown(event)"></textarea>
+      <span id="dwct">0 / 20</span>
+    </div>
+    <button id="dexb" onclick="dSubmit()" disabled>EXECUTE →</button>
+  </div>
+</div>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<script>
+// Mapbox token — restrict this to your domain in mapbox.com/account/access-tokens
+const MAPBOX_TOKEN='pk.eyJ1IjoiYWxla3NlaWlpIiwiYSI6ImNtb3d6ZWF1cDAyN2EzMm9oODY4cmFubHoifQ.kHp4lP_eO7JHCSWr46nf1g';
+// DeepSeek key lives server-side in /api/ai (Vercel env var DEEPSEEK_KEY)
+
+const DSC={influence:'#00c8ff',economy:'#22d882',military:'#ff3355',resources:'#e0a82a',land:'#9966ff'};
+const DSC_KEYS=['influence','economy','military','resources','land'];
+
+const DNS=[
+  {id:'usa',name:'United States',region:'Americas',iso:'US',center:[-98,38],color:'#1e3560',stats:{influence:95,economy:92,military:98,resources:78,land:85},desc:'Global hegemon. Unmatched military and economic reach.'},
+  {id:'china',name:'China',region:'Asia',iso:'CN',center:[105,35],color:'#6e2020',stats:{influence:85,economy:90,military:88,resources:75,land:88},desc:'Rising superpower. Vast manufacturing and growing ambition.'},
+  {id:'russia',name:'Russia',region:'Europe/Asia',iso:'RU',center:[90,60],color:'#1e4010',stats:{influence:72,economy:55,military:85,resources:95,land:98},desc:'Energy giant. Nuclear arsenal and vast Eurasian land.'},
+  {id:'germany',name:'Germany',region:'Europe',iso:'DE',center:[10,51],color:'#303040',stats:{influence:70,economy:82,military:50,resources:40,land:30},desc:'EU economic anchor. Industrial powerhouse.'},
+  {id:'india',name:'India',region:'Asia',iso:'IN',center:[78,22],color:'#6a3a10',stats:{influence:65,economy:72,military:75,resources:60,land:65},desc:'Emerging giant with a massive population and growing tech.'},
+  {id:'brazil',name:'Brazil',region:'Americas',iso:'BR',center:[-52,-14],color:'#104020',stats:{influence:55,economy:60,military:55,resources:85,land:80},desc:'Resource-rich South American giant with huge potential.'},
+  {id:'uk',name:'United Kingdom',region:'Europe',iso:'GB',center:[-2,54],color:'#101050',stats:{influence:75,economy:72,military:65,resources:35,land:20},desc:'Middle power. Global networks and nuclear deterrent.'},
+  {id:'france',name:'France',region:'Europe',iso:'FR',center:[2,46],color:'#3a1040',stats:{influence:70,economy:68,military:68,resources:38,land:32},desc:'Nuclear power with EU influence and African presence.'},
+  {id:'japan',name:'Japan',region:'Asia',iso:'JP',center:[138,37],color:'#501030',stats:{influence:65,economy:75,military:45,resources:20,land:22},desc:'Tech economy under pressure. Resource-scarce, US-aligned.'},
+  {id:'nigeria',name:'Nigeria',region:'Africa',iso:'NG',center:[8,10],color:'#284010',stats:{influence:40,economy:48,military:42,resources:68,land:55},desc:"Africa's most populous. Oil wealth and regional ambition."},
+  {id:'turkey',name:'Turkey',region:'Mid East/Eur',iso:'TR',center:[35,39],color:'#402010',stats:{influence:55,economy:52,military:65,resources:40,land:45},desc:'Strategic NATO bridge between Europe and Asia.'},
+  {id:'iran',name:'Iran',region:'Middle East',iso:'IR',center:[53,32],color:'#301808',stats:{influence:48,economy:38,military:60,resources:80,land:55},desc:'Isolated but resourceful. Energy wealth and proxy network.'},
+  {id:'australia',name:'Australia',region:'Oceania',iso:'AU',center:[134,-26],color:'#103030',stats:{influence:52,economy:65,military:50,resources:82,land:78},desc:'Stable democracy. Vast resources, US-aligned.'},
+  {id:'saudi',name:'Saudi Arabia',region:'Middle East',iso:'SA',center:[45,24],color:'#403010',stats:{influence:62,economy:65,military:60,resources:92,land:58},desc:'OPEC anchor. Oil wealth with growing regional ambitions.'},
+  {id:'s_africa',name:'South Africa',region:'Africa',iso:'ZA',center:[25,-30],color:'#103020',stats:{influence:42,economy:44,military:38,resources:70,land:50},desc:'Continental leader. Mineral wealth, domestic instability.'},
+  {id:'mexico',name:'Mexico',region:'Americas',iso:'MX',center:[-102,24],color:'#302010',stats:{influence:45,economy:55,military:40,resources:60,land:55},desc:'US neighbor leveraging USMCA and manufacturing.'},
+  {id:'indonesia',name:'Indonesia',region:'Asia',iso:'ID',center:[118,-2],color:'#200830',stats:{influence:50,economy:55,military:48,resources:72,land:60},desc:'Archipelago giant at the crossroads of Pacific trade.'},
+  {id:'s_korea',name:'South Korea',region:'Asia',iso:'KR',center:[128,36],color:'#102040',stats:{influence:55,economy:68,military:58,resources:18,land:18},desc:'Tech powerhouse under constant geopolitical pressure.'},
+  {id:'argentina',name:'Argentina',region:'Americas',iso:'AR',center:[-64,-34],color:'#101830',stats:{influence:38,economy:40,military:35,resources:65,land:70},desc:'Resource-rich. Chronic economic instability.'},
+  {id:'pakistan',name:'Pakistan',region:'Asia',iso:'PK',center:[70,30],color:'#281808',stats:{influence:38,economy:32,military:55,resources:42,land:50},desc:'Nuclear state. Volatile region, India rivalry.'}
+];
+
+let DG={
+  playerNation:null,startStats:null,cs:null,turn:1,
+  allies:[],enemies:[],sel:null,nations:{},busy:false,
+  map:null,sentiments:{},territories:[],
+  statDeltas:{influence:0,economy:0,military:0,resources:0,land:0},
+  history:[],collateral:[],dpsCollapsed:false
+};
+
+DNS.forEach(n=>{DG.nations[n.id]={...n,cs:{...n.stats}};DG.sentiments[n.id]=0;});
+
+const INITIAL_SENTIMENTS={
+  usa:{uk:70,france:60,germany:55,japan:70,s_korea:65,australia:70,china:-40,russia:-50,iran:-60,pakistan:30,saudi:40,mexico:50,brazil:30,india:20},
+  china:{russia:45,iran:35,pakistan:50,usa:-40,uk:-30,france:-25,japan:-50,s_korea:-45,india:-35,australia:-40,indonesia:15,nigeria:20,brazil:25},
+  russia:{china:45,iran:40,turkey:20,india:30,usa:-50,uk:-55,france:-45,germany:-40,japan:-35,s_korea:-30},
+  germany:{france:75,uk:65,usa:55,china:-15,russia:-40,turkey:20},
+  india:{usa:25,russia:30,france:20,china:-35,pakistan:-70,saudi:15,japan:10,australia:15},
+  brazil:{usa:20,china:25,argentina:-10,mexico:30,nigeria:15,s_africa:25,france:15},
+  uk:{usa:70,france:65,germany:60,australia:65,india:25,china:-30,russia:-55,argentina:-20},
+  france:{germany:75,uk:65,usa:55,china:-20,russia:-40,turkey:15,nigeria:20},
+  japan:{usa:70,s_korea:50,australia:55,india:15,china:-50,russia:-45},
+  nigeria:{usa:20,china:25,uk:20,france:20,s_africa:35,brazil:15,india:10},
+  turkey:{usa:30,uk:25,germany:20,russia:15,china:10,iran:-10,saudi:-15},
+  iran:{russia:40,china:35,usa:-60,saudi:-50,uk:-45,turkey:-15},
+  australia:{usa:70,uk:65,japan:55,india:20,indonesia:15,china:-40},
+  saudi:{usa:45,uk:35,china:15,iran:-50,turkey:-20},
+  s_africa:{china:20,usa:15,nigeria:35,brazil:25,india:20,uk:20},
+  mexico:{usa:60,brazil:30,argentina:25,china:10},
+  indonesia:{australia:15,china:20,usa:15,japan:10,india:10},
+  s_korea:{usa:70,japan:50,australia:45,china:-40,russia:-35},
+  argentina:{brazil:-10,china:20,russia:15,usa:-5,uk:-15,mexico:20},
+  pakistan:{china:50,saudi:40,turkey:25,india:-70,usa:-20,iran:10}
+};
+
+function assign(){
+  const n=DNS[Math.floor(Math.random()*DNS.length)];
+  DG.playerNation=n;DG.startStats={...n.stats};DG.cs={...n.stats};
+  DG.statDeltas={influence:0,economy:0,military:0,resources:0,land:0};
+  DG.history=[{turn:0,...n.stats}];
+  DG.allies=[];DG.enemies=[];DG.territories=[];
+  DNS.forEach(o=>{DG.sentiments[o.id]=0;});
+  const init=INITIAL_SENTIMENTS[n.id]||{};
+  DNS.forEach(o=>{
+    if(o.id===n.id){DG.sentiments[n.id]=100;}
+    else if(init[o.id]!==undefined){DG.sentiments[o.id]=init[o.id];}
+  });
+  document.getElementById('drname').textContent=n.name;
+  document.getElementById('drdesc').textContent=n.desc;
+  document.getElementById('dnrev').style.display='block';
+  document.getElementById('dstartbtn').disabled=false;
+}
+window.dAssign=assign;
+
+function dStart(){
+  document.getElementById('dsto').style.display='none';
+  document.getElementById('chart-btn').style.display='inline-block';
+  initMap();dRStats();dRHeader();dUpdateRelations();
+  dLog('turn','Turn 1');
+  dLog('rs','You lead '+DG.playerNation.name+'. The world watches. Issue your first directive.');
+}
+
+function getSentimentCategory(v){
+  if(typeof v!=='number')v=0;
+  return v>=40?'positive':v<=-30?'negative':'neutral';
+}
+function getSentimentLabel(v){
+  if(typeof v!=='number')v=0;
+  if(v>=80)return'Devoted Ally';
+  if(v>=50)return'Strong Ally';
+  if(v>=30)return'Friendly';
+  if(v>=10)return'Warm';
+  if(v>=-10)return'Neutral';
+  if(v>=-30)return'Cool';
+  if(v>=-50)return'Hostile';
+  if(v>=-70)return'Adversary';
+  return'Existential Threat';
+}
+
+function toggleSection(id){
+  const el=document.getElementById(id);
+  const hdr=el.previousElementSibling;
+  if(id==='dps'){
+    DG.dpsCollapsed=!DG.dpsCollapsed;
+    el.classList.toggle('collapsed',DG.dpsCollapsed);
+    hdr.classList.toggle('collapsed',DG.dpsCollapsed);
+    hdr.querySelector('.toggle-icon').textContent=DG.dpsCollapsed?'▶':'▼';
+  }
+}
+
+function togglePanel(id){
+  const panel=document.getElementById(id);
+  const bd=document.getElementById('panel-bd');
+  const wasOpen=panel.classList.contains('open');
+  document.getElementById('dlp').classList.remove('open');
+  document.getElementById('drp').classList.remove('open');
+  if(!wasOpen){panel.classList.add('open');bd.classList.add('show');}
+  else{bd.classList.remove('show');}
+}
+function closePanels(){
+  document.getElementById('dlp').classList.remove('open');
+  document.getElementById('drp').classList.remove('open');
+  document.getElementById('panel-bd').classList.remove('show');
+}
+
+function toggleChart(){
+  const p=document.getElementById('chart-panel');
+  if(p.classList.contains('show'))p.classList.remove('show');
+  else{p.classList.add('show');drawChart();}
+}
+
+function drawChart(){
+  const canvas=document.getElementById('chart-canvas');
+  const ctx=canvas.getContext('2d');
+  const hist=DG.history;
+  if(hist.length<2)return;
+  const dpr=window.devicePixelRatio||1;
+  const rect=canvas.parentElement.getBoundingClientRect();
+  canvas.width=rect.width*dpr;canvas.height=160*dpr;
+  canvas.style.width=rect.width+'px';canvas.style.height='160px';
+  ctx.scale(dpr,dpr);
+  const w=rect.width-8,h=140;
+  const pad={top:10,right:10,bottom:20,left:30};
+  const pw=w-pad.left-pad.right,ph=h-pad.top-pad.bottom;
+  ctx.clearRect(0,0,w,h+20);
+  ctx.fillStyle='#07091a';ctx.fillRect(0,0,w,h+20);
+  ctx.strokeStyle='#19213d';ctx.lineWidth=0.5;
+  for(let i=0;i<=4;i++){
+    const y=pad.top+(ph/4)*i;
+    ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(w-pad.right,y);ctx.stroke();
+    ctx.fillStyle='#3a4870';ctx.font='8px Share Tech Mono,monospace';
+    ctx.textAlign='right';ctx.fillText(Math.round(100-(100/4)*i),pad.left-5,y+3);
+  }
+  ctx.fillStyle='#3a4870';ctx.font='8px Share Tech Mono,monospace';ctx.textAlign='center';
+  const step=Math.max(1,Math.floor((hist.length-1)/9));
+  for(let i=0;i<hist.length;i+=step){
+    const x=pad.left+(i/(hist.length-1))*pw;
+    ctx.fillText('T'+hist[i].turn,x,h-2);
+  }
+  DSC_KEYS.forEach(key=>{
+    ctx.strokeStyle=DSC[key];ctx.lineWidth=1.6;ctx.beginPath();
+    hist.forEach((pt,i)=>{
+      const x=pad.left+(i/(hist.length-1))*pw;
+      const y=pad.top+ph-((pt[key]||0)/100)*ph;
+      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    });ctx.stroke();
+  });
+  let lx=6;
+  DSC_KEYS.forEach(key=>{
+    ctx.fillStyle=DSC[key];ctx.fillRect(lx,h+2,8,8);
+    ctx.fillStyle='#3a4870';ctx.font='7px Share Tech Mono,monospace';ctx.textAlign='left';
+    ctx.fillText(key[0].toUpperCase()+key.slice(1),lx+10,h+10);lx+=50;
+  });
+}
+
+function dUpdateRelations(){
+  const el=document.getElementById('drel');
+  if(!DG.playerNation){el.innerHTML='';return;}
+  const list=[];
+  DNS.forEach(n=>{
+    if(n.id===DG.playerNation.id)return;
+    list.push({id:n.id,name:n.name,sentiment:DG.sentiments[n.id]||0});
+  });
+  list.sort((a,b)=>Math.abs(b.sentiment)-Math.abs(a.sentiment));
+  const allies=list.filter(c=>c.sentiment>10).slice(0,3);
+  const enemies=list.filter(c=>c.sentiment<-10).slice(0,3);
+  let html='<div style="font-family:var(--font-mono);font-size:8px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase;">Allies</div>';
+  allies.forEach(a=>{
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">'+
+      '<span style="color:var(--green);font-size:10px;">'+a.name+'</span>'+
+      '<span class="sent '+getSentimentCategory(a.sentiment)+'">'+getSentimentLabel(a.sentiment)+'</span></div>';
+  });
+  if(!allies.length)html+='<div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">None established</div>';
+  html+='<div style="font-family:var(--font-mono);font-size:8px;letter-spacing:2px;color:var(--text-dim);margin:6px 0 4px;text-transform:uppercase;">Rivals</div>';
+  enemies.forEach(a=>{
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">'+
+      '<span style="color:var(--red);font-size:10px;">'+a.name+'</span>'+
+      '<span class="sent '+getSentimentCategory(a.sentiment)+'">'+getSentimentLabel(a.sentiment)+'</span></div>';
+  });
+  if(!enemies.length)html+='<div style="font-size:10px;color:var(--text-dim);">None established</div>';
+  el.innerHTML=html;
+}
+
+function dApplySentimentEffects(targetId,delta){
+  if(!DG.nations[targetId])return;
+  const cur=DG.sentiments[targetId]||0;
+  DG.sentiments[targetId]=Math.max(-100,Math.min(100,cur+delta));
+  if(Math.abs(delta)>3){
+    const ripple=Math.round(delta*0.25);
+    const tSent=INITIAL_SENTIMENTS[targetId]||{};
+    DNS.forEach(n=>{
+      if(n.id===DG.playerNation.id||n.id===targetId)return;
+      const ts=tSent[n.id]||0;
+      if(ts>20)DG.sentiments[n.id]=Math.max(-100,Math.min(100,(DG.sentiments[n.id]||0)+ripple));
+      else if(ts<-20)DG.sentiments[n.id]=Math.max(-100,Math.min(100,(DG.sentiments[n.id]||0)-ripple));
+    });
+  }
+  DG.allies=[];DG.enemies=[];
+  DNS.forEach(n=>{
+    if(n.id===DG.playerNation.id)return;
+    const s=DG.sentiments[n.id]||0;
+    if(s>=40)DG.allies.push(n.id);
+    if(s<=-40)DG.enemies.push(n.id);
+  });
+}
+
+function initMap(){
+  mapboxgl.accessToken=MAPBOX_TOKEN;
+  const map=new mapboxgl.Map({
+    container:'mapbox-container',style:'mapbox://styles/mapbox/dark-v11',
+    projection:'globe',center:[20,20],zoom:1.4,attributionControl:false
+  });
+  DG.map=map;
+  map.on('load',()=>{
+    map.setFog({color:'#080c1a','high-color':'#080c28','horizon-blend':0.05,'space-color':'#020408','star-intensity':0.9});
+    map.addSource('countries',{type:'vector',url:'mapbox://mapbox.country-boundaries-v1'});
+    map.addLayer({id:'country-fills',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':buildColorExpr(),'fill-opacity':0.78}});
+    map.addLayer({id:'country-borders',type:'line',source:'countries','source-layer':'country_boundaries',paint:{'line-color':buildBorderExpr(),'line-width':['case',['in',['get','iso_3166_1'],['literal',getAllISOs()]],1,0.3],'line-opacity':0.85}});
+    map.addLayer({id:'country-hover',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':'#ffffff','fill-opacity':['case',['boolean',['feature-state','hover'],false],0.12,0]}});
+    map.addLayer({id:'territory-overlay',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':DG.playerNation?.color||'#e0a82a','fill-opacity':['case',['in',['get','iso_3166_1'],['literal',[]]],0.4,0]}});
+    map.addLayer({id:'territory-glow',type:'line',source:'countries','source-layer':'country_boundaries',paint:{'line-color':DG.playerNation?.color||'#e0a82a','line-width':['case',['in',['get','iso_3166_1'],['literal',[]]],2.5,0],'line-opacity':0.7,'line-blur':2}});
+
+    let hoverId=null;
+    map.on('mousemove','country-fills',e=>{
+      if(e.features.length>0){
+        if(hoverId!==null)map.setFeatureState({source:'countries',sourceLayer:'country_boundaries',id:hoverId},{hover:false});
+        hoverId=e.features[0].id;
+        map.setFeatureState({source:'countries',sourceLayer:'country_boundaries',id:hoverId},{hover:true});
+        const iso=e.features[0].properties.iso_3166_1;
+        const nation=DNS.find(n=>n.iso===iso);
+        const tp=document.getElementById('dtp');
+        if(nation){
+          const s=DG.nations[nation.id]?.cs;
+          const sent=DG.sentiments[nation.id]||0;
+          const isT=DG.territories.includes(nation.id);
+          tp.innerHTML='<b>'+nation.name+'</b> &nbsp;·&nbsp; '+getSentimentLabel(sent)+' &nbsp;·&nbsp; MIL:'+Math.round(s?.military||0)+' ECO:'+Math.round(s?.economy||0)+(isT?' &nbsp;⚑':' ');
+          tp.style.display='block';
+        }else tp.style.display='none';
+      }
+    });
+    map.on('mouseleave','country-fills',()=>{
+      if(hoverId!==null)map.setFeatureState({source:'countries',sourceLayer:'country_boundaries',id:hoverId},{hover:false});
+      hoverId=null;document.getElementById('dtp').style.display='none';
+    });
+    map.on('click','country-fills',e=>{
+      if(e.features.length>0){
+        const iso=e.features[0].properties.iso_3166_1;
+        const nation=DNS.find(n=>n.iso===iso);
+        if(nation){
+          if(!DG.nations[nation.id]?.cs)DG.nations[nation.id]={...nation,cs:{...nation.stats}};
+          dInspect(nation.id);
+          map.flyTo({center:nation.center,zoom:3.5,duration:800});
+          // auto-open inspector on mobile
+          if(window.innerWidth<=680)togglePanel('drp');
+        }
+      }
+    });
+    map.getCanvas().style.cursor='pointer';
+    highlightPlayer();updateLegend();
+  });
+}
+
+function updateLegend(){
+  const el=document.getElementById('dlig');
+  if(!DG.playerNation){el.innerHTML='';return;}
+  let h='<div class="ltag owned">▶ '+DG.playerNation.name+'</div>';
+  if(DG.allies.length)h+='<div class="ltag allied">◆ Allies ('+DG.allies.length+')</div>';
+  if(DG.enemies.length)h+='<div class="ltag enemy">✖ Rivals ('+DG.enemies.length+')</div>';
+  if(DG.territories.length)h+='<div class="ltag owned">⚑ Territories ('+DG.territories.length+')</div>';
+  el.innerHTML=h;
+}
+
+function updateTerritoryLayers(){
+  if(!DG.map||!DG.map.isStyleLoaded())return;
+  const isoList=DG.territories.map(id=>DG.nations[id]?.iso).filter(Boolean);
+  const pc=DG.playerNation?.color||'#e0a82a';
+  try{
+    DG.map.setPaintProperty('territory-overlay','fill-color',pc);
+    DG.map.setPaintProperty('territory-overlay','fill-opacity',['case',['in',['get','iso_3166_1'],['literal',isoList]],0.4,0]);
+    DG.map.setPaintProperty('territory-glow','line-color',pc);
+    DG.map.setPaintProperty('territory-glow','line-width',['case',['in',['get','iso_3166_1'],['literal',isoList]],2.5,0]);
+  }catch(e){}
+}
+
+function getAllISOs(){return DNS.map(n=>n.iso);}
+
+function buildColorExpr(){
+  const s=['match',['get','iso_3166_1']];
+  const pc=DG.playerNation?.color||'#e0a82a';
+  DNS.forEach(n=>{s.push(n.iso,(DG.territories&&DG.territories.includes(n.id))?pc:n.color);});
+  s.push('#0a0e22');return s;
+}
+
+function buildBorderExpr(){
+  const s=['match',['get','iso_3166_1']];
+  const pc=DG.playerNation?.color||'#e0a82a';
+  (DG.territories||[]).forEach(id=>{const n=DG.nations[id];if(n)s.push(n.iso,pc);});
+  DG.allies.forEach(id=>{const n=DG.nations[id];if(n)s.push(n.iso,'#22d882');});
+  DG.enemies.forEach(id=>{const n=DG.nations[id];if(n)s.push(n.iso,'#ff3355');});
+  if(DG.playerNation)s.push(DG.playerNation.iso,pc);
+  if(DG.sel){const sn=DG.nations[DG.sel];if(sn)s.push(sn.iso,'#ffffff');}
+  s.push('#253060');return s;
+}
+
+function highlightPlayer(){
+  if(!DG.map||!DG.map.isStyleLoaded())return;
+  try{
+    DG.map.setPaintProperty('country-fills','fill-color',buildColorExpr());
+    DG.map.setPaintProperty('country-borders','line-color',buildBorderExpr());
+    DG.map.setPaintProperty('country-borders','line-width',['match',['get','iso_3166_1'],
+      ...(DG.playerNation?[DG.playerNation.iso,2]:[]),
+      ...(DG.territories||[]).flatMap(id=>[DG.nations[id]?.iso,2.2]).filter(Boolean),
+      ...(DG.sel&&DG.sel!==DG.playerNation?.id?[DG.nations[DG.sel]?.iso,1.5]:[]).filter(Boolean),
+      0.3
+    ]);
+    updateTerritoryLayers();updateLegend();
+  }catch(e){}
+}
+
+function dInspect(id){
+  DG.sel=id;highlightPlayer();
+  let n=DG.nations[id];
+  if(!n){
+    const t=DNS.find(x=>x.id===id);
+    if(t){DG.nations[id]={...t,cs:{...t.stats}};n=DG.nations[id];}
+    else return;
+  }
+  const s=n.cs;if(!s)return;
+  const isP=DG.playerNation&&id===DG.playerNation.id;
+  const sent=DG.sentiments[id]||0;
+  const isT=DG.territories.includes(id);
+  let bars='';
+  DSC_KEYS.forEach(k=>{
+    const v=typeof s[k]==='number'?s[k]:n.stats[k]||50;
+    const delta=Math.round(v-(n.stats[k]||v));
+    let dh='';
+    if(delta>0)dh='<span class="sd pos">+'+delta+'</span>';
+    else if(delta<0)dh='<span class="sd neg">'+delta+'</span>';
+    bars+='<div class="sr"><div class="sl">'+k[0].toUpperCase()+k.slice(1)+'</div>'+
+      '<div class="sbw"><div class="sb" style="width:'+Math.max(2,v)+'%;background:'+DSC[k]+'"></div></div>'+
+      '<div class="sv" style="color:'+DSC[k]+'">'+Math.round(v)+dh+'</div></div>';
+  });
+  let acts='';
+  if(!isP){
+    acts='<div class="cis">'+getSentimentLabel(sent).toUpperCase()+'<span class="sent '+getSentimentCategory(sent)+'">'+getSentimentLabel(sent)+'</span>'+(isT?' <span class="rb ra">⚑ Controlled</span>':'')+'</div>';
+    if(sent<40)acts+='<div class="ac gn" onclick="dHint(\'Forge alliance with '+n.name+', mutual defense pact, open trade corridors and joint investment\')"><h4>Alliance</h4><p>Influence and economy synergy. Strong partners stabilize; weak ones carry risk.</p></div>';
+    if(sent>-60&&!isT)acts+='<div class="ac rd" onclick="dHint(\'Invade '+n.name+', full military commitment, seize territory and critical resource assets\')"><h4>Attack / Invade</h4><p>High escalatory risk. Rewards scale with their land and resources.</p></div>';
+    if(sent>=40)acts+='<div class="ac gd" onclick="dHint(\'Betray '+n.name+', exploit shared intelligence, launch coordinated surprise offensive immediately\')"><h4>Betray Alliance</h4><p>Surprise advantage, but permanent influence collapse. Global reputation destroyed.</p></div>';
+    acts+='<div class="ac rd" onclick="dHint(\'Impose international sanctions on '+n.name+', rally coalition, cut off trade and freeze assets\')"><h4>Sanctions</h4><p>Degrades their economy. Effective when you hold leverage over third parties.</p></div>';
+    acts+='<div class="ac gn" onclick="dHint(\'Open bilateral trade with '+n.name+', investment agreements, secure resource access and supply chains\')"><h4>Trade Deal</h4><p>Mutual economy growth. Strongest with resource-rich partners.</p></div>';
+    acts+='<div class="ac" onclick="dHint(\'Fund covert proxy forces inside '+n.name+', destabilize government, quietly extend sphere of influence\')"><h4>Covert Operation</h4><p>Deniable influence gain. Backfires severely if attributed.</p></div>';
+  }
+  document.getElementById('dci').innerHTML=
+    '<div class="cin">'+n.name+'</div><div class="cir">'+n.region+'</div>'+bars+
+    (isP?'<div style="color:var(--cyan);font-family:var(--font-mono);font-size:10px;padding:8px 0;letter-spacing:1px;">▶ THIS IS YOUR NATION</div>':'')+
+    (acts?'<div class="at2">Strategic Options</div>'+acts:'');
+}
+
+function dHint(t){const el=document.getElementById('dmi');el.value=t;dWC(el);el.focus();}
+
+function dRStats(){
+  if(!DG.playerNation)return;
+  document.getElementById('dpnn').textContent=DG.playerNation.name.toUpperCase();
+  let bars='';
+  DSC_KEYS.forEach(k=>{
+    const v=DG.cs[k],sv=DG.startStats[k];
+    const delta=Math.round(v-sv),pct=Math.max(2,v);
+    const gainPct=delta>0?Math.max(0,Math.round((delta/100)*100)):0;
+    const lossPct=delta<0?Math.max(0,Math.round((-delta/100)*100)):0;
+    const basePct=Math.max(0,Math.round(v)-(delta>0?delta:0));
+    let dh='';
+    if(delta>0)dh='<span class="sd pos">+'+delta+'</span>';
+    else if(delta<0)dh='<span class="sd neg">'+delta+'</span>';
+    bars+='<div class="sr"><div class="sl">'+k[0].toUpperCase()+k.slice(1)+'</div><div class="sbw">'+
+      (delta>0?'<div class="sbs gain" style="width:'+gainPct+'%;left:'+Math.min(98,basePct)+'%;"></div>':'')+
+      (delta<0?'<div class="sbs loss" style="width:'+lossPct+'%;left:'+Math.min(98,Math.round(v))+'%;"></div>':'')+
+      '<div class="sb" style="width:'+Math.max(2,Math.round(v))+'%;background:'+DSC[k]+'"></div></div>'+
+      '<div class="sv" style="color:'+DSC[k]+'">'+Math.round(v)+dh+'</div></div>';
+  });
+  document.getElementById('dpbars').innerHTML=bars;
+}
+
+function dRHeader(){
+  const s=DG.cs||{};
+  const pairs=[['influence','dhi','dhid'],['economy','dhe','dhed'],['military','dhm','dhmd'],['resources','dhr','dhrd'],['land','dhl','dhld']];
+  pairs.forEach(([k,vi,di])=>{
+    const val=s[k]==='—'?'—':Math.round(s[k]);
+    const delta=Math.round(DG.statDeltas?.[k]||0);
+    document.getElementById(vi).textContent=val;
+    const del=document.getElementById(di);
+    if(delta!==0&&val!=='—'){del.style.display='inline';del.textContent=delta>0?'+'+delta:delta;del.className='delta '+(delta>0?'up':'down');}
+    else del.style.display='none';
+  });
+  document.getElementById('dht').textContent=DG.turn;
+}
+
+function dLog(type,text){
+  const p=document.getElementById('dlog'),d=document.createElement('div');
+  if(type==='turn'){d.className='lt';d.textContent='— '+text+' —';}
+  else{d.className='le '+type;d.textContent=text;}
+  p.appendChild(d);p.scrollTop=p.scrollHeight;
+}
+
+function dWC(el){
+  const w=el.value.trim()===''?0:el.value.trim().split(/\s+/).length;
+  const c=document.getElementById('dwct');
+  c.textContent=w+' / 20';c.className=w>20?'ov':'';
+  document.getElementById('dexb').disabled=w===0||w>20||DG.busy;
+}
+
+function dKeyDown(e){
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    if(!DG.busy&&document.getElementById('dmi').value.trim())dSubmit();
+  }
+}
+
+function resolveNationName(id){
+  return DG.nations[id]?.name||null;
+}
+
+function showResultModal(result){
+  const mc=document.getElementById('modal-content');
+  const statChanges=result.statChanges||{};
+  let statHtml='';
+  DSC_KEYS.forEach(k=>{
+    const delta=statChanges[k]||0,newVal=Math.round(DG.cs[k]);
+    statHtml+='<div class="modal-stat"><span class="modal-stat-name">'+k+'</span><div><span class="modal-stat-val">'+newVal+'</span>'+
+      (delta!==0?'<span class="modal-stat-delta '+(delta>0?'up':'down')+'">'+(delta>0?'+':'')+delta+'</span>':'')+
+      '</div></div>';
+  });
+  let tagsHtml='';
+  const addTags=(list,cls,prefix)=>{
+    (list||[]).forEach(id=>{
+      const nm=resolveNationName(id);if(!nm)return;
+      tagsHtml+='<span class="modal-tag '+cls+'">'+prefix+nm+'</span>';
+    });
+  };
+  addTags(result.newAllies,'good','+ ');
+  addTags(result.newEnemies,'bad','✖ ');
+  addTags(result.territoryGained,'good','⚑ ');
+  addTags(result.removedAllies,'bad','— ');
+
+  let sentHtml='';
+  if(result.sentimentShifts){
+    Object.entries(result.sentimentShifts).forEach(([id,delta])=>{
+      if(Math.abs(delta)<8)return;
+      const nm=resolveNationName(id);if(!nm)return;
+      sentHtml+='<span class="modal-tag '+(delta>0?'good':'bad')+'">'+nm+' '+(delta>0?'+':'')+delta+'</span>';
+    });
+  }
+
+  mc.innerHTML=
+    '<button class="modal-close" onclick="closeModal()">✕</button>'+
+    '<div class="modal-nation">'+(DG.playerNation?.name||'—')+'</div>'+
+    '<div class="modal-turn">TURN '+DG.turn+' · DIRECTIVE RESOLVED</div>'+
+    '<div class="modal-narrative">'+(result.narrative||'No narrative provided.')+'</div>'+
+    (result.sideEffect&&result.sideEffect.trim()?'<div class="modal-spy">⚠ INTEL: '+result.sideEffect+'</div>':'')+
+    '<div class="modal-section" style="margin-top:14px;"><div class="modal-section-title">Stat Changes</div><div class="modal-stats">'+statHtml+'</div></div>'+
+    (tagsHtml?'<div class="modal-section"><div class="modal-section-title">Diplomatic Events</div><div class="modal-tags">'+tagsHtml+'</div></div>':'')+
+    (sentHtml?'<div class="modal-section"><div class="modal-section-title">Sentiment Shifts</div><div class="modal-tags">'+sentHtml+'</div></div>':'')+
+    '<div class="modal-chart-toggle" onclick="closeModalAndChart()">TREND CHART →</div>';
+  document.getElementById('result-modal').style.display='flex';
+}
+
+function closeModal(){
+  document.getElementById('result-modal').style.display='none';
+  DG.collateral.push({turn:DG.turn,result:DG._lastResult});
+}
+function closeModalAndChart(){
+  document.getElementById('result-modal').style.display='none';
+  toggleChart();
+}
+
+async function dSubmit(){
+  if(DG.busy)return;
+  const el=document.getElementById('dmi'),move=el.value.trim();
+  if(!move||move.split(/\s+/).length>20)return;
+  DG.busy=true;
+  document.getElementById('dexb').disabled=true;
+  document.getElementById('dexb').textContent='Processing...';
+  el.disabled=true;
+  dLog('pl','You: "'+move+'"');
+  const td=document.createElement('div');
+  td.className='le';td.innerHTML='<div class="thk"><span></span><span></span><span></span></div>';
+  document.getElementById('dlog').appendChild(td);
+  document.getElementById('dlog').scrollTop=99999;
+  try{
+    const r=await dCallAI(move);td.remove();
+    DG._lastResult=r;dApply(r);
+    DG.history.push({turn:DG.turn,...DG.cs});
+    showResultModal(r);
+    if(document.getElementById('chart-panel').classList.contains('show'))drawChart();
+  }catch(e){
+    td.remove();dLog('wn','Intelligence failure — move could not be resolved.');console.error(e);
+  }
+  DG.busy=false;el.disabled=false;el.value='';
+  dWC(el);document.getElementById('dexb').textContent='EXECUTE →';
+  if(DG.turn<20){
+    DG.turn++;dRHeader();dRStats();dUpdateRelations();
+    dLog('turn','Turn '+DG.turn);
+    if(DG.sel)dInspect(DG.sel);
+  }else{
+    dEndGame();
+  }
+}
+
+async function dCallAI(move){
+  const n=DG.playerNation,s=DG.cs;
+  const world=DNS.filter(x=>x.id!==n.id).map(x=>{
+    const c=DG.nations[x.id].cs;
+    return x.name+'(Mil:'+Math.round(c.military)+',Eco:'+Math.round(c.economy)+',Inf:'+Math.round(c.influence)+',Res:'+Math.round(c.resources)+',Sentiment:'+getSentimentLabel(DG.sentiments[x.id]||0)+')';
+  }).join(', ');
+  const sysPrompt=`You are the AI resolution engine for DOMINION, a Risk-like geopolitical strategy game based on realpolitik and game theory.
+You resolve player moves with Machiavellian realism — nations are opportunistic, aggressive when advantageous, and rarely altruistic.
+Bold overextension backfires spectacularly. Economic growth is gradual unless major reforms. Betrayals destroy influence permanently.
+Military action risks devastating retaliation. Alliances shift based on mutual interest, not sentimentality.
+Scale magnitude to ambition and precision (max ±18 per stat, rarely above ±12).
+Territory conquest is possible but extremely difficult — only successful with overwhelming military superiority or complete collapse of target.
+NEVER use markdown formatting. Return ONLY valid JSON. Nation IDs must be exact: usa,china,russia,germany,india,brazil,uk,france,japan,nigeria,turkey,iran,australia,saudi,s_africa,mexico,indonesia,s_korea,argentina,pakistan`;
+  const userPrompt=`PLAYER: ${n.name} (${n.region})
+STATS: Influence:${Math.round(s.influence)}, Economy:${Math.round(s.economy)}, Military:${Math.round(s.military)}, Resources:${Math.round(s.resources)}, Land:${Math.round(s.land)}
+TURN: ${DG.turn}/20
+ALLIES: ${DG.allies.map(id=>DG.nations[id]?.name||id).join(', ')||'None'}
+AT WAR: ${DG.enemies.map(id=>DG.nations[id]?.name||id).join(', ')||'None'}
+TERRITORIES: ${DG.territories.map(id=>DG.nations[id]?.name||id).join(', ')||'None'}
+SENTIMENTS: ${DNS.filter(x=>x.id!==n.id).map(x=>x.name+':'+getSentimentLabel(DG.sentiments[x.id]||0)).join(', ')}
+WORLD: ${world}
+MOVE: "${move}"
+Return JSON:
+{"narrative":"2-3 sentence vivid geopolitical result","statChanges":{"influence":0,"economy":0,"military":0,"resources":0,"land":0},"sentimentShifts":{"nationId":delta},"newAllies":[],"newEnemies":[],"removedAllies":[],"territoryGained":[],"territoryLost":[],"sideEffect":"any espionage or unexpected consequence (empty string if none)"}
+RULES: Territory conquest requires target military<40 AND your military>70, OR critical narrative event. Betrayal sets betrayed sentiment to -80 and their close allies to -30. sideEffect should be concise. Use only exact nation IDs listed above.`;
+
+  const resp=await fetch('/api/ai',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({messages:[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}]})
+  });
+  if(!resp.ok)throw new Error('API error '+resp.status);
+  const data=await resp.json();
+  const txt=data.choices[0].message.content.replace(/```json|```/g,'').trim();
+  return JSON.parse(txt);
+}
+
+function dApply(r){
+  dLog('rs',r.narrative);
+  if(r.sideEffect&&r.sideEffect.trim())dLog('spy',r.sideEffect);
+  Object.keys(r.statChanges||{}).forEach(k=>{
+    if(DG.cs[k]!==undefined){
+      const ch=r.statChanges[k];
+      DG.cs[k]=Math.max(1,Math.min(100,DG.cs[k]+ch));
+      DG.statDeltas[k]=(DG.statDeltas[k]||0)+ch;
+    }
+  });
+  if(r.sentimentShifts)Object.entries(r.sentimentShifts).forEach(([id,delta])=>{dApplySentimentEffects(id,delta);});
+  (r.newAllies||[]).forEach(id=>{dApplySentimentEffects(id,40);});
+  (r.newEnemies||[]).forEach(id=>{dApplySentimentEffects(id,-40);});
+  (r.removedAllies||[]).forEach(id=>{dApplySentimentEffects(id,-50);});
+  (r.territoryGained||[]).forEach(id=>{
+    if(!DG.territories.includes(id)){
+      DG.territories.push(id);
+      const tn=DG.nations[id];
+      if(tn){tn.cs.land=Math.max(5,tn.cs.land-30);tn.cs.military=Math.max(5,tn.cs.military-25);tn.cs.economy=Math.max(5,tn.cs.economy-15);dApplySentimentEffects(id,-60);}
+    }
+  });
+  (r.territoryLost||[]).forEach(id=>{DG.territories=DG.territories.filter(t=>t!==id);});
+  const pos=[],neg=[];
+  Object.entries(r.statChanges||{}).forEach(([k,v])=>{if(v>0)pos.push('+'+v+' '+k);else if(v<0)neg.push(v+' '+k);});
+  if(pos.length)dLog('ps',pos.join('  '));
+  if(neg.length)dLog('wn',neg.join('  '));
+  if(r.sentimentShifts)Object.entries(r.sentimentShifts).forEach(([id,delta])=>{
+    if(Math.abs(delta)<10)return;
+    const nm=resolveNationName(id);if(!nm)return;
+    dLog(delta>0?'ps':'wn',nm+' sentiment '+(delta>0?'+':'')+delta);
+  });
+  if((r.territoryGained||[]).length){
+    const names=r.territoryGained.map(id=>resolveNationName(id)).filter(Boolean);
+    if(names.length)dLog('ps','⚑ Territory gained: '+names.join(', '));
+  }
+  highlightPlayer();dRStats();dRHeader();dUpdateRelations();
+  if(DG.sel)dInspect(DG.sel);
+}
+
+function dEndGame(){
+  setTimeout(()=>{
+    const s=DG.cs,st=DG.startStats;
+    const tot=DSC_KEYS.reduce((a,k)=>a+s[k],0);
+    const totSt=DSC_KEYS.reduce((a,k)=>a+st[k],0);
+    const avg=totSt/5;
+    const mult=1+Math.max(0,(50-avg)/50)*0.55;
+    const score=Math.round((tot/totSt)*100*mult);
+    const terrBonus=DG.territories.length*8;
+    const final=score+terrBonus;
+    const label=final>=155?'World Hegemon':final>=130?'Regional Superpower':final>=110?'Rising Power':final>=90?'Holding Ground':'Declining Power';
+    document.getElementById('dslbl').textContent=DG.playerNation.name+' · '+label;
+    document.getElementById('dfsc').textContent=final;
+    document.getElementById('dsbrk').innerHTML=
+      'Final: Inf '+Math.round(s.influence)+', Eco '+Math.round(s.economy)+', Mil '+Math.round(s.military)+', Res '+Math.round(s.resources)+', Land '+Math.round(s.land)+'\n\n'+
+      'Starting total: '+Math.round(totSt)+' → Final: '+Math.round(tot)+'\n'+
+      'Territories: '+DG.territories.length+' (+'+terrBonus+' pts)\nUnderdog multiplier: ×'+mult.toFixed(2);
+    document.getElementById('dsov').style.display='flex';
+  },800);
+}
+
+dWC(document.getElementById('dmi'));
+</script>
+</body>
+</html>

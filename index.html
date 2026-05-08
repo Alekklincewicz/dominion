@@ -163,6 +163,7 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 .le.wn{color:var(--amber);}
 .le.ps{color:var(--green);}
 .le.spy{color:var(--red);font-style:italic;font-size:10px;}
+.le.ev{color:#b066ff;font-size:10px;}
 .lt{font-family:var(--font-mono);font-size:8px;letter-spacing:2px;color:var(--amber-dim);padding:5px 10px 3px;text-transform:uppercase;}
 
 /* ── MAP ── */
@@ -579,26 +580,65 @@ const DSC={influence:'#00c8ff',economy:'#22d882',military:'#ff3355',resources:'#
 const DSC_KEYS=['influence','economy','military','resources','land'];
 
 const DNS=[
-  {id:'usa',name:'United States',region:'Americas',iso:'US',center:[-98,38],color:'#1e3560',stats:{influence:95,economy:92,military:98,resources:78,land:85},desc:'Global hegemon. Unmatched military and economic reach.'},
-  {id:'china',name:'China',region:'Asia',iso:'CN',center:[105,35],color:'#6e2020',stats:{influence:85,economy:90,military:88,resources:75,land:88},desc:'Rising superpower. Vast manufacturing and growing ambition.'},
-  {id:'russia',name:'Russia',region:'Europe/Asia',iso:'RU',center:[90,60],color:'#1e4010',stats:{influence:72,economy:55,military:85,resources:95,land:98},desc:'Energy giant. Nuclear arsenal and vast Eurasian land.'},
-  {id:'germany',name:'Germany',region:'Europe',iso:'DE',center:[10,51],color:'#303040',stats:{influence:70,economy:82,military:50,resources:40,land:30},desc:'EU economic anchor. Industrial powerhouse.'},
-  {id:'india',name:'India',region:'Asia',iso:'IN',center:[78,22],color:'#6a3a10',stats:{influence:65,economy:72,military:75,resources:60,land:65},desc:'Emerging giant with a massive population and growing tech.'},
-  {id:'brazil',name:'Brazil',region:'Americas',iso:'BR',center:[-52,-14],color:'#104020',stats:{influence:55,economy:60,military:55,resources:85,land:80},desc:'Resource-rich South American giant with huge potential.'},
-  {id:'uk',name:'United Kingdom',region:'Europe',iso:'GB',center:[-2,54],color:'#101050',stats:{influence:75,economy:72,military:65,resources:35,land:20},desc:'Middle power. Global networks and nuclear deterrent.'},
-  {id:'france',name:'France',region:'Europe',iso:'FR',center:[2,46],color:'#3a1040',stats:{influence:70,economy:68,military:68,resources:38,land:32},desc:'Nuclear power with EU influence and African presence.'},
-  {id:'japan',name:'Japan',region:'Asia',iso:'JP',center:[138,37],color:'#501030',stats:{influence:65,economy:75,military:45,resources:20,land:22},desc:'Tech economy under pressure. Resource-scarce, US-aligned.'},
-  {id:'nigeria',name:'Nigeria',region:'Africa',iso:'NG',center:[8,10],color:'#284010',stats:{influence:40,economy:48,military:42,resources:68,land:55},desc:"Africa's most populous. Oil wealth and regional ambition."},
-  {id:'turkey',name:'Turkey',region:'Mid East/Eur',iso:'TR',center:[35,39],color:'#402010',stats:{influence:55,economy:52,military:65,resources:40,land:45},desc:'Strategic NATO bridge between Europe and Asia.'},
-  {id:'iran',name:'Iran',region:'Middle East',iso:'IR',center:[53,32],color:'#301808',stats:{influence:48,economy:38,military:60,resources:80,land:55},desc:'Isolated but resourceful. Energy wealth and proxy network.'},
-  {id:'australia',name:'Australia',region:'Oceania',iso:'AU',center:[134,-26],color:'#103030',stats:{influence:52,economy:65,military:50,resources:82,land:78},desc:'Stable democracy. Vast resources, US-aligned.'},
-  {id:'saudi',name:'Saudi Arabia',region:'Middle East',iso:'SA',center:[45,24],color:'#403010',stats:{influence:62,economy:65,military:60,resources:92,land:58},desc:'OPEC anchor. Oil wealth with growing regional ambitions.'},
-  {id:'s_africa',name:'South Africa',region:'Africa',iso:'ZA',center:[25,-30],color:'#103020',stats:{influence:42,economy:44,military:38,resources:70,land:50},desc:'Continental leader. Mineral wealth, domestic instability.'},
-  {id:'mexico',name:'Mexico',region:'Americas',iso:'MX',center:[-102,24],color:'#302010',stats:{influence:45,economy:55,military:40,resources:60,land:55},desc:'US neighbor leveraging USMCA and manufacturing.'},
-  {id:'indonesia',name:'Indonesia',region:'Asia',iso:'ID',center:[118,-2],color:'#200830',stats:{influence:50,economy:55,military:48,resources:72,land:60},desc:'Archipelago giant at the crossroads of Pacific trade.'},
-  {id:'s_korea',name:'South Korea',region:'Asia',iso:'KR',center:[128,36],color:'#102040',stats:{influence:55,economy:68,military:58,resources:18,land:18},desc:'Tech powerhouse under constant geopolitical pressure.'},
-  {id:'argentina',name:'Argentina',region:'Americas',iso:'AR',center:[-64,-34],color:'#101830',stats:{influence:38,economy:40,military:35,resources:65,land:70},desc:'Resource-rich. Chronic economic instability.'},
-  {id:'pakistan',name:'Pakistan',region:'Asia',iso:'PK',center:[70,30],color:'#281808',stats:{influence:38,economy:32,military:55,resources:42,land:50},desc:'Nuclear state. Volatile region, India rivalry.'}
+  // Major powers
+  {id:'usa',name:'United States',region:'Americas',iso:'US',center:[-98,38],color:'#2a4e96',stats:{influence:95,economy:92,military:98,resources:78,land:85},desc:'Global hegemon. Unmatched military and economic reach.'},
+  {id:'china',name:'China',region:'Asia',iso:'CN',center:[105,35],color:'#963030',stats:{influence:85,economy:90,military:88,resources:75,land:88},desc:'Rising superpower. Vast manufacturing and growing ambition.'},
+  {id:'russia',name:'Russia',region:'Europe/Asia',iso:'RU',center:[90,60],color:'#2e6e1e',stats:{influence:72,economy:55,military:85,resources:95,land:98},desc:'Energy giant. Nuclear arsenal and vast Eurasian land.'},
+  {id:'germany',name:'Germany',region:'Europe',iso:'DE',center:[10,51],color:'#565666',stats:{influence:70,economy:82,military:50,resources:40,land:30},desc:'EU economic anchor. Industrial powerhouse.'},
+  {id:'india',name:'India',region:'Asia',iso:'IN',center:[78,22],color:'#966228',stats:{influence:65,economy:72,military:75,resources:60,land:65},desc:'Emerging giant with a massive population and growing tech.'},
+  {id:'brazil',name:'Brazil',region:'Americas',iso:'BR',center:[-52,-14],color:'#1e7040',stats:{influence:55,economy:60,military:55,resources:85,land:80},desc:'Resource-rich South American giant with huge potential.'},
+  {id:'uk',name:'United Kingdom',region:'Europe',iso:'GB',center:[-2,54],color:'#202090',stats:{influence:75,economy:72,military:65,resources:35,land:20},desc:'Middle power. Global networks and nuclear deterrent.'},
+  {id:'france',name:'France',region:'Europe',iso:'FR',center:[2,46],color:'#702878',stats:{influence:70,economy:68,military:68,resources:38,land:32},desc:'Nuclear power with EU influence and African presence.'},
+  {id:'japan',name:'Japan',region:'Asia',iso:'JP',center:[138,37],color:'#903848',stats:{influence:65,economy:75,military:45,resources:20,land:22},desc:'Tech economy under pressure. Resource-scarce, US-aligned.'},
+  {id:'turkey',name:'Turkey',region:'Mid East/Eur',iso:'TR',center:[35,39],color:'#8a5a20',stats:{influence:55,economy:52,military:65,resources:40,land:45},desc:'Strategic NATO bridge between Europe and Asia.'},
+  {id:'iran',name:'Iran',region:'Middle East',iso:'IR',center:[53,32],color:'#7a3820',stats:{influence:48,economy:38,military:60,resources:80,land:55},desc:'Isolated but resourceful. Energy wealth and proxy network.'},
+  {id:'australia',name:'Australia',region:'Oceania',iso:'AU',center:[134,-26],color:'#1e7068',stats:{influence:52,economy:65,military:50,resources:82,land:78},desc:'Stable democracy. Vast resources, US-aligned.'},
+  {id:'saudi',name:'Saudi Arabia',region:'Middle East',iso:'SA',center:[45,24],color:'#887030',stats:{influence:62,economy:65,military:60,resources:92,land:58},desc:'OPEC anchor. Oil wealth with growing regional ambitions.'},
+  {id:'nigeria',name:'Nigeria',region:'Africa',iso:'NG',center:[8,10],color:'#487828',stats:{influence:40,economy:48,military:42,resources:68,land:55},desc:"Africa's most populous. Oil wealth and regional ambition."},
+  {id:'s_africa',name:'South Africa',region:'Africa',iso:'ZA',center:[25,-30],color:'#287848',stats:{influence:42,economy:44,military:38,resources:70,land:50},desc:'Continental leader. Mineral wealth, domestic instability.'},
+  {id:'mexico',name:'Mexico',region:'Americas',iso:'MX',center:[-102,24],color:'#785030',stats:{influence:45,economy:55,military:40,resources:60,land:55},desc:'US neighbor leveraging USMCA and manufacturing.'},
+  {id:'indonesia',name:'Indonesia',region:'Asia',iso:'ID',center:[118,-2],color:'#581868',stats:{influence:50,economy:55,military:48,resources:72,land:60},desc:'Archipelago giant at the crossroads of Pacific trade.'},
+  {id:'s_korea',name:'South Korea',region:'Asia',iso:'KR',center:[128,36],color:'#20407a',stats:{influence:55,economy:68,military:58,resources:18,land:18},desc:'Tech powerhouse under constant geopolitical pressure.'},
+  {id:'argentina',name:'Argentina',region:'Americas',iso:'AR',center:[-64,-34],color:'#204068',stats:{influence:38,economy:40,military:35,resources:65,land:70},desc:'Resource-rich. Chronic economic instability.'},
+  {id:'pakistan',name:'Pakistan',region:'Asia',iso:'PK',center:[70,30],color:'#684030',stats:{influence:38,economy:32,military:55,resources:42,land:50},desc:'Nuclear state. Volatile region, India rivalry.'},
+  // Europe
+  {id:'canada',name:'Canada',region:'Americas',iso:'CA',center:[-96,60],color:'#1a3e7a',stats:{influence:62,economy:72,military:52,resources:78,land:82},desc:'G7 democracy. Vast resources, deep US ties.'},
+  {id:'ukraine',name:'Ukraine',region:'Europe',iso:'UA',center:[32,49],color:'#2e5a8a',stats:{influence:42,economy:35,military:62,resources:52,land:55},desc:'Frontline state. Resilient under existential pressure.'},
+  {id:'poland',name:'Poland',region:'Europe',iso:'PL',center:[20,52],color:'#8a2838',stats:{influence:48,economy:55,military:58,resources:32,land:35},desc:'NATO eastern anchor. Rapidly rearming.'},
+  {id:'italy',name:'Italy',region:'Europe',iso:'IT',center:[12,42],color:'#6a2858',stats:{influence:58,economy:62,military:48,resources:28,land:28},desc:'G7 member. Mediterranean gateway, EU political weight.'},
+  {id:'spain',name:'Spain',region:'Europe',iso:'ES',center:[-4,40],color:'#8a4820',stats:{influence:55,economy:60,military:45,resources:32,land:30},desc:'EU major. Atlantic-Mediterranean crossroads.'},
+  {id:'netherlands',name:'Netherlands',region:'Europe',iso:'NL',center:[5,52],color:'#1e3880',stats:{influence:58,economy:65,military:42,resources:25,land:18},desc:'EU port giant. Finance hub, global trade networks.'},
+  {id:'sweden',name:'Sweden',region:'Europe',iso:'SE',center:[18,62],color:'#1a5080',stats:{influence:52,economy:60,military:48,resources:45,land:40},desc:'New NATO member. Tech economy, strong defense.'},
+  {id:'romania',name:'Romania',region:'Europe',iso:'RO',center:[25,46],color:'#582030',stats:{influence:35,economy:40,military:42,resources:38,land:32},desc:'NATO eastern flank. Black Sea strategic access.'},
+  {id:'greece',name:'Greece',region:'Europe',iso:'GR',center:[22,39],color:'#283888',stats:{influence:38,economy:38,military:45,resources:28,land:22},desc:'Mediterranean NATO anchor. Strategic geography.'},
+  // Middle East
+  {id:'israel',name:'Israel',region:'Middle East',iso:'IL',center:[35,31],color:'#304878',stats:{influence:60,economy:65,military:72,resources:22,land:15},desc:'Regional military power. High-tech economy, US-backed.'},
+  {id:'uae',name:'UAE',region:'Middle East',iso:'AE',center:[54,24],color:'#786020',stats:{influence:62,economy:72,military:55,resources:82,land:22},desc:'Gulf hub. Sovereign wealth, diversification drive.'},
+  {id:'iraq',name:'Iraq',region:'Middle East',iso:'IQ',center:[44,33],color:'#6a3820',stats:{influence:32,economy:35,military:42,resources:75,land:42},desc:'Oil-rich, fractured. Contested by regional powers.'},
+  {id:'qatar',name:'Qatar',region:'Middle East',iso:'QA',center:[51,25],color:'#706828',stats:{influence:55,economy:68,military:38,resources:90,land:18},desc:'LNG titan. Outsized influence through energy and media.'},
+  // Asia
+  {id:'vietnam',name:'Vietnam',region:'Asia',iso:'VN',center:[106,16],color:'#1a5a30',stats:{influence:42,economy:52,military:52,resources:48,land:40},desc:'Rising manufacturing hub. Wary of China, wooing the West.'},
+  {id:'thailand',name:'Thailand',region:'Asia',iso:'TH',center:[101,15],color:'#4a2868',stats:{influence:45,economy:52,military:48,resources:45,land:40},desc:'ASEAN hub. Tourism economy, military-influenced politics.'},
+  {id:'philippines',name:'Philippines',region:'Asia',iso:'PH',center:[122,13],color:'#1e4070',stats:{influence:38,economy:45,military:40,resources:40,land:35},desc:'South China Sea frontline. US ally, Chinese pressure.'},
+  {id:'malaysia',name:'Malaysia',region:'Asia',iso:'MY',center:[110,4],color:'#1e5040',stats:{influence:45,economy:55,military:42,resources:62,land:42},desc:'ASEAN middle power. Resource-rich, strategic straits.'},
+  {id:'kazakhstan',name:'Kazakhstan',region:'Central Asia',iso:'KZ',center:[68,48],color:'#3a5028',stats:{influence:38,economy:48,military:45,resources:78,land:72},desc:'Vast energy reserves. Balancing Russia, China, West.'},
+  {id:'bangladesh',name:'Bangladesh',region:'Asia',iso:'BD',center:[90,24],color:'#2a4828',stats:{influence:28,economy:38,military:32,resources:28,land:30},desc:'Densely populated. Garment economy, rising but fragile.'},
+  {id:'taiwan',name:'Taiwan',region:'Asia',iso:'TW',center:[121,24],color:'#3a2878',stats:{influence:55,economy:70,military:58,resources:15,land:15},desc:'Semiconductor powerhouse. Existence itself a geopolitical flashpoint.'},
+  {id:'n_korea',name:'North Korea',region:'Asia',iso:'KP',center:[127,40],color:'#1e2848',stats:{influence:28,economy:18,military:65,resources:42,land:30},desc:'Nuclear pariah. Survival through deterrence and isolation.'},
+  {id:'myanmar',name:'Myanmar',region:'Asia',iso:'MM',center:[96,17],color:'#2a5028',stats:{influence:22,economy:28,military:40,resources:45,land:40},desc:'Military junta. Strategic location, civil war.'},
+  // Africa
+  {id:'ethiopia',name:'Ethiopia',region:'Africa',iso:'ET',center:[40,9],color:'#486028',stats:{influence:38,economy:35,military:48,resources:38,land:52},desc:"Africa's 2nd most populous. Fast-growing but internally fractured."},
+  {id:'kenya',name:'Kenya',region:'Africa',iso:'KE',center:[38,0],color:'#307840',stats:{influence:38,economy:42,military:38,resources:35,land:42},desc:'East African hub. Tech scene, regional finance centre.'},
+  {id:'algeria',name:'Algeria',region:'Africa',iso:'DZ',center:[3,28],color:'#485830',stats:{influence:40,economy:40,military:52,resources:72,land:58},desc:'North African energy power. Military-backed government.'},
+  {id:'morocco',name:'Morocco',region:'Africa',iso:'MA',center:[-5,32],color:'#784030',stats:{influence:42,economy:42,military:48,resources:38,land:40},desc:'Atlantic-Mediterranean bridge. Stable monarchy, EU partner.'},
+  {id:'d_congo',name:'DR Congo',region:'Africa',iso:'CD',center:[24,-4],color:'#186028',stats:{influence:25,economy:25,military:28,resources:82,land:62},desc:'Mineral superpower on paper. Chronic instability.'},
+  {id:'ghana',name:'Ghana',region:'Africa',iso:'GH',center:[-1,8],color:'#587030',stats:{influence:32,economy:36,military:28,resources:40,land:30},desc:'African democracy model. Oil, gold, cocoa.'},
+  {id:'angola',name:'Angola',region:'Africa',iso:'AO',center:[17,-12],color:'#1e5830',stats:{influence:28,economy:32,military:30,resources:70,land:50},desc:'Oil giant. Chinese partner, post-war reconstruction.'},
+  // Americas
+  {id:'colombia',name:'Colombia',region:'Americas',iso:'CO',center:[-74,4],color:'#786030',stats:{influence:40,economy:46,military:44,resources:55,land:50},desc:'Andean pivot. US partner, narco-politics overhang.'},
+  {id:'chile',name:'Chile',region:'Americas',iso:'CL',center:[-71,-30],color:'#2a3878',stats:{influence:42,economy:50,military:38,resources:65,land:48},desc:'Stable Andean economy. Lithium and copper wealth.'},
+  {id:'venezuela',name:'Venezuela',region:'Americas',iso:'VE',center:[-66,8],color:'#3a1858',stats:{influence:28,economy:22,military:35,resources:82,land:52},desc:'Oil giant in freefall. Authoritarian, US-sanctioned.'},
+  {id:'peru',name:'Peru',region:'Americas',iso:'PE',center:[-76,-10],color:'#583828',stats:{influence:35,economy:42,military:32,resources:62,land:50},desc:'Andean resource hub. Copper and lithium corridor.'},
 ];
 
 let DG={
@@ -612,26 +652,59 @@ let DG={
 DNS.forEach(n=>{DG.nations[n.id]={...n,cs:{...n.stats}};DG.sentiments[n.id]=0;});
 
 const INITIAL_SENTIMENTS={
-  usa:{uk:70,france:60,germany:55,japan:70,s_korea:65,australia:70,china:-40,russia:-50,iran:-60,pakistan:30,saudi:40,mexico:50,brazil:30,india:20},
-  china:{russia:45,iran:35,pakistan:50,usa:-40,uk:-30,france:-25,japan:-50,s_korea:-45,india:-35,australia:-40,indonesia:15,nigeria:20,brazil:25},
-  russia:{china:45,iran:40,turkey:20,india:30,usa:-50,uk:-55,france:-45,germany:-40,japan:-35,s_korea:-30},
-  germany:{france:75,uk:65,usa:55,china:-15,russia:-40,turkey:20},
-  india:{usa:25,russia:30,france:20,china:-35,pakistan:-70,saudi:15,japan:10,australia:15},
-  brazil:{usa:20,china:25,argentina:-10,mexico:30,nigeria:15,s_africa:25,france:15},
-  uk:{usa:70,france:65,germany:60,australia:65,india:25,china:-30,russia:-55,argentina:-20},
-  france:{germany:75,uk:65,usa:55,china:-20,russia:-40,turkey:15,nigeria:20},
-  japan:{usa:70,s_korea:50,australia:55,india:15,china:-50,russia:-45},
-  nigeria:{usa:20,china:25,uk:20,france:20,s_africa:35,brazil:15,india:10},
-  turkey:{usa:30,uk:25,germany:20,russia:15,china:10,iran:-10,saudi:-15},
-  iran:{russia:40,china:35,usa:-60,saudi:-50,uk:-45,turkey:-15},
-  australia:{usa:70,uk:65,japan:55,india:20,indonesia:15,china:-40},
-  saudi:{usa:45,uk:35,china:15,iran:-50,turkey:-20},
-  s_africa:{china:20,usa:15,nigeria:35,brazil:25,india:20,uk:20},
-  mexico:{usa:60,brazil:30,argentina:25,china:10},
-  indonesia:{australia:15,china:20,usa:15,japan:10,india:10},
-  s_korea:{usa:70,japan:50,australia:45,china:-40,russia:-35},
-  argentina:{brazil:-10,china:20,russia:15,usa:-5,uk:-15,mexico:20},
-  pakistan:{china:50,saudi:40,turkey:25,india:-70,usa:-20,iran:10}
+  usa:{uk:70,france:60,germany:55,japan:70,s_korea:65,australia:70,canada:75,israel:65,poland:55,netherlands:55,sweden:50,ukraine:55,china:-40,russia:-50,iran:-60,n_korea:-75,venezuela:-50,pakistan:25,saudi:40,mexico:50,brazil:30,india:20,taiwan:60},
+  china:{russia:45,iran:35,pakistan:55,n_korea:40,myanmar:35,cambodia:30,venezuela:25,angola:30,d_congo:20,ethiopia:20,nigeria:15,brazil:20,indonesia:15,usa:-40,uk:-30,france:-25,japan:-50,s_korea:-45,india:-35,australia:-40,taiwan:-80,vietnam:-35,philippines:-30},
+  russia:{china:45,iran:40,belarus:70,syria:50,n_korea:30,india:30,turkey:20,venezuela:30,serbia:40,angola:20,usa:-50,uk:-55,france:-45,germany:-40,poland:-65,ukraine:-80,sweden:-30,japan:-35,s_korea:-30},
+  germany:{france:75,uk:65,usa:55,netherlands:70,poland:55,italy:60,spain:55,sweden:50,ukraine:40,china:-15,russia:-40,turkey:20},
+  india:{usa:25,russia:30,france:25,japan:15,australia:18,israel:20,uae:20,s_korea:10,vietnam:15,china:-35,pakistan:-72,n_korea:-25},
+  brazil:{usa:20,china:25,mexico:30,colombia:30,peru:25,chile:20,argentina:10,nigeria:15,s_africa:22,france:15,angola:20},
+  uk:{usa:70,france:65,germany:60,australia:65,canada:70,india:25,israel:30,netherlands:55,sweden:45,ukraine:45,china:-30,russia:-55,argentina:-20},
+  france:{germany:75,uk:65,usa:55,italy:60,spain:62,netherlands:55,algeria:-10,morocco:20,nigeria:20,ukraine:40,china:-20,russia:-40,turkey:15},
+  japan:{usa:70,s_korea:50,australia:55,india:18,taiwan:55,philippines:35,vietnam:25,china:-52,russia:-45,n_korea:-65},
+  nigeria:{usa:20,china:25,uk:22,france:22,s_africa:35,ghana:40,kenya:30,ethiopia:15,angola:25,brazil:18,india:12},
+  turkey:{usa:28,uk:22,germany:18,russia:18,ukraine:10,qatar:30,pakistan:25,azerbaijan:55,china:12,iran:-12,saudi:-18,greece:-40,armenia:-50},
+  iran:{russia:42,china:38,syria:45,iraq:15,venezuela:25,pakistan:10,usa:-62,saudi:-55,israel:-80,uk:-48,uae:-30,turkey:-15},
+  australia:{usa:72,uk:68,japan:58,s_korea:40,india:22,canada:55,philippines:30,indonesia:18,china:-42,russia:-35},
+  saudi:{usa:48,uk:38,uae:52,egypt:30,jordan:35,pakistan:30,china:18,iran:-55,qatar:-15,turkey:-22,israel:-25},
+  s_africa:{china:22,usa:18,nigeria:35,kenya:30,angola:28,brazil:25,india:22,uk:22,russia:15},
+  mexico:{usa:62,brazil:30,colombia:30,argentina:22,chile:20,canada:40,china:12,venezuela:-15},
+  indonesia:{australia:18,china:22,usa:18,japan:12,india:12,malaysia:30,vietnam:15,philippines:20},
+  s_korea:{usa:72,japan:52,australia:48,taiwan:42,philippines:25,india:15,china:-42,russia:-38,n_korea:-80},
+  argentina:{brazil:12,chile:18,peru:20,colombia:15,china:22,russia:18,usa:-8,uk:-18,mexico:22,venezuela:-10},
+  pakistan:{china:55,saudi:42,turkey:28,uae:22,india:-72,usa:-22,iran:12,afghanistan:10},
+  canada:{usa:75,uk:70,australia:65,france:55,germany:52,japan:42,mexico:42,ukraine:40,poland:40,china:-22,russia:-38},
+  ukraine:{usa:62,uk:42,poland:58,germany:38,france:32,romania:32,sweden:30,canada:40,australia:28,russia:-90,belarus:-60},
+  poland:{usa:58,uk:38,germany:42,france:32,ukraine:55,sweden:32,romania:28,czech:30,slovakia:32,russia:-82,belarus:-55,china:-18},
+  italy:{france:58,germany:52,usa:42,uk:38,spain:52,netherlands:42,greece:32,ukraine:35,china:8,russia:-22,turkey:12},
+  spain:{france:62,italy:55,germany:48,uk:32,usa:38,netherlands:38,morocco:12,ukraine:30,russia:-25},
+  netherlands:{germany:68,uk:58,france:58,usa:52,belgium:65,ukraine:38,poland:42,china:-18,russia:-42},
+  sweden:{norway:72,finland:68,denmark:72,germany:52,uk:52,usa:58,ukraine:45,poland:38,russia:-62,china:-12},
+  romania:{usa:48,germany:42,france:38,poland:35,ukraine:32,bulgaria:40,moldova:35,russia:-52,hungary:-10},
+  greece:{usa:32,france:38,germany:22,italy:42,cyprus:62,israel:30,russia:18,turkey:-45,albania:-20},
+  israel:{usa:72,uk:32,germany:32,france:28,uae:32,bahrain:25,india:22,greece:28,cyprus:35,iran:-88,hamas:-95,hezbollah:-95,saudi:-22,turkey:-32,russia:8},
+  uae:{saudi:52,usa:48,uk:42,india:32,pakistan:22,jordan:32,egypt:28,bahrain:48,israel:28,iran:-42,qatar:-12,turkey:10},
+  iraq:{iran:22,turkey:12,jordan:22,usa:-18,saudi:-12,russia:18,china:18,kuwait:-5,syria:20},
+  qatar:{turkey:32,usa:28,uk:22,china:18,iran:12,russia:12,kuwait:30,uae:-12,saudi:-22},
+  vietnam:{china:-38,usa:18,russia:12,japan:12,india:12,australia:15,thailand:22,malaysia:22,philippines:12,cambodia:10},
+  thailand:{usa:22,china:18,malaysia:28,vietnam:22,indonesia:18,australia:18,japan:15,myanmar:-8},
+  philippines:{usa:68,japan:42,australia:38,vietnam:22,malaysia:22,indonesia:18,india:15,china:-45,russia:-15},
+  malaysia:{indonesia:32,thailand:28,china:22,usa:18,australia:22,singapore:28,vietnam:22,philippines:18,brunei:30},
+  kazakhstan:{russia:32,china:22,usa:12,ukraine:18,kyrgyzstan:20,uzbekistan:22,turkey:15},
+  bangladesh:{india:-10,china:25,usa:12,uk:18,saudi:20,uae:18,malaysia:15,myanmar:-15,pakistan:10},
+  taiwan:{usa:68,japan:62,australia:48,s_korea:42,uk:32,canada:35,india:20,china:-82,russia:-25},
+  n_korea:{china:48,russia:32,usa:-82,s_korea:-72,japan:-68,australia:-45},
+  myanmar:{china:38,india:-12,thailand:12,russia:22,usa:-22,uk:-18,bangladesh:-15},
+  ethiopia:{kenya:22,china:28,usa:12,egypt:-22,eritrea:-35,somalia:-25,s_africa:18,nigeria:18,angola:15},
+  kenya:{s_africa:28,ethiopia:22,tanzania:32,uganda:28,usa:22,china:22,uk:28,nigeria:18,india:15},
+  algeria:{russia:28,china:22,france:-12,usa:8,morocco:-22,nigeria:22,egypt:18,s_africa:15},
+  morocco:{spain:22,france:28,usa:22,saudi:22,uae:18,egypt:18,senegal:20,mauritania:10,algeria:-22},
+  d_congo:{angola:18,china:28,france:12,usa:12,kenya:12,ethiopia:12,s_africa:18,rwanda:-20,uganda:-10},
+  ghana:{nigeria:28,uk:32,usa:28,china:22,s_africa:32,kenya:22,france:22,senegal:25},
+  angola:{china:38,russia:22,brazil:28,s_africa:22,usa:12,portugal:18,namibia:20,d_congo:18},
+  colombia:{usa:42,brazil:28,peru:22,chile:28,mexico:28,canada:25,argentina:18,ecuador:20,venezuela:-22,china:15},
+  chile:{usa:32,brazil:22,argentina:12,peru:8,colombia:28,china:18,australia:18,canada:20,bolivia:-15},
+  venezuela:{russia:32,china:28,cuba:35,iran:22,nicaragua:30,bolivia:25,usa:-65,colombia:-28,brazil:-8},
+  peru:{usa:28,brazil:22,chile:10,colombia:28,argentina:12,china:18,canada:18,bolivia:8}
 };
 
 function assign(){
@@ -813,10 +886,10 @@ function initMap(){
   });
   DG.map=map;
   map.on('load',()=>{
-    map.setFog({color:'#080c1a','high-color':'#080c28','horizon-blend':0.05,'space-color':'#020408','star-intensity':0.9});
+    map.setFog({color:'#111a30','high-color':'#1a2848','horizon-blend':0.06,'space-color':'#04070f','star-intensity':0.7});
     map.addSource('countries',{type:'vector',url:'mapbox://mapbox.country-boundaries-v1'});
-    map.addLayer({id:'country-fills',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':buildColorExpr(),'fill-opacity':0.78}});
-    map.addLayer({id:'country-borders',type:'line',source:'countries','source-layer':'country_boundaries',paint:{'line-color':buildBorderExpr(),'line-width':['case',['in',['get','iso_3166_1'],['literal',getAllISOs()]],1,0.3],'line-opacity':0.85}});
+    map.addLayer({id:'country-fills',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':buildColorExpr(),'fill-opacity':0.62}});
+    map.addLayer({id:'country-borders',type:'line',source:'countries','source-layer':'country_boundaries',paint:{'line-color':buildBorderExpr(),'line-width':['case',['in',['get','iso_3166_1'],['literal',getAllISOs()]],1.2,0.6],'line-opacity':0.9}});
     map.addLayer({id:'country-hover',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':'#ffffff','fill-opacity':['case',['boolean',['feature-state','hover'],false],0.12,0]}});
     map.addLayer({id:'territory-overlay',type:'fill',source:'countries','source-layer':'country_boundaries',paint:{'fill-color':DG.playerNation?.color||'#e0a82a','fill-opacity':['case',['in',['get','iso_3166_1'],['literal',[]]],0.4,0]}});
     map.addLayer({id:'territory-glow',type:'line',source:'countries','source-layer':'country_boundaries',paint:{'line-color':DG.playerNation?.color||'#e0a82a','line-width':['case',['in',['get','iso_3166_1'],['literal',[]]],2.5,0],'line-opacity':0.7,'line-blur':2}});
@@ -889,7 +962,7 @@ function buildColorExpr(){
   const s=['match',['get','iso_3166_1']];
   const pc=DG.playerNation?.color||'#e0a82a';
   DNS.forEach(n=>{s.push(n.iso,(DG.territories&&DG.territories.includes(n.id))?pc:n.color);});
-  s.push('#0a0e22');return s;
+  s.push('#1e2d50');return s;
 }
 
 function buildBorderExpr(){
@@ -1020,6 +1093,99 @@ function resolveNationName(id){
   return DG.nations[id]?.name||null;
 }
 
+const WORLD_EVENTS=[
+  // Crisis events — open up deals with desperate nations
+  {type:'crisis',msg:'{n} descends into economic crisis. The government, desperate for foreign capital, is suddenly open to outside partners.',sentDelta:28,statKey:'economy',statDelta:-14},
+  {type:'crisis',msg:'A military coup in {n} installs a junta seeking international legitimacy — existing alliances are up for renegotiation.',sentDelta:22,statKey:'influence',statDelta:-12},
+  {type:'crisis',msg:'Famine sweeps through {n}. The government makes urgent appeals for humanitarian assistance and trade access.',sentDelta:32,statKey:'resources',statDelta:-12},
+  {type:'crisis',msg:'{n} defaults on its sovereign debt. Creditors walk out; the government is scrambling for new financial partners.',sentDelta:26,statKey:'economy',statDelta:-18},
+  {type:'crisis',msg:'Civil unrest paralyses {n}. The weakened government is offering generous terms to any nation willing to back it.',sentDelta:24,statKey:'military',statDelta:-10},
+  {type:'crisis',msg:'A contested election in {n} leaves a power vacuum. Factions are actively courting outside powers for recognition and support.',sentDelta:20,statKey:'influence',statDelta:-10},
+  // Opportunity events — diplomatic windows open
+  {type:'opportunity',msg:'International sanctions against {n} are lifted. Previously closed diplomatic channels are now wide open.',sentDelta:35,statKey:'influence',statDelta:8},
+  {type:'opportunity',msg:'{n} breaks from its traditional patron and begins an independent foreign policy — actively seeking new relationships.',sentDelta:24,statKey:null,statDelta:0},
+  {type:'opportunity',msg:'A new, pragmatic government takes power in {n} and signals willingness to reset relations with all parties.',sentDelta:18,statKey:null,statDelta:0},
+  {type:'opportunity',msg:'Resource discoveries in {n} attract global interest. The government is offering favourable access agreements.',sentDelta:15,statKey:'resources',statDelta:14},
+  // Threat events — some nations grow more hostile or assertive
+  {type:'threat',msg:'Resource nationalism surges in {n}. The government expels foreign investors and tightens control of key industries.',sentDelta:-22,statKey:'resources',statDelta:10},
+  {type:'threat',msg:'An ultranationalist government rises in {n}, turning inward and hostile to outside influence.',sentDelta:-20,statKey:'military',statDelta:8},
+  {type:'threat',msg:'{n} conducts provocative military exercises near disputed territory, raising regional tensions.',sentDelta:-15,statKey:'military',statDelta:6},
+  // Player windfalls
+  {type:'windfall',msg:'Global commodity prices surge — your resource exports generate an unexpected revenue windfall.',statKey:'resources',statDelta:10},
+  {type:'windfall',msg:'A foreign intelligence leak hands you detailed assessments of rival military capabilities.',statKey:'military',statDelta:7},
+  {type:'windfall',msg:'Your nation\'s diaspora communities abroad launch a major soft-power campaign, boosting your international standing.',statKey:'influence',statDelta:8},
+  // Two-nation events
+  {type:'conflict',msg:'{n1} and {n2} erupt in a border conflict. Regional stability fractures and alliance calculations shift.'},
+  {type:'alliance',msg:'{n1} and {n2} announce a surprise strategic partnership, redrawing regional power dynamics.'},
+  {type:'trade',msg:'{n1} and {n2} sign a landmark trade agreement, deepening economic ties and locking in supply chains.'},
+  {type:'collapse',msg:'The alliance between {n1} and {n2} collapses in mutual recriminations — both are now seeking new partners.'},
+];
+
+function worldEvent(){
+  if(!DG.playerNation||Math.random()>0.30)return;
+  const evt=WORLD_EVENTS[Math.floor(Math.random()*WORLD_EVENTS.length)];
+  const eligible=DNS.filter(n=>n.id!==DG.playerNation.id);
+
+  if(evt.type==='windfall'){
+    const key=evt.statKey;
+    DG.cs[key]=Math.min(100,DG.cs[key]+evt.statDelta);
+    DG.statDeltas[key]=(DG.statDeltas[key]||0)+evt.statDelta;
+    dLog('ev','⚡ WORLD EVENT: '+evt.msg);
+    dRStats();dRHeader();
+    return;
+  }
+
+  if(evt.type==='conflict'||evt.type==='alliance'||evt.type==='trade'||evt.type==='collapse'){
+    if(eligible.length<2)return;
+    const n1=eligible[Math.floor(Math.random()*eligible.length)];
+    const n2=eligible.filter(n=>n.id!==n1.id)[Math.floor(Math.random()*(eligible.length-1))];
+    const msg=evt.msg.replace('{n1}',n1.name).replace('{n2}',n2.name);
+    dLog('ev','⚡ WORLD EVENT: '+msg);
+    if(evt.type==='conflict'){
+      if(DG.nations[n1.id])DG.nations[n1.id].cs.military=Math.max(5,DG.nations[n1.id].cs.military-12);
+      if(DG.nations[n2.id])DG.nations[n2.id].cs.military=Math.max(5,DG.nations[n2.id].cs.military-10);
+      if(DG.allies.includes(n1.id))dApplySentimentEffects(n2.id,-14);
+      if(DG.allies.includes(n2.id))dApplySentimentEffects(n1.id,-14);
+    } else if(evt.type==='alliance'){
+      if(DG.nations[n1.id])DG.nations[n1.id].cs.economy=Math.min(100,DG.nations[n1.id].cs.economy+5);
+      if(DG.nations[n2.id])DG.nations[n2.id].cs.economy=Math.min(100,DG.nations[n2.id].cs.economy+5);
+      if(DG.enemies.includes(n1.id))dApplySentimentEffects(n2.id,-10);
+      if(DG.enemies.includes(n2.id))dApplySentimentEffects(n1.id,-10);
+    } else if(evt.type==='trade'){
+      if(DG.nations[n1.id])DG.nations[n1.id].cs.economy=Math.min(100,DG.nations[n1.id].cs.economy+7);
+      if(DG.nations[n2.id])DG.nations[n2.id].cs.economy=Math.min(100,DG.nations[n2.id].cs.economy+7);
+    } else if(evt.type==='collapse'){
+      if(DG.allies.includes(n1.id))dApplySentimentEffects(n1.id,15);
+      if(DG.allies.includes(n2.id))dApplySentimentEffects(n2.id,15);
+    }
+    return;
+  }
+
+  // Single-nation events
+  const nation=eligible[Math.floor(Math.random()*eligible.length)];
+  const msg=evt.msg.replace('{n}',nation.name);
+  dLog('ev','⚡ WORLD EVENT: '+msg);
+  dApplySentimentEffects(nation.id,evt.sentDelta);
+  if(evt.statKey&&DG.nations[nation.id]){
+    const nc=DG.nations[nation.id].cs;
+    nc[evt.statKey]=Math.max(5,Math.min(100,nc[evt.statKey]+evt.statDelta));
+  }
+  if(evt.sentDelta>0)dLog('ps',nation.name+' is now more open to engagement (+'+evt.sentDelta+' sentiment)');
+  else if(evt.sentDelta<0)dLog('wn',nation.name+' turns hostile ('+evt.sentDelta+' sentiment)');
+  dUpdateRelations();highlightPlayer();
+}
+
+function sentimentDrift(){
+  if(!DG.playerNation)return;
+  DNS.forEach(n=>{
+    if(n.id===DG.playerNation.id)return;
+    const s=DG.sentiments[n.id]||0;
+    // Only drift sentiments in the cool/warm range — don't erode strong alliances or enmities
+    if(s>5&&s<50)DG.sentiments[n.id]=s-1;
+    else if(s<-5&&s>-50)DG.sentiments[n.id]=s+1;
+  });
+}
+
 function showResultModal(result){
   const mc=document.getElementById('modal-content');
   const statChanges=result.statChanges||{};
@@ -1089,6 +1255,8 @@ async function dSubmit(){
   try{
     const r=await dCallAI(move);td.remove();
     DG._lastResult=r;dApply(r);
+    worldEvent();
+    sentimentDrift();
     DG.history.push({turn:DG.turn,...DG.cs});
     showResultModal(r);
     if(document.getElementById('chart-panel').classList.contains('show'))drawChart();
@@ -1112,13 +1280,12 @@ async function dCallAI(move){
     const c=DG.nations[x.id].cs;
     return x.name+'(Mil:'+Math.round(c.military)+',Eco:'+Math.round(c.economy)+',Inf:'+Math.round(c.influence)+',Res:'+Math.round(c.resources)+',Sentiment:'+getSentimentLabel(DG.sentiments[x.id]||0)+')';
   }).join(', ');
-  const sysPrompt=`You are the AI resolution engine for DOMINION, a Risk-like geopolitical strategy game based on realpolitik and game theory.
-You resolve player moves with Machiavellian realism — nations are opportunistic, aggressive when advantageous, and rarely altruistic.
-Bold overextension backfires spectacularly. Economic growth is gradual unless major reforms. Betrayals destroy influence permanently.
-Military action risks devastating retaliation. Alliances shift based on mutual interest, not sentimentality.
-Scale magnitude to ambition and precision (max ±18 per stat, rarely above ±12).
-Territory conquest is possible but extremely difficult — only successful with overwhelming military superiority or complete collapse of target.
-NEVER use markdown formatting. Return ONLY valid JSON. Nation IDs must be exact: usa,china,russia,germany,india,brazil,uk,france,japan,nigeria,turkey,iran,australia,saudi,s_africa,mexico,indonesia,s_korea,argentina,pakistan`;
+  const sysPrompt=`You are the AI resolution engine for DOMINION, a geopolitical strategy game based on realpolitik and game theory.
+You resolve player moves with Machiavellian realism — nations are opportunistic, self-interested, and rarely altruistic.
+CRITICAL DEALING RULES: Neutral nations (sentiment label "Neutral" or "Warm") have NO reason to refuse reasonable propositions — they should respond positively to well-crafted overtures. Nations in economic crisis (economy<40) are desperate and will accept almost any deal. Smaller nations eagerly accept partnerships with major powers. DO NOT make every interaction fail — that is bad game design. Deals with neutral or friendly nations should generally succeed with moderate stat rewards.
+Bold overextension backfires. Economic growth is gradual. Betrayals destroy influence permanently. Military aggression risks retaliation.
+Scale stat changes to ambition and precision (max ±18 per stat, rarely above ±12). Territory conquest requires target military<40 AND player military>70, or total collapse.
+NEVER use markdown. Return ONLY valid JSON. Use only these exact nation IDs: usa,china,russia,germany,india,brazil,uk,france,japan,nigeria,turkey,iran,australia,saudi,s_africa,mexico,indonesia,s_korea,argentina,pakistan,canada,ukraine,poland,italy,spain,netherlands,sweden,romania,greece,israel,uae,iraq,qatar,vietnam,thailand,philippines,malaysia,kazakhstan,bangladesh,taiwan,n_korea,myanmar,ethiopia,kenya,algeria,morocco,d_congo,ghana,angola,colombia,chile,venezuela,peru`;
   const userPrompt=`PLAYER: ${n.name} (${n.region})
 STATS: Influence:${Math.round(s.influence)}, Economy:${Math.round(s.economy)}, Military:${Math.round(s.military)}, Resources:${Math.round(s.resources)}, Land:${Math.round(s.land)}
 TURN: ${DG.turn}/20

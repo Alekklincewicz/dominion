@@ -906,7 +906,7 @@ function initMap(){
       paint:{'line-color':'#e0a82a','line-width':['case',['in',['get','iso_3166_1'],['literal',[]]],2.5,0],'line-opacity':0.95,'line-blur':0.3}});
     // Selected country: white outline
     map.addLayer({id:'selected-outline',type:'line',source:'countries','source-layer':'country_boundaries',
-      paint:{'line-color':'#ffffff','line-width':['case',['in',['get','iso_3166_1'],['literal',[]]],1.8,0],'line-opacity':0.90}});
+      paint:{'line-color':'#00aaff','line-width':['case',['in',['get','iso_3166_1'],['literal',[]]],2.2,0],'line-opacity':1.0}});
 
     let hoverId=null;
     map.on('mousemove','country-hit',e=>{

@@ -187,6 +187,30 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 .ltag.owned{color:var(--amber);border-color:var(--amber-dim);}
 .ltag.allied{color:var(--green);border-color:rgba(34,216,130,0.35);}
 .ltag.enemy{color:var(--red);border-color:rgba(255,51,85,0.35);}
+/* Resize handles (desktop only) */
+.rh{width:5px;flex-shrink:0;cursor:col-resize;background:transparent;
+  position:relative;z-index:10;transition:background .2s;}
+.rh:hover,.rh.dragging{background:var(--cyan);}
+.rh::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:1px;height:40px;background:var(--border2);pointer-events:none;}
+
+/* Collapsible empire + history */
+#dter{overflow:hidden;transition:max-height .3s ease,opacity .3s;max-height:400px;opacity:1;}
+#dter.collapsed{max-height:0!important;opacity:0;border-bottom:none;}
+#dhist{overflow-y:auto;transition:max-height .3s ease,opacity .3s;max-height:340px;opacity:1;border-bottom:1px solid var(--border);}
+#dhist.collapsed{max-height:0!important;opacity:0;border-bottom:none;}
+.dh-entry{padding:7px 10px;border-bottom:1px solid rgba(25,33,61,0.55);}
+.dh-entry:last-child{border-bottom:none;}
+.dh-turn{font-family:var(--font-mono);font-size:8px;color:var(--amber-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;}
+.dh-move{font-size:10px;color:var(--cyan);margin-bottom:4px;line-height:1.4;}
+.dh-outcome{font-size:9px;color:var(--text-dim);line-height:1.5;}
+
+/* Land total in Empire */
+.ter-total{padding:6px 10px 5px;font-family:var(--font-mono);font-size:9px;
+  color:var(--text-dim);letter-spacing:1px;background:var(--bg2);
+  border-bottom:1px solid var(--border);display:flex;justify-content:space-between;}
+.ter-total b{color:var(--amber);}
+
 /* Territory widget */
 .ter-entry{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-bottom:1px solid rgba(25,33,61,0.5);}
 .ter-entry:last-child{border-bottom:none;}
@@ -495,6 +519,10 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 
   /* Backdrop covers full screen on mobile */
   #panel-bd{position:fixed;z-index:40;}
+  /* Hide resize handles on mobile */
+  .rh{display:none!important;}
+  /* Nation status always visible — never collapse on mobile */
+  #dps,#dps.collapsed{max-height:280px!important;padding:10px!important;opacity:1!important;border-bottom:1px solid var(--border)!important;}
 }
 @media(max-width:460px){
   .ocard{padding:20px;}
@@ -561,11 +589,6 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <h1>DOMINION</h1>
     </div>
     <div class="hst">
-      <div class="sp">INF <b id="dhi">—</b><span class="delta" id="dhid" style="display:none;"></span></div>
-      <div class="sp">ECO <b id="dhe">—</b><span class="delta" id="dhed" style="display:none;"></span></div>
-      <div class="sp">MIL <b id="dhm">—</b><span class="delta" id="dhmd" style="display:none;"></span></div>
-      <div class="sp">RES <b id="dhr">—</b><span class="delta" id="dhrd" style="display:none;"></span></div>
-      <div class="sp">LND <b id="dhl">—</b><span class="delta" id="dhld" style="display:none;"></span></div>
       <div class="tb">TURN <span id="dht">1</span>/20</div>
       <button class="chbtn" id="chart-btn" onclick="toggleChart()" style="display:none;">CHART</button>
     </div>
@@ -586,9 +609,14 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <div id="drel"></div>
       <div class="pt" onclick="toggleSection('dter')">Empire <span class="toggle-icon" id="ter-icon">▼</span></div>
       <div id="dter"></div>
+      <div class="pt" onclick="toggleSection('dhist')">Directive History <span class="toggle-icon">▼</span></div>
+      <div id="dhist"></div>
       <div class="pl">Operational Log</div>
       <div id="dlog"></div>
     </div>
+
+    <!-- Resize handle: left panel -->
+    <div class="rh" id="rh-left" onmousedown="startResize(event,'left')"></div>
 
     <!-- Map -->
     <div id="dmap">
@@ -598,6 +626,9 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <button class="mob-btn" id="mob-right-btn" onclick="togglePanel('drp')">INTEL ▶</button>
       <button class="mob-btn" id="mob-map-max" onclick="toggleMapMax()">⛶ EXPAND</button>
     </div>
+
+    <!-- Resize handle: right panel -->
+    <div class="rh" id="rh-right" onmousedown="startResize(event,'right')"></div>
 
     <!-- Right Panel -->
     <div id="drp">
@@ -776,7 +807,7 @@ window.dAssign=assign;
 function dStart(){
   document.getElementById('dsto').style.display='none';
   document.getElementById('chart-btn').style.display='inline-block';
-  initMap();dRStats();dRHeader();dUpdateRelations();
+  initMap();dRStats();dRHeader();dUpdateRelations();dRenderDirectives();
   dLog('turn','Turn 1');
   dLog('rs','You lead '+DG.playerNation.name+'. The world watches. Issue your first directive.');
 }
@@ -799,14 +830,34 @@ function getSentimentLabel(v){
 }
 
 function toggleSection(id){
-  const el=document.getElementById(id);
+  // Never collapse nation status on mobile
+  if(id==='dps'&&window.innerWidth<=680)return;
+  const el=document.getElementById(id);if(!el)return;
   const hdr=el.previousElementSibling;
-  if(id==='dps'){
-    DG.dpsCollapsed=!DG.dpsCollapsed;
-    el.classList.toggle('collapsed',DG.dpsCollapsed);
-    hdr.classList.toggle('collapsed',DG.dpsCollapsed);
-    hdr.querySelector('.toggle-icon').textContent=DG.dpsCollapsed?'▶':'▼';
+  const collapsed=el.classList.toggle('collapsed');
+  if(hdr){hdr.classList.toggle('collapsed',collapsed);const ic=hdr.querySelector('.toggle-icon');if(ic)ic.textContent=collapsed?'▶':'▼';}
+  if(id==='dps')DG.dpsCollapsed=collapsed;
+}
+
+function startResize(e,side){
+  e.preventDefault();
+  const handle=e.currentTarget;handle.classList.add('dragging');
+  const startX=e.clientX;
+  const panel=document.getElementById(side==='left'?'dlp':'drp');
+  const startW=panel.offsetWidth;
+  function onMove(ev){
+    const dx=ev.clientX-startX;
+    const newW=Math.max(150,Math.min(460,startW+(side==='left'?dx:-dx)));
+    panel.style.width=newW+'px';
   }
+  function onUp(){
+    handle.classList.remove('dragging');
+    document.removeEventListener('mousemove',onMove);
+    document.removeEventListener('mouseup',onUp);
+    if(DG.map)DG.map.resize();
+  }
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onUp);
 }
 
 function toggleMapMax(){
@@ -923,7 +974,11 @@ function dUpdateTerritories(){
     el.innerHTML='<div class="ter-empty">No territories acquired</div>';
     return;
   }
-  let html='';
+  // Total land index across home + all territories
+  const homeLand=Math.round(DG.cs?.land||0);
+  const terLand=territories.reduce((s,id)=>{const t=DG.nations[id];return s+Math.round(t?.cs?.land||0);},0);
+  const totalLand=homeLand+terLand;
+  let html=`<div class="ter-total"><span>⬡ Total Land Index</span><b>${totalLand}</b></div>`;
   // Home nation first
   const home=DG.playerNation;
   const hs=DG.cs||home.stats;
@@ -936,6 +991,23 @@ function dUpdateTerritories(){
     html+=`<div class="ter-entry"><div><div class="ter-name">⚑ ${n.name}</div><div class="ter-stats">MIL:${Math.round(s.military||0)} ECO:${Math.round(s.economy||0)} RES:${Math.round(s.resources||0)}</div></div><button class="ter-view" onclick="flyToNation('${id}')">VIEW</button></div>`;
   });
   el.innerHTML=html;
+}
+
+function dRenderDirectives(){
+  const el=document.getElementById('dhist');if(!el)return;
+  const hist=DG.chatHistory||[];
+  if(!hist.length){el.innerHTML='<div class="ter-empty">No directives issued yet</div>';return;}
+  let html='';
+  for(let i=0;i<hist.length;i+=2){
+    const u=hist[i],a=hist[i+1];if(!u)continue;
+    const mMove=u.content.match(/MOVE:\s*"([^"]+)"/);
+    const mTurn=u.content.match(/^Turn\s*(\d+)/);
+    if(!mMove)continue;
+    const outcome=a?a.content:'Pending…';
+    html+=`<div class="dh-entry"><div class="dh-turn">Turn ${mTurn?mTurn[1]:'?'}</div><div class="dh-move">"${mMove[1]}"</div><div class="dh-outcome">${outcome.length>140?outcome.slice(0,140)+'…':outcome}</div></div>`;
+  }
+  el.innerHTML=html||'<div class="ter-empty">No directives issued yet</div>';
+  el.scrollTop=el.scrollHeight;
 }
 
 function flyToNation(id){
@@ -1139,16 +1211,6 @@ function dRStats(){
 }
 
 function dRHeader(){
-  const s=DG.cs||{};
-  const pairs=[['influence','dhi','dhid'],['economy','dhe','dhed'],['military','dhm','dhmd'],['resources','dhr','dhrd'],['land','dhl','dhld']];
-  pairs.forEach(([k,vi,di])=>{
-    const val=s[k]==='—'?'—':Math.round(s[k]);
-    const delta=Math.round(DG.statDeltas?.[k]||0);
-    document.getElementById(vi).textContent=val;
-    const del=document.getElementById(di);
-    if(delta!==0&&val!=='—'){del.style.display='inline';del.textContent=delta>0?'+'+delta:delta;del.className='delta '+(delta>0?'up':'down');}
-    else del.style.display='none';
-  });
   document.getElementById('dht').textContent=DG.turn;
 }
 
@@ -1256,7 +1318,7 @@ function worldEvent(){
   }
   if(evt.sentDelta>0)dLog('ps',nation.name+' is now more open to engagement (+'+evt.sentDelta+' sentiment)');
   else if(evt.sentDelta<0)dLog('wn',nation.name+' turns hostile ('+evt.sentDelta+' sentiment)');
-  dUpdateRelations();highlightPlayer();
+  dUpdateRelations();highlightPlayer();dRenderDirectives();
 }
 
 function sentimentDrift(){
@@ -1453,7 +1515,7 @@ function dApply(r){
     const names=r.territoryGained.map(id=>resolveNationName(id)).filter(Boolean);
     if(names.length)dLog('ps','⚑ Territory gained: '+names.join(', '));
   }
-  highlightPlayer();dRStats();dRHeader();dUpdateRelations();
+  highlightPlayer();dRStats();dRHeader();dUpdateRelations();dRenderDirectives();
   if(DG.sel)dInspect(DG.sel);
 }
 

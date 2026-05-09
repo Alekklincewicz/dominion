@@ -2432,15 +2432,26 @@ RULES: Territory conquest requires target military<40 AND your military>70, OR c
   if(!resp.ok){
     let detail='';
     try{const e=await resp.json();detail=e.error||'';}catch(_){try{detail=await resp.text();}catch(_){}}
+    // Detect if a cached HTML page was returned instead of the API (SW fallback edge case)
+    if(detail.trim().startsWith('<!'))throw new Error('Offline or network error — check your connection and try again.');
     throw new Error('HTTP '+resp.status+(detail?' — '+detail:''));
+  }
+  // Guard against SW returning a cached HTML page for a POST that failed offline
+  const contentType=resp.headers.get('content-type')||'';
+  if(contentType.includes('text/html')){
+    throw new Error('Offline or network error — check your connection and try again.');
   }
   const data=await resp.json();
   const raw=data.choices?.[0]?.message?.content;
-  if(!raw)throw new Error('Empty response from AI');
-  // Extract JSON even if surrounded by markdown or prose
+  if(!raw)throw new Error('AI returned an empty response — try again.');
+  // Extract JSON even if surrounded by markdown fences or prose
   const match=raw.match(/\{[\s\S]*\}/);
-  if(!match)throw new Error('No JSON found in AI response');
-  return JSON.parse(match[0]);
+  if(!match)throw new Error('AI response was not JSON. Got: "'+raw.slice(0,120)+'"');
+  try{
+    return JSON.parse(match[0]);
+  }catch(pe){
+    throw new Error('JSON parse failed: '+pe.message+' | Raw: '+match[0].slice(0,120));
+  }
 }
 
 function dApply(r){
@@ -2840,10 +2851,15 @@ function pwaShowEntryPoints(){
 }
 
 function pwaInit(){
-  // Register service worker
+  // Register service worker — updateViaCache:'none' forces browser to always
+  // re-fetch sw.js from network (never serve from HTTP cache), ensuring
+  // the new SW with the POST-passthrough fix is picked up immediately.
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/sw.js',{scope:'/'})
-      .then(reg=>console.log('[SW] Registered:',reg.scope))
+    navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'})
+      .then(reg=>{
+        console.log('[SW] Registered:',reg.scope);
+        reg.update(); // check for updates on every page load
+      })
       .catch(err=>console.warn('[SW] Failed:',err));
   }
 

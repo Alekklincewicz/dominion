@@ -1,7 +1,7 @@
-// DOMINION Service Worker
-// Cache-first for static assets, network-only for AI API calls
+// DOMINION Service Worker v2
+// Only caches GET requests. POST (AI, auth) always goes direct to network.
 
-const CACHE = 'dominion-v1';
+const CACHE = 'dominion-v2';
 
 const PRECACHE = [
   '/',
@@ -9,17 +9,17 @@ const PRECACHE = [
   '/firebase-config.js',
   '/manifest.json',
   '/icon.svg',
+  '/icon-192.png',
+  '/icon-512.png',
 ];
 
 const CDN_HOSTS = [
-  'api.mapbox.com',
   'fonts.googleapis.com',
   'fonts.gstatic.com',
   'www.gstatic.com',
-  'events.mapbox.com',
 ];
 
-// ── INSTALL: pre-cache the app shell ──────────────────────────
+// ── INSTALL ───────────────────────────────────────────────────
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(cache => cache.addAll(PRECACHE))
@@ -27,7 +27,7 @@ self.addEventListener('install', e => {
   self.skipWaiting();
 });
 
-// ── ACTIVATE: clear old caches ────────────────────────────────
+// ── ACTIVATE: evict old caches ────────────────────────────────
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -37,57 +37,68 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// ── FETCH: routing strategy ───────────────────────────────────
+// ── FETCH ─────────────────────────────────────────────────────
 self.addEventListener('fetch', e => {
+  // RULE 1: Never touch non-GET requests (POST = AI API, auth, etc.)
+  // Let them go straight to the network with zero SW involvement.
+  if (e.request.method !== 'GET') return;
+
   const url = new URL(e.request.url);
 
-  // 1. AI API — always network only (never cache LLM responses)
-  if (url.pathname.startsWith('/api/')) {
-    return; // fall through to browser default (network)
-  }
+  // RULE 2: Never cache Vercel serverless functions
+  if (url.pathname.startsWith('/api/')) return;
 
-  // 2. Firebase API calls — network only
-  if (url.hostname.includes('firestore.googleapis.com') ||
-      url.hostname.includes('identitytoolkit.googleapis.com') ||
-      url.hostname.includes('securetoken.googleapis.com') ||
-      url.hostname.includes('firebase')) {
-    return;
-  }
+  // RULE 3: Never cache Firebase / auth endpoints
+  if (url.hostname.includes('googleapis.com') ||
+      url.hostname.includes('firebaseio.com') ||
+      url.hostname.includes('firebase.com')) return;
 
-  // 3. Mapbox tile/style requests — network only (dynamic map data)
-  if (url.hostname.includes('mapbox.com') && url.pathname.includes('/tiles/')) {
-    return;
-  }
+  // RULE 4: Never cache Mapbox dynamic tiles or events
+  if (url.hostname.includes('mapbox.com') &&
+      (url.pathname.includes('/tiles/') ||
+       url.hostname.includes('events.mapbox'))) return;
 
-  // 4. CDN static assets (Mapbox GL JS, Firebase SDK, fonts) — cache first
+  // RULE 5: CDN static assets (fonts, Firebase SDK JS) — cache first
   if (CDN_HOSTS.some(h => url.hostname.includes(h))) {
     e.respondWith(
       caches.match(e.request).then(cached => {
         if (cached) return cached;
         return fetch(e.request).then(res => {
-          if (res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE).then(c => c.put(e.request, clone));
+          if (res.ok && res.status < 400) {
+            caches.open(CACHE).then(c => c.put(e.request, res.clone()));
           }
           return res;
-        }).catch(() => cached);
+        });
       })
     );
     return;
   }
 
-  // 5. App shell + own assets — network first, cache fallback
+  // RULE 6: Own origin GET assets — network first, cache fallback
+  // (covers index.html, manifest, icons, firebase-config, Mapbox GL JS CSS)
   if (url.origin === self.location.origin) {
     e.respondWith(
       fetch(e.request)
         .then(res => {
-          if (res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE).then(c => c.put(e.request, clone));
+          // Only cache successful non-API responses
+          if (res.ok && res.status < 400 && !url.pathname.startsWith('/api/')) {
+            caches.open(CACHE).then(c => c.put(e.request, res.clone()));
           }
           return res;
         })
-        .catch(() => caches.match(e.request).then(cached => cached || caches.match('/index.html')))
+        .catch(() =>
+          // Offline fallback: serve cached version, or the app shell
+          caches.match(e.request)
+            .then(cached => cached || caches.match('/index.html'))
+        )
     );
+    return;
   }
+
+  // RULE 7: Everything else (Mapbox GL JS CDN, etc.) — network first, no cache write
+  e.respondWith(
+    caches.match(e.request).then(cached =>
+      cached || fetch(e.request)
+    )
+  );
 });

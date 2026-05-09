@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     const upstream = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-      body: JSON.stringify({ model, messages, temperature: 0.85, max_tokens: 800 })
+      body: JSON.stringify({ model, messages, temperature: 0.85, max_tokens: 1500, response_format: { type: 'json_object' } })
     });
     if (!upstream.ok) {
       const err = await upstream.text();

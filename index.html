@@ -2574,7 +2574,10 @@ RULES: Territory conquest requires target military<40 AND your military>70, OR c
     throw new Error('Offline or network error — check your connection and try again.');
   }
   const data=await resp.json();
-  const raw=data.choices?.[0]?.message?.content;
+  const choice=data.choices?.[0];
+  if(!choice)throw new Error('AI returned an empty response — try again.');
+  if(choice.finish_reason==='length')throw new Error('AI response was cut off (token limit). Try a shorter directive.');
+  const raw=choice.message?.content;
   if(!raw)throw new Error('AI returned an empty response — try again.');
   // Extract JSON even if surrounded by markdown fences or prose
   const match=raw.match(/\{[\s\S]*\}/);

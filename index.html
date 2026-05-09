@@ -106,6 +106,10 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 }
 .chbtn:hover{border-color:var(--cyan);color:var(--cyan);}
 
+/* ── STABILITY BAR ── */
+#dstab-bar-wrap{height:2px;background:var(--bg3);flex-shrink:0;}
+#dstab-bar{height:100%;width:78%;background:#3ddc84;transition:width .6s ease,background .6s ease;}
+
 /* ── MAIN LAYOUT ── */
 #dm{display:flex;flex:1;overflow:hidden;min-height:0;position:relative;}
 
@@ -516,81 +520,138 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
   #dlp{width:178px;}
   #drp{width:200px;}
 }
+/* ── MOBILE TAB BAR ── */
+#mob-tabs{
+  display:none;flex-shrink:0;
+  background:var(--bg1);border-top:1px solid var(--border2);
+  height:46px;
+}
+.mob-tab{
+  flex:1;border:none;background:none;
+  color:var(--text-dim);font-family:var(--font-mono);font-size:9px;
+  letter-spacing:2px;text-transform:uppercase;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  transition:color .15s;border-top:2px solid transparent;
+  padding:0;
+}
+.mob-tab .ti{font-size:14px;line-height:1;}
+.mob-tab.active{color:var(--amber);border-top-color:var(--amber);}
+
+/* ── MOBILE MENU ── */
+#mob-menu-btn{
+  display:none;
+  background:var(--bg2);border:1px solid var(--border);border-radius:2px;
+  color:var(--text-mid);font-family:var(--font-mono);font-size:16px;
+  padding:3px 10px;cursor:pointer;line-height:1;
+}
+#mob-menu{
+  display:none;position:fixed;inset:0;z-index:300;
+  flex-direction:column;justify-content:flex-end;
+}
+#mob-menu.open{display:flex;}
+#mob-menu-bd{position:absolute;inset:0;background:rgba(4,6,14,0.7);}
+#mob-menu-sheet{
+  position:relative;z-index:1;
+  background:var(--bg1);border-top:2px solid var(--border2);
+  padding:16px;display:flex;flex-direction:column;gap:10px;
+}
+.mob-menu-title{
+  font-family:var(--font-mono);font-size:8px;letter-spacing:3px;
+  color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;
+}
+.mob-menu-row{display:flex;gap:8px;flex-wrap:wrap;}
+.mob-menu-btn{
+  flex:1;min-width:calc(50% - 4px);
+  background:var(--bg2);border:1px solid var(--border2);border-radius:2px;
+  color:var(--text);font-family:var(--font-mono);font-size:11px;
+  letter-spacing:1px;padding:12px 8px;cursor:pointer;text-align:center;
+  text-transform:uppercase;transition:all .15s;
+}
+.mob-menu-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.mob-menu-btn.amber{color:var(--amber);border-color:var(--amber-dim);background:var(--amber-faint);}
+.mob-menu-btn.red{color:var(--red);border-color:rgba(255,51,85,0.4);background:rgba(255,51,85,0.08);}
+.mob-menu-close{
+  background:var(--bg3);border:1px solid var(--border);border-radius:2px;
+  color:var(--text-dim);font-family:var(--font-mono);font-size:11px;
+  letter-spacing:1px;padding:12px;cursor:pointer;text-align:center;
+  text-transform:uppercase;width:100%;
+}
+
+/* ── MOBILE STAT STRIP (below header) ── */
+#mob-stat-strip{
+  display:none;flex-shrink:0;overflow-x:auto;
+  background:var(--bg1);border-bottom:1px solid var(--border);
+  padding:4px 10px;gap:6px;-webkit-overflow-scrolling:touch;
+}
+#mob-stat-strip::-webkit-scrollbar{display:none;}
+.mob-stat-chip{
+  flex-shrink:0;background:var(--bg2);border:1px solid var(--border);border-radius:2px;
+  padding:3px 8px;font-family:var(--font-mono);font-size:10px;
+  color:var(--text-dim);display:flex;gap:4px;align-items:center;white-space:nowrap;
+}
+.mob-stat-chip b{color:var(--text);font-weight:400;}
+
 @media(max-width:680px){
-  #dh h1{font-size:12px;letter-spacing:4px;}
-  .hst{gap:3px;}
-  .sp{padding:2px 5px;font-size:9px;}
-  .sp:nth-child(n+4){display:none;}
-  .tb{padding:2px 6px;font-size:9px;}
+  /* ── HEADER ── */
+  #dh h1{font-size:11px;letter-spacing:3px;}
+  .hst{display:none;} /* desktop nav hidden; mobile uses tab bar + mob menu */
+  #mob-menu-btn{display:block;}
+  #mob-stat-strip{display:flex;}
 
-  /* Vertical stack: status panel top, globe strip bottom */
+  /* ── MAIN LAYOUT ── */
   #dm{flex-direction:column;overflow:hidden;}
+  #mob-tabs{display:flex;}
 
-  /* Left panel: takes fixed portion of #dm height, scrollable */
+  /* All panels hidden by default — tabs control visibility */
   #dlp{
-    width:100%;flex:0 0 42%;min-height:0;overflow-y:auto;
-    border-right:none;border-bottom:1px solid var(--border2);
+    display:none;flex:1;min-height:0;width:100%;
+    overflow-y:auto;border-right:none;border-bottom:none;
     position:relative;transform:none!important;box-shadow:none!important;
   }
+  #dmap{display:none;flex:1;min-height:0;width:100%;border:none;}
+  #drp{
+    display:none;flex:1;min-height:0;width:100%;
+    position:static;transform:none!important;box-shadow:none;border-left:none;
+    border-top:1px solid var(--border);
+  }
+  /* Active tab panel */
+  #dlp.mob-active{display:flex;flex-direction:column;}
+  #dmap.mob-active{display:block;}
+  #drp.mob-active{display:flex;flex-direction:column;}
+
   /* Larger text for readability */
-  #dlp .pl{font-size:9px;letter-spacing:3px;padding:8px 12px 4px;}
-  #dlp .pt{font-size:9px;letter-spacing:3px;padding:8px 12px;}
-  #dlp .pn{font-size:16px;letter-spacing:4px;padding:6px 12px 2px;}
+  #dlp .pl{font-size:9px;letter-spacing:2px;padding:8px 12px 4px;}
+  #dlp .pt{font-size:9px;letter-spacing:2px;padding:8px 12px;}
+  #dlp .pn{font-size:15px;letter-spacing:3px;padding:6px 12px 2px;}
   #dlp .pb-label{font-size:10px;}
   #dlp .pb-val{font-size:11px;}
   .le{font-size:11px;line-height:1.6;}
   .rt{font-size:11px;padding:3px 8px;}
   .rtag{font-size:10px;padding:2px 7px;}
 
-  /* Map strip: takes remaining #dm height */
-  #dmap{
-    flex:1;min-height:0;width:100%;position:relative;
-    border-top:1px solid var(--border2);
-  }
   /* Map maximized state */
   #dmap.map-max{
     position:fixed!important;inset:0!important;
-    height:100dvh!important;width:100vw!important;
     z-index:50!important;border:none!important;
   }
-  #dmap.map-max #mob-map-max{background:rgba(7,10,26,0.92);border-color:var(--red);color:var(--red);}
 
-  /* Intel panel slides in from right over full screen */
-  #drp{
-    position:fixed;right:0;top:0;bottom:0;z-index:45;
-    width:82vw;max-width:340px;
-    transform:translateX(100%);transition:transform .28s;
-    box-shadow:-6px 0 32px rgba(0,0,0,0.75);
-  }
-  #drp.open{transform:translateX(0);}
+  /* Hide old floating mob-btns */
+  .mob-btn{display:none!important;}
+  /* Hide resize handles */
+  .rh{display:none!important;}
+  /* Hide panel backdrop — not needed with tab system */
+  #panel-bd{display:none!important;}
 
-  .mob-btn{display:block;}
-  #dbot{
-    padding:10px 12px;
-    flex-direction:column;gap:8px;
-  }
+  /* ── DIRECTIVE ── */
+  #dbot{padding:10px 12px;flex-direction:column;gap:8px;}
   #dbot>div{width:100%;position:relative;}
-  #dmi{
-    font-size:16px;padding:10px 12px 26px 12px;
-    height:74px;width:100%;
-  }
-  #dwct{
-    bottom:8px;left:12px;
-    font-size:10px;
-  }
-  #dexb{
-    width:100%;height:44px;min-height:44px;
-    font-size:12px;letter-spacing:2px;
-    padding:0;flex-shrink:0;align-self:auto;
-  }
+  #dmi{font-size:16px;padding:10px 12px 26px 12px;height:74px;width:100%;}
+  #dwct{bottom:8px;left:12px;font-size:10px;}
+  #dexb{width:100%;height:44px;min-height:44px;font-size:12px;letter-spacing:2px;padding:0;flex-shrink:0;align-self:auto;}
   label{font-size:10px;letter-spacing:2px;}
 
-  /* Backdrop covers full screen on mobile */
-  #panel-bd{position:fixed;z-index:40;}
-  /* Hide resize handles on mobile */
-  .rh{display:none!important;}
-  /* Nation status always visible — never collapse on mobile */
-  #dps,#dps.collapsed{max-height:280px!important;padding:10px!important;opacity:1!important;border-bottom:1px solid var(--border)!important;}
+  /* Nation status always fully expanded */
+  #dps,#dps.collapsed{max-height:none!important;padding:10px!important;opacity:1!important;}
 }
 @media(max-width:460px){
   .ocard{padding:20px;}
@@ -778,6 +839,27 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
     </div>
   </div>
 
+  <!-- Mobile menu overlay -->
+  <div id="mob-menu">
+    <div id="mob-menu-bd" onclick="closeMobMenu()"></div>
+    <div id="mob-menu-sheet">
+      <div class="mob-menu-title">Command</div>
+      <div class="mob-menu-row">
+        <button class="mob-menu-btn amber" id="mob-analytics-btn" onclick="closeMobMenu();openAnalytics();" style="display:none;">📊 Analytics</button>
+        <button class="mob-menu-btn" onclick="closeMobMenu();openSettings();">⚙ Settings</button>
+        <button class="mob-menu-btn red" onclick="closeMobMenu();confirmNewGame();">↺ New Game</button>
+      </div>
+      <div class="mob-menu-title" style="margin-top:6px;">Account</div>
+      <div class="mob-menu-row">
+        <button class="mob-menu-btn" id="mob-auth-btn" onclick="closeMobMenu();openAuthModal();">Sign In</button>
+        <button class="mob-menu-btn" id="mob-save-btn" onclick="closeMobMenu();manualSave();" style="display:none;">💾 Save</button>
+        <button class="mob-menu-btn" id="mob-load-btn" onclick="closeMobMenu();openLoadModal();" style="display:none;">📂 Load</button>
+      </div>
+      <div id="mob-user-label" style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:1px;text-align:center;margin-top:4px;"></div>
+      <button class="mob-menu-close" onclick="closeMobMenu()">✕ Close</button>
+    </div>
+  </div>
+
   <!-- Header -->
   <div id="dh">
     <div class="dh-brand">
@@ -786,6 +868,8 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
     </div>
     <div class="hst">
       <div class="tb">TURN <span id="dht">1</span>/<span id="dhtl">20</span></div>
+      <div class="sp">YEAR <b id="dyear">—</b></div>
+      <div class="sp">STABILITY <b id="dstab">—</b></div>
       <button class="chbtn" id="analytics-btn" onclick="openAnalytics()" style="display:none;">ANALYTICS</button>
       <button class="chbtn" onclick="openSettings()" title="Settings">⚙ SETTINGS</button>
       <button class="chbtn" id="newgame-btn" onclick="confirmNewGame()" style="background:rgba(255,51,85,0.12);color:var(--red);border-color:var(--red);" title="End current campaign and start over">↺ NEW GAME</button>
@@ -796,7 +880,16 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
         <button class="chbtn" id="load-btn" onclick="openLoadModal()" style="display:none;">LOAD</button>
       </div>
     </div>
+    <!-- Mobile-only controls -->
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="tb" id="mob-turn-badge" style="display:none;">T<span id="mob-dht">1</span></div>
+      <button id="mob-menu-btn" onclick="openMobMenu()">☰</button>
+    </div>
   </div>
+  <!-- Stability bar -->
+  <div id="dstab-bar-wrap"><div id="dstab-bar"></div></div>
+  <!-- Mobile scrollable stat strip -->
+  <div id="mob-stat-strip"></div>
 
   <!-- Main Area -->
   <div id="dm">
@@ -839,6 +932,22 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <div class="pl">Country Inspector</div>
       <div id="dci"><div class="cie">Select target on globe<br>to view intel &amp;<br>strategic options</div></div>
     </div>
+  </div>
+
+  <!-- Mobile tab bar -->
+  <div id="mob-tabs">
+    <button class="mob-tab" id="mob-tab-status" onclick="switchMobTab('status')">
+      <span class="ti">◈</span>STATUS
+    </button>
+    <button class="mob-tab active" id="mob-tab-map" onclick="switchMobTab('map')">
+      <span class="ti">⊕</span>MAP
+    </button>
+    <button class="mob-tab" id="mob-tab-intel" onclick="switchMobTab('intel')">
+      <span class="ti">◉</span>INTEL
+    </button>
+    <button class="mob-tab" id="mob-tab-log" onclick="switchMobTab('log')">
+      <span class="ti">≡</span>LOG
+    </button>
   </div>
 
   <!-- Bottom -->
@@ -1055,7 +1164,9 @@ let DG={
   allies:[],enemies:[],sel:null,selISO:null,nations:{},busy:false,
   map:null,sentiments:{},territories:[],
   statDeltas:{influence:0,economy:0,military:0,resources:0,land:0},
-  history:[],collateral:[],chatHistory:[],dpsCollapsed:false
+  history:[],collateral:[],chatHistory:[],dpsCollapsed:false,
+  year:new Date().getFullYear(),yearStart:new Date().getFullYear(),
+  stability:78,stabHistory:[78],pending:[]
 };
 
 DNS.forEach(n=>{DG.nations[n.id]={...n,cs:{...n.stats}};DG.sentiments[n.id]=0;});
@@ -1197,9 +1308,88 @@ function syncIntroAuth(user){
 function dStart(){
   document.getElementById('dsto').style.display='none';
   document.getElementById('analytics-btn').style.display='inline-block';
+  const ma=document.getElementById('mob-analytics-btn');if(ma)ma.style.display='';
+  switchMobTab('map');
+  DG.year=new Date().getFullYear();DG.yearStart=DG.year;DG.stability=78;DG.stabHistory=[78];
+  dRecomputeStability();dRenderYear();dRenderStability();
   initMap();dRStats();dRHeader();dUpdateRelations();dRenderDirectives();
   dLog('turn','Turn 1');
   dLog('rs','You lead '+DG.playerNation.name+'. The world watches. Issue your first directive.');
+}
+
+// ── YEAR CLOCK + GLOBAL STABILITY ─────────────────────────────────
+const D_AMBITION_VERBS=['invade','annex','overthrow','collapse','dominate','conquer','crush','destroy','eliminate','assassinate','nuke','blockade','occupy','seize'];
+const D_MODERATE_VERBS=['sanction','threaten','pressure','demand','expel','betray','undermine','sabotage','infiltrate','arm','militarize','escalate'];
+const D_SCOPE_WORDS=['global','worldwide','all','every','entire','total','complete','permanent','forever','massive'];
+
+function dEstimateYearAdvance(directive,moveResult){
+  const text=(directive||'').toLowerCase();
+  const wc=text.trim().split(/\s+/).filter(Boolean).length;
+  let adv=1;
+  if(wc>=8)adv+=0.5;
+  if(wc>=14)adv+=0.5;
+  if(wc>=18)adv+=0.5;
+  adv+=D_AMBITION_VERBS.filter(v=>text.includes(v)).length*0.8;
+  adv+=D_MODERATE_VERBS.filter(v=>text.includes(v)).length*0.4;
+  adv+=D_SCOPE_WORDS.filter(s=>text.includes(s)).length*0.5;
+  if(moveResult&&moveResult.statChanges){
+    const tot=Object.values(moveResult.statChanges).reduce((s,v)=>s+Math.abs(v||0),0);
+    if(tot>=20)adv+=1;
+    if(tot>=35)adv+=1;
+  }
+  return Math.min(5,Math.max(1,Math.round(adv)));
+}
+
+function dAdvanceYear(directive,moveResult){
+  const yrs=dEstimateYearAdvance(directive,moveResult);
+  DG.year+=yrs;
+  return yrs;
+}
+
+// Inter-nation sentiment proxy using INITIAL_SENTIMENTS
+function dRel(aId,bId){return(INITIAL_SENTIMENTS[aId]&&INITIAL_SENTIMENTS[aId][bId])||0;}
+
+function dRecomputeStability(){
+  let s=100;
+  s-=(DG.pending||[]).length*3;
+  const allCS=DNS.map(n=>n.id===DG.playerNation?.id?DG.cs:DG.nations[n.id]?.cs||n.stats);
+  const avgMil=allCS.reduce((t,c)=>t+(c.military||0),0)/allCS.length;
+  if(avgMil>60)s-=(avgMil-60)*0.4;
+  let hostilePairs=0;
+  DNS.forEach((a,ai)=>DNS.forEach((b,bi)=>{
+    if(bi<=ai)return;
+    if(dRel(a.id,b.id)<-50||dRel(b.id,a.id)<-50)hostilePairs++;
+  }));
+  s-=hostilePairs*1.2;
+  const avgEco=allCS.reduce((t,c)=>t+(c.economy||0),0)/allCS.length;
+  if(avgEco<50)s-=(50-avgEco)*0.5;
+  if(DG.turn>14)s-=(DG.turn-14)*1.5;
+  DG.stability=Math.max(0,Math.min(100,Math.round(s)));
+  DG.stabHistory.push(DG.stability);
+  return DG.stability;
+}
+
+function dStabilityTier(s){
+  if(s>=75)return{label:'Stable',color:'#3ddc84'};
+  if(s>=55)return{label:'Strained',color:'#f0c040'};
+  if(s>=35)return{label:'Volatile',color:'#ff8a3d'};
+  if(s>=15)return{label:'Crisis',color:'#ff4f6a'};
+  return{label:'Catastrophic',color:'#ff2040'};
+}
+
+function dRenderYear(){
+  const el=document.getElementById('dyear');if(el)el.textContent=DG.year;
+  const m=document.getElementById('mob-year');if(m)m.textContent=DG.year;
+}
+
+function dRenderStability(){
+  const el=document.getElementById('dstab');
+  const bar=document.getElementById('dstab-bar');
+  if(!el)return;
+  const tier=dStabilityTier(DG.stability);
+  el.innerHTML=`<span style="color:${tier.color}">${DG.stability}%</span>`;
+  el.title=tier.label;
+  if(bar){bar.style.width=DG.stability+'%';bar.style.background=tier.color;}
 }
 
 function getSentimentCategory(v){
@@ -1491,7 +1681,7 @@ function flyToNation(id){
   if(!n||!DG.map)return;
   DG.map.flyTo({center:n.center,zoom:3.5,duration:800});
   dInspect(id);
-  if(window.innerWidth<=680)togglePanel('drp');
+  if(window.innerWidth<=680)switchMobTab('intel');
 }
 
 function dApplySentimentEffects(targetId,delta){
@@ -1593,13 +1783,13 @@ function initMap(){
           if(!DG.nations[nation.id]?.cs)DG.nations[nation.id]={...nation,cs:{...nation.stats}};
           dInspect(nation.id);
           map.flyTo({center:nation.center,zoom:3.5,duration:800});
-          if(window.innerWidth<=680)togglePanel('drp');
+          if(window.innerWidth<=680)switchMobTab('intel');
         }else{
           // Any country not in DNS — inspect with name from Mapbox feature
           dInspectUnknown(iso,nameEn);
           // Fly to click location since we have no center coord for unknown nations
           map.flyTo({center:e.lngLat,zoom:Math.max(map.getZoom(),3),duration:600});
-          if(window.innerWidth<=680)togglePanel('drp');
+          if(window.innerWidth<=680)switchMobTab('intel');
         }
       }
     });
@@ -1702,7 +1892,7 @@ function dInspectUnknown(iso, nameEn){
       '<h4>Establish Contact</h4><p>Open initial diplomatic channels.</p></div>'+
     '<div class="ac" onclick="dHint(\'Fund intelligence assets inside '+nameEn+', gather strategic data, assess capabilities and political stability\')">'+
       '<h4>Intelligence Probe</h4><p>Survey capabilities before committing resources.</p></div>';
-  if(window.innerWidth<=680)togglePanel('drp');
+  if(window.innerWidth<=680)switchMobTab('intel');
 }
 
 function dHint(t){const el=document.getElementById('dmi');el.value=t;dWC(el);el.focus();}
@@ -1734,10 +1924,12 @@ function dRStats(){
       '<div class="sv" style="color:'+DSC[k]+'">'+Math.round(v)+dh+'</div></div>';
   });
   document.getElementById('dpbars').innerHTML=bars;
+  updateMobStrip();
 }
 
 function dRHeader(){
   document.getElementById('dht').textContent=DG.turn;
+  const m=document.getElementById('mob-dht');if(m)m.textContent=DG.turn;
 }
 
 function dLog(type,text){
@@ -1936,6 +2128,11 @@ async function dSubmit(){
     if(DG.chatHistory.length>12)DG.chatHistory=DG.chatHistory.slice(-12);
     dApply(r);
     saveDirective(move, r); // fire-and-forget, non-blocking
+    const yrs=dAdvanceYear(move,r);
+    dRecomputeStability();
+    dRenderYear();
+    dRenderStability();
+    dLog('nt',`📅 ${yrs} year${yrs>1?'s':''} pass — now ${DG.year} · Stability ${DG.stability}% (${dStabilityTier(DG.stability).label})`);
     worldEvent();
     sentimentDrift();
     DG.history.push({turn:DG.turn,...DG.cs});
@@ -1972,7 +2169,7 @@ You resolve player moves with Machiavellian realism — nations are opportunisti
 CRITICAL DEALING RULES: Neutral nations (sentiment label "Neutral" or "Warm") have NO reason to refuse reasonable propositions — they should respond positively to well-crafted overtures. Nations in economic crisis (economy<40) are desperate and will accept almost any deal. Smaller nations eagerly accept partnerships with major powers. DO NOT make every interaction fail — that is bad game design. Deals with neutral or friendly nations should generally succeed with moderate stat rewards.
 Bold overextension backfires. Economic growth is gradual. Betrayals destroy influence permanently. Military aggression risks retaliation.
 Scale stat changes to ambition and precision (max ±18 per stat, rarely above ±12). Territory conquest requires target military<40 AND player military>70, or total collapse.
-NEVER use markdown. Return ONLY valid JSON. Use only these exact nation IDs: usa,china,russia,germany,india,brazil,uk,france,japan,nigeria,turkey,iran,australia,saudi,s_africa,mexico,indonesia,s_korea,argentina,pakistan,canada,ukraine,poland,italy,spain,netherlands,sweden,romania,greece,israel,uae,iraq,qatar,vietnam,thailand,philippines,malaysia,kazakhstan,bangladesh,taiwan,n_korea,myanmar,ethiopia,kenya,algeria,morocco,d_congo,ghana,angola,colombia,chile,venezuela,peru`;
+NEVER use markdown. Return ONLY valid JSON. Use only these exact nation IDs: usa,china,russia,germany,india,brazil,uk,france,japan,turkey,iran,australia,saudi,nigeria,s_africa,mexico,indonesia,s_korea,argentina,pakistan,canada,ukraine,poland,italy,spain,netherlands,sweden,romania,greece,israel,uae,iraq,qatar,vietnam,thailand,philippines,malaysia,kazakhstan,bangladesh,taiwan,n_korea,myanmar,ethiopia,kenya,algeria,morocco,d_congo,ghana,angola,colombia,chile,venezuela,peru,norway,finland,denmark,switzerland,belgium,austria,portugal,czech,slovakia,hungary,ireland,croatia,serbia,bulgaria,albania,north_macedonia,montenegro,bosnia,slovenia,lithuania,latvia,estonia,belarus,moldova,iceland,luxembourg,malta,cyprus,kosovo,egypt,syria,lebanon,jordan,kuwait,bahrain,oman,yemen,libya,tunisia,armenia,azerbaijan,georgia,uzbekistan,turkmenistan,kyrgyzstan,tajikistan,afghanistan,singapore,sri_lanka,nepal,mongolia,cambodia,laos,brunei,timor_leste,maldives,bhutan,new_zealand,papua_ng,fiji,sudan,south_sudan,somalia,tanzania,uganda,rwanda,mozambique,zimbabwe,zambia,madagascar,senegal,ivory_coast,cameroon,mali,niger,burkina,chad,guinea,caf,congo_rep,gabon,namibia,botswana,malawi,eritrea,djibouti,togo,benin,mauritania,sierra_leone,liberia,mauritius,eswatini,lesotho,cape_verde,seychelles,comoros,guinea_bissau,gambia,eq_guinea,sao_tome,ecuador,bolivia,paraguay,uruguay,cuba,dom_rep,haiti,guatemala,honduras,el_salvador,nicaragua,costa_rica,panama,jamaica,trinidad,guyana,belize,suriname,barbados. Current world stability: ${DG.stability}% (${dStabilityTier(DG.stability).label}). Tone your narrative accordingly — low stability means cascading consequences, high stability means contained outcomes.`;
   const userPrompt=`PLAYER: ${n.name} (${n.region})
 STATS: Influence:${Math.round(s.influence)}, Economy:${Math.round(s.economy)}, Military:${Math.round(s.military)}, Resources:${Math.round(s.resources)}, Land:${Math.round(s.land)}
 TURN: ${DG.turn}/${DS.turnLimit||20}
@@ -1984,7 +2181,7 @@ WORLD: ${world}
 MOVE: "${move}"
 Return JSON:
 {"narrative":"2-3 sentence vivid geopolitical result","statChanges":{"influence":0,"economy":0,"military":0,"resources":0,"land":0},"sentimentShifts":{"nationId":delta},"newAllies":[],"newEnemies":[],"removedAllies":[],"territoryGained":[],"territoryLost":[],"sideEffect":"any espionage or unexpected consequence (empty string if none)"}
-RULES: Territory conquest requires target military<40 AND your military>70, OR critical narrative event. Betrayal sets betrayed sentiment to -80 and their close allies to -30. sideEffect should be concise. Use only exact nation IDs listed above.`;
+RULES: Territory conquest requires target military<40 AND your military>70, OR critical narrative event. Betrayal sets betrayed sentiment to -80 and their close allies to -30. sideEffect should be concise. Use only exact nation IDs listed in the system prompt. Year ${DG.year}, Turn ${DG.turn}.`;
 
   const resp=await fetch('/api/ai',{
     method:'POST',
@@ -2050,6 +2247,69 @@ function confirmNewGame(){
   if(confirm('Abandon current campaign and return to the start screen?')){
     location.reload();
   }
+}
+
+// ── MOBILE NAV ──────────────────────────────────────────────
+let _mobTab='map';
+function switchMobTab(tab){
+  _mobTab=tab;
+  // Map 'log' → show the left panel (which contains the log)
+  const panelTab=tab==='log'?'status':tab;
+  ['status','map','intel'].forEach(t=>{
+    const panel=t==='status'?document.getElementById('dlp')
+                :t==='map'?document.getElementById('dmap')
+                :document.getElementById('drp');
+    if(panel)panel.classList.toggle('mob-active',t===panelTab);
+  });
+  // If log tab, scroll left panel to bottom of log
+  if(tab==='log'){
+    const log=document.getElementById('dlog');
+    if(log)setTimeout(()=>log.scrollIntoView({behavior:'smooth',block:'end'}),80);
+  }
+  // Update tab button styles
+  ['status','map','intel','log'].forEach(t=>{
+    document.getElementById('mob-tab-'+t)?.classList.toggle('active',t===tab);
+  });
+}
+
+function openMobMenu(){document.getElementById('mob-menu').classList.add('open');}
+function closeMobMenu(){document.getElementById('mob-menu').classList.remove('open');}
+
+function updateMobStrip(){
+  if(window.innerWidth>680)return;
+  const strip=document.getElementById('mob-stat-strip');
+  if(!strip||!DG.cs)return;
+  const s=DG.cs;
+  strip.innerHTML=
+    `<div class="mob-stat-chip" style="border-color:var(--amber-dim);color:var(--amber);">T<b>${DG.turn}</b></div>`+
+    `<div class="mob-stat-chip"><span style="color:#00c8ff">INF</span>&nbsp;<b>${Math.round(s.influence)}</b></div>`+
+    `<div class="mob-stat-chip"><span style="color:#22d882">ECO</span>&nbsp;<b>${Math.round(s.economy)}</b></div>`+
+    `<div class="mob-stat-chip"><span style="color:#ff3355">MIL</span>&nbsp;<b>${Math.round(s.military)}</b></div>`+
+    `<div class="mob-stat-chip"><span style="color:#e0a82a">RES</span>&nbsp;<b>${Math.round(s.resources)}</b></div>`+
+    `<div class="mob-stat-chip"><span style="color:#9966ff">LND</span>&nbsp;<b>${Math.round(s.land)}</b></div>`+
+    (DG.allies.length?`<div class="mob-stat-chip"><span style="color:#22d882">✦</span>&nbsp;<b>${DG.allies.length}</b>&nbsp;allies</div>`:'');
+}
+
+function syncMobAuth(user){
+  const mb=document.getElementById('mob-auth-btn');
+  const ml=document.getElementById('mob-user-label');
+  const ms=document.getElementById('mob-save-btn');
+  const mld=document.getElementById('mob-load-btn');
+  const ma=document.getElementById('mob-analytics-btn');
+  if(user){
+    if(mb)mb.textContent='Sign Out';
+    if(mb)mb.onclick=()=>{closeMobMenu();fbAuth.signOut();};
+    if(ml)ml.textContent=user.email||user.displayName||'Signed in';
+    if(ms)ms.style.display='';
+    if(mld)mld.style.display='';
+  }else{
+    if(mb)mb.textContent='Sign In';
+    if(mb)mb.onclick=()=>{closeMobMenu();openAuthModal();};
+    if(ml)ml.textContent='';
+    if(ms)ms.style.display='none';
+    if(mld)mld.style.display='none';
+  }
+  if(ma)ma.style.display=DG.playerNation?'':'none';
 }
 
 function dEndGame(){
@@ -2124,6 +2384,7 @@ function initFirebase(){
     fbAuth.onAuthStateChanged(user=>{
       currentUser=user;
       syncIntroAuth(user);
+      syncMobAuth(user);
       const btn=document.getElementById('auth-btn');
       const emailEl=document.getElementById('auth-email');
       const saveBtn=document.getElementById('save-btn');

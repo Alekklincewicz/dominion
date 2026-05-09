@@ -571,6 +571,36 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 .an-mini{flex:1;min-width:100px;}
 #chart-canvas{width:100%;display:block;}
 
+/* ── INTERNATIONAL MATRIX ── */
+.mat-sort-btn,.mat-filter-btn{
+  font-family:var(--font-mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;
+  background:none;border:1px solid var(--border);border-radius:2px;
+  color:var(--text-dim);cursor:pointer;padding:3px 8px;transition:all .15s;white-space:nowrap;
+}
+.mat-sort-btn:hover,.mat-filter-btn:hover{border-color:var(--border2);color:var(--text);}
+.mat-sort-btn.active{border-color:var(--amber-dim);color:var(--amber);}
+.mat-filter-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,200,255,0.06);}
+.mat-row{
+  display:grid;
+  grid-template-columns:22px 1fr 70px 80px 42px 88px;
+  gap:6px;align-items:center;
+  padding:5px 4px;border-bottom:1px solid rgba(25,33,61,0.4);
+  font-family:var(--font-mono);font-size:10px;cursor:pointer;transition:background .1s;
+}
+.mat-row:hover{background:rgba(0,200,255,0.04);}
+.mat-row-hdr{
+  color:var(--text-dim);font-size:7px;letter-spacing:1.5px;
+  padding-bottom:5px;border-bottom:1px solid var(--border2);margin-bottom:2px;
+  cursor:default;pointer-events:none;
+}
+.mat-row-hdr:hover{background:none;}
+.mat-bar-track{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.mat-bar-fill{height:100%;border-radius:2px;}
+.mat-empty{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);padding:12px 4px;}
+@media(max-width:680px){
+  .mat-row{grid-template-columns:18px 1fr 52px 50px 36px 72px;font-size:9px;gap:4px;}
+}
+
 @keyframes fo{from{opacity:0}to{opacity:1}}
 @keyframes su{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
 
@@ -898,6 +928,26 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <div class="an-section">
         <div class="an-section-title">World Power Ranking</div>
         <div id="an-ranking"></div>
+      </div>
+      <div class="an-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+          <div class="an-section-title" style="margin-bottom:0;">International Relations Matrix</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;" id="mat-sort-bar">
+            <button class="mat-sort-btn active" data-sort="sentiment_desc" onclick="setMatSort('sentiment_desc')">SENTIMENT ↓</button>
+            <button class="mat-sort-btn" data-sort="sentiment_asc" onclick="setMatSort('sentiment_asc')">SENTIMENT ↑</button>
+            <button class="mat-sort-btn" data-sort="name_asc" onclick="setMatSort('name_asc')">A–Z</button>
+            <button class="mat-sort-btn" data-sort="region_asc" onclick="setMatSort('region_asc')">REGION</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;" id="mat-filter-bar">
+          <button class="mat-filter-btn active" data-filter="all" onclick="setMatFilter('all')">ALL</button>
+          <button class="mat-filter-btn" data-filter="allies" onclick="setMatFilter('allies')">ALLIES</button>
+          <button class="mat-filter-btn" data-filter="friendly" onclick="setMatFilter('friendly')">FRIENDLY</button>
+          <button class="mat-filter-btn" data-filter="neutral" onclick="setMatFilter('neutral')">NEUTRAL</button>
+          <button class="mat-filter-btn" data-filter="hostile" onclick="setMatFilter('hostile')">HOSTILE</button>
+          <button class="mat-filter-btn" data-filter="rivals" onclick="setMatFilter('rivals')">RIVALS</button>
+        </div>
+        <div id="an-matrix"></div>
       </div>
     </div>
   </div>
@@ -1665,6 +1715,7 @@ function drawChart(){
 
 function renderAnalytics(){
   drawChart();
+  renderMatrix();
   // Legend
   const leg=document.getElementById('an-legend');
   leg.innerHTML=DSC_KEYS.map(k=>`<span style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10px;color:${DSC[k]}"><span style="display:inline-block;width:14px;height:3px;background:${DSC[k]};border-radius:2px;"></span>${k}</span>`).join('');
@@ -1737,6 +1788,79 @@ function renderAnalytics(){
       <div class="an-bar-track"><div class="an-bar-fill" style="width:${Math.round((s.total/maxT)*100)}%;background:${s.isPlayer?'var(--cyan)':'var(--border2)'};"></div></div>
       <span class="an-stat-val">${s.total}</span>
     </div>`).join('');
+}
+
+/* ── INTERNATIONAL MATRIX ── */
+let _matFilter='all';
+let _matSort='sentiment_desc';
+
+function setMatFilter(f){
+  _matFilter=f;
+  document.querySelectorAll('.mat-filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));
+  renderMatrix();
+}
+function setMatSort(s){
+  _matSort=s;
+  document.querySelectorAll('.mat-sort-btn').forEach(b=>b.classList.toggle('active',b.dataset.sort===s));
+  renderMatrix();
+}
+function renderMatrix(){
+  const el=document.getElementById('an-matrix');
+  if(!el||!DG.playerNation)return;
+
+  let nations=DNS
+    .filter(n=>n.id!==DG.playerNation.id)
+    .map(n=>({
+      id:n.id,name:n.name,region:n.region||'—',
+      sentiment:Math.round(DG.sentiments[n.id]||0),
+      isAlly:DG.allies.includes(n.id),
+      isRival:DG.enemies.includes(n.id)
+    }));
+
+  // Apply filter
+  switch(_matFilter){
+    case'allies':   nations=nations.filter(n=>n.isAlly||(n.sentiment>=50&&!n.isRival));break;
+    case'friendly': nations=nations.filter(n=>!n.isAlly&&!n.isRival&&n.sentiment>10&&n.sentiment<50);break;
+    case'neutral':  nations=nations.filter(n=>!n.isAlly&&!n.isRival&&n.sentiment>=-10&&n.sentiment<=10);break;
+    case'hostile':  nations=nations.filter(n=>!n.isRival&&n.sentiment<-10&&n.sentiment>-50);break;
+    case'rivals':   nations=nations.filter(n=>n.isRival||(n.sentiment<=-50&&!n.isAlly));break;
+  }
+
+  // Apply sort
+  switch(_matSort){
+    case'sentiment_desc':nations.sort((a,b)=>b.sentiment-a.sentiment);break;
+    case'sentiment_asc': nations.sort((a,b)=>a.sentiment-b.sentiment);break;
+    case'name_asc':      nations.sort((a,b)=>a.name.localeCompare(b.name));break;
+    case'region_asc':    nations.sort((a,b)=>a.region.localeCompare(b.region)||b.sentiment-a.sentiment);break;
+  }
+
+  if(!nations.length){
+    el.innerHTML='<div class="mat-empty">No nations match this filter.</div>';
+    return;
+  }
+
+  const rows=nations.map((n,i)=>{
+    const cat=getSentimentCategory(n.sentiment);
+    const lbl=getSentimentLabel(n.sentiment);
+    const pct=Math.min(100,Math.abs(n.sentiment));
+    const barColor=n.sentiment>0?'var(--green)':n.sentiment<0?'var(--red)':'var(--border2)';
+    const nameColor=n.isAlly?'var(--green)':n.isRival?'var(--red)':n.sentiment>10?'var(--text)':n.sentiment<-10?'var(--text-mid)':'var(--text-dim)';
+    const marker=n.isAlly?'<span style="color:var(--green);font-size:8px;margin-right:2px;">★</span>':n.isRival?'<span style="color:var(--red);font-size:8px;margin-right:2px;">✕</span>':'';
+    const scoreStr=(n.sentiment>0?'+':'')+n.sentiment;
+    const scoreColor=n.sentiment>=40?'var(--green)':n.sentiment<=-30?'var(--red)':'var(--text-dim)';
+    return `<div class="mat-row" onclick="closeAnalytics();setTimeout(()=>dInspect('${n.id}'),80)" title="${n.name} — click to inspect">
+      <span style="color:var(--text-dim);font-size:8px;">${i+1}</span>
+      <span style="color:${nameColor};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${marker}${n.name}</span>
+      <span style="color:var(--text-dim);font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.region}</span>
+      <div class="mat-bar-track"><div class="mat-bar-fill" style="width:${pct}%;background:${barColor};"></div></div>
+      <span style="color:${scoreColor};text-align:right;font-size:10px;">${scoreStr}</span>
+      <span class="sent ${cat}" style="font-size:7.5px;padding:2px 5px;white-space:nowrap;">${lbl}</span>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`<div class="mat-row mat-row-hdr">
+    <span>#</span><span>NATION</span><span>REGION</span><span>SENTIMENT</span><span style="text-align:right;">SCORE</span><span>STATUS</span>
+  </div>${rows}`;
 }
 
 function dUpdateRelations(){
@@ -2380,6 +2504,17 @@ async function dSubmit(){
     autoSave();
     showResultModal(r,DG.turn,DG.year,DG.stability);
     if(document.getElementById('analytics-modal').classList.contains('open'))renderAnalytics();
+    // ── SUCCESS: clear box, advance turn ──────────────────────
+    DG.busy=false;el.disabled=false;el.value='';
+    dWC(el);document.getElementById('dexb').textContent='EXECUTE →';
+    if(DG.turn<(DS.turnLimit||20)){
+      DG.turn++;dRHeader();dRStats();dUpdateRelations();
+      dLog('turn','Turn '+DG.turn);
+      if(DG.sel)dInspect(DG.sel);
+    }else{
+      dEndGame();
+    }
+    return; // exit — don't fall through to failure cleanup
   }catch(e){
     td.remove();
     const msg=e.message||String(e);
@@ -2388,15 +2523,12 @@ async function dSubmit(){
     else dLog('wn','⚠ Intelligence failure: '+msg.slice(0,120));
     console.error(e);
   }
-  DG.busy=false;el.disabled=false;el.value='';
-  dWC(el);document.getElementById('dexb').textContent='EXECUTE →';
-  if(DG.turn<(DS.turnLimit||20)){
-    DG.turn++;dRHeader();dRStats();dUpdateRelations();
-    dLog('turn','Turn '+DG.turn);
-    if(DG.sel)dInspect(DG.sel);
-  }else{
-    dEndGame();
-  }
+  // ── FAILURE: restore box, do NOT advance turn ──────────────
+  DG.busy=false;el.disabled=false;
+  // Leave el.value intact so player can retry without retyping
+  document.getElementById('dexb').disabled=false;
+  document.getElementById('dexb').textContent='EXECUTE →';
+  dWC(el); // re-evaluate word count to re-enable button
 }
 
 async function dCallAI(move){

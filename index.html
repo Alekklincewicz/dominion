@@ -16,7 +16,7 @@
   --red:#ff3355;--red-dim:rgba(255,51,85,0.12);
   --purple:#9966ff;
   --text:#b8cbff;--text-mid:#7a8fb8;--text-dim:#8a9ec0;
-  --font-mono:'Share Tech Mono','Courier New',monospace;
+  --font-mono:'Times New Roman',Times,serif;
   --font-sans:'Inter',sans-serif;
   --font-serif:'Crimson Pro',Georgia,serif;
 }
@@ -314,38 +314,41 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 
 /* ── BOTTOM INPUT ── */
 #dbot{
-  border-top:1px solid var(--border);background:var(--bg1);
-  padding:8px 12px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0;
-  position:relative;
+  border-top:2px solid var(--border2);background:var(--bg1);
+  padding:16px 20px;display:flex;gap:12px;align-items:stretch;flex-shrink:0;
+  position:relative;min-height:30dvh;
 }
 #dbot::before{
   content:'';position:absolute;top:-1px;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--amber-dim),transparent);
+  background:linear-gradient(90deg,transparent,var(--amber-dim) 40%,var(--amber-dim) 60%,transparent);
 }
-#dmiw{flex:1;position:relative;}
+#dmiw{flex:1;position:relative;display:flex;flex-direction:column;}
 #dmiw label{
-  display:block;font-family:var(--font-mono);font-size:8px;
-  letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;
+  display:block;font-family:var(--font-mono);font-size:9px;
+  letter-spacing:3px;color:var(--amber-dim);text-transform:uppercase;margin-bottom:8px;flex-shrink:0;
 }
 #dmi{
-  width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:2px;
-  color:var(--text);font-family:var(--font-mono);font-size:12px;
-  padding:8px 76px 8px 10px;outline:none;resize:none;
-  transition:border-color .15s;line-height:1.5;letter-spacing:0.5px;
+  flex:1;min-height:0;
+  width:100%;background:var(--bg0);border:1px solid var(--border2);border-radius:2px;
+  color:var(--text);font-family:var(--font-mono);font-size:14px;
+  padding:14px 14px 30px 14px;outline:none;resize:none;
+  transition:border-color .2s,box-shadow .2s;line-height:1.7;letter-spacing:0.5px;
+  box-sizing:border-box;
 }
-#dmi:focus{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,200,255,0.06);}
-#dmi::placeholder{color:var(--text-dim);font-size:11px;}
-#dwct{position:absolute;bottom:9px;right:10px;font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:1px;}
+#dmi:focus{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,200,255,0.1);}
+#dmi::placeholder{color:var(--text-dim);font-size:12px;}
+#dwct{position:absolute;bottom:10px;left:14px;font-family:var(--font-mono);font-size:10px;color:var(--text-dim);letter-spacing:1px;}
 #dwct.ov{color:var(--red);}
 #dexb{
   background:var(--amber-faint);color:var(--amber);
   border:1px solid var(--amber-dim);border-radius:2px;
-  padding:8px 14px;font-family:var(--font-mono);font-size:11px;
+  padding:0 26px;font-family:var(--font-mono);font-size:12px;
   letter-spacing:2px;cursor:pointer;white-space:nowrap;
-  height:38px;align-self:flex-end;text-transform:uppercase;
-  transition:all .15s;
+  align-self:flex-end;text-transform:uppercase;
+  transition:all .15s;flex-shrink:0;
+  min-height:52px;height:100%;max-height:120px;
 }
-#dexb:hover:not(:disabled){background:rgba(224,168,42,0.14);border-color:var(--amber);}
+#dexb:hover:not(:disabled){background:rgba(224,168,42,0.18);border-color:var(--amber);box-shadow:0 0 16px rgba(224,168,42,0.18);}
 #dexb:disabled{background:var(--bg2);color:var(--text-dim);border-color:var(--border);cursor:not-allowed;}
 
 /* ── OVERLAYS ── */
@@ -387,8 +390,6 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 .diff-row{display:flex;align-items:center;justify-content:space-between;margin-top:2px;}
 .diff-badge{font-family:var(--font-mono);font-size:11px;font-weight:400;letter-spacing:1px;padding:2px 8px;border-radius:2px;border:1px solid currentColor;opacity:0.9;}
 .diff-hint{font-family:var(--font-mono);font-size:8px;letter-spacing:1px;color:var(--text-dim);margin-top:5px;text-transform:uppercase;}
-/* Deck counter */
-.deck-ctr{font-family:var(--font-mono);font-size:8px;color:var(--text-dim);letter-spacing:1px;margin:3px 0 8px;text-align:center;}
 .abtn{
   background:transparent;color:var(--cyan);border:1px solid rgba(0,200,255,0.3);
   border-radius:2px;padding:9px;font-family:var(--font-mono);font-size:11px;
@@ -473,18 +474,41 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 }
 .modal-chart-toggle:hover{background:rgba(0,200,255,0.22);}
 
-/* ── CHART ── */
-#chart-panel{
-  position:absolute;bottom:60px;left:10px;z-index:18;
-  background:var(--bg1);border:1px solid var(--border2);border-radius:3px;
-  padding:12px;display:none;width:280px;
+/* ── ANALYTICS MODAL ── */
+#analytics-modal{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(4,6,14,0.97);
+  display:none;flex-direction:column;overflow:hidden;
 }
-#chart-panel.show{display:block;}
-.chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.chart-title{font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;}
-.chart-close{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:12px;padding:2px 5px;font-family:var(--font-mono);}
-.chart-close:hover{color:var(--text);}
-#chart-canvas{width:100%;height:160px;}
+#analytics-modal.open{display:flex;}
+.an-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;border-bottom:1px solid var(--border2);flex-shrink:0;
+  background:var(--bg1);
+}
+.an-title{font-family:var(--font-mono);font-size:12px;letter-spacing:5px;color:var(--amber);text-transform:uppercase;}
+.an-close{background:none;border:1px solid var(--border2);border-radius:2px;color:var(--text-dim);cursor:pointer;font-size:12px;padding:4px 10px;font-family:var(--font-mono);transition:all .15s;}
+.an-close:hover{color:var(--text);border-color:var(--text);}
+.an-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:20px;}
+.an-section{background:var(--bg1);border:1px solid var(--border);border-radius:3px;padding:16px;}
+.an-section-title{font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--amber-dim);text-transform:uppercase;margin-bottom:12px;}
+.an-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;}
+.an-card{background:var(--bg1);border:1px solid var(--border);border-radius:3px;padding:14px;}
+.an-card-title{font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:10px;}
+.an-stat-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;gap:8px;}
+.an-stat-name{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);text-transform:capitalize;min-width:70px;}
+.an-bar-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.an-bar-fill{height:100%;border-radius:3px;transition:width .4s;}
+.an-stat-val{font-family:var(--font-mono);font-size:10px;color:var(--text);min-width:36px;text-align:right;}
+.an-delta{font-family:var(--font-mono);font-size:9px;min-width:36px;text-align:right;}
+.an-delta.up{color:var(--green);}
+.an-delta.dn{color:var(--red);}
+.an-delta.eq{color:var(--text-dim);}
+.an-big{font-family:var(--font-mono);font-size:28px;color:var(--amber);line-height:1;}
+.an-big-label{font-family:var(--font-mono);font-size:8px;letter-spacing:2px;color:var(--text-dim);margin-top:4px;}
+.an-row2{display:flex;gap:16px;flex-wrap:wrap;}
+.an-mini{flex:1;min-width:100px;}
+#chart-canvas{width:100%;display:block;}
 
 @keyframes fo{from{opacity:0}to{opacity:1}}
 @keyframes su{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -502,12 +526,11 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
   .tb{padding:2px 6px;font-size:9px;}
 
   /* Vertical stack: status panel top, globe strip bottom */
-  #dm{flex-direction:column;}
+  #dm{flex-direction:column;overflow:hidden;}
 
-  /* Left panel always visible, full width, scrollable */
+  /* Left panel: takes fixed portion of #dm height, scrollable */
   #dlp{
-    width:100%;flex-shrink:0;
-    height:46vh;overflow-y:auto;
+    width:100%;flex:0 0 42%;min-height:0;overflow-y:auto;
     border-right:none;border-bottom:1px solid var(--border2);
     position:relative;transform:none!important;box-shadow:none!important;
   }
@@ -521,9 +544,9 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
   .rt{font-size:11px;padding:3px 8px;}
   .rtag{font-size:10px;padding:2px 7px;}
 
-  /* Map strip at bottom, compact */
+  /* Map strip: takes remaining #dm height */
   #dmap{
-    flex:none;height:36vh;width:100%;position:relative;
+    flex:1;min-height:0;width:100%;position:relative;
     border-top:1px solid var(--border2);
   }
   /* Map maximized state */
@@ -544,10 +567,25 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
   #drp.open{transform:translateX(0);}
 
   .mob-btn{display:block;}
-  #dbot{padding:8px 12px;}
-  #dmi{font-size:13px;padding:8px 10px;}
-  #dexb{padding:10px 12px;font-size:11px;letter-spacing:2px;}
-  #dwct{font-size:10px;}
+  #dbot{
+    padding:12px;
+    flex-direction:column;gap:8px;
+    min-height:30dvh;
+  }
+  #dbot>div{width:100%;position:relative;flex:1;display:flex;flex-direction:column;}
+  #dmi{
+    font-size:14px;padding:12px 12px 28px 12px;
+    flex:1;min-height:0;width:100%;
+  }
+  #dwct{
+    position:absolute;bottom:8px;left:12px;right:auto;
+    font-size:10px;
+  }
+  #dexb{
+    width:100%;height:48px;min-height:48px;max-height:48px;
+    font-size:12px;letter-spacing:2px;
+    padding:0;flex-shrink:0;
+  }
   label{font-size:10px;letter-spacing:2px;}
 
   /* Backdrop covers full screen on mobile */
@@ -658,13 +696,41 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
     </div>
   </div>
 
-  <!-- Chart -->
-  <div id="chart-panel">
-    <div class="chart-header">
-      <span class="chart-title">Operational Trend</span>
-      <button class="chart-close" onclick="toggleChart()">✕</button>
+  <!-- Analytics Modal -->
+  <div id="analytics-modal">
+    <div class="an-header">
+      <span class="an-title">⬡ Analytics</span>
+      <button class="an-close" onclick="closeAnalytics()">✕ CLOSE</button>
     </div>
-    <canvas id="chart-canvas"></canvas>
+    <div class="an-body">
+      <div class="an-section">
+        <div class="an-section-title">Stat History — All Turns</div>
+        <canvas id="chart-canvas" style="height:200px;"></canvas>
+        <div id="an-legend" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;"></div>
+      </div>
+      <div class="an-grid">
+        <div class="an-card">
+          <div class="an-card-title">Net Stat Changes</div>
+          <div id="an-deltas"></div>
+        </div>
+        <div class="an-card">
+          <div class="an-card-title">Current Power</div>
+          <div id="an-power"></div>
+        </div>
+        <div class="an-card">
+          <div class="an-card-title">Diplomacy</div>
+          <div id="an-diplomacy"></div>
+        </div>
+        <div class="an-card">
+          <div class="an-card-title">Territories</div>
+          <div id="an-territories"></div>
+        </div>
+      </div>
+      <div class="an-section">
+        <div class="an-section-title">World Power Ranking</div>
+        <div id="an-ranking"></div>
+      </div>
+    </div>
   </div>
 
   <!-- Start Screen -->
@@ -697,11 +763,9 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
           <div class="diff-badge" id="ddiff"></div>
         </div>
         <div class="nd" id="drdesc"></div>
-        <div class="diff-hint" id="ddiff-hint"></div>
       </div>
 
       <button class="abtn" onclick="dAssign()">▶ Roll Nation Assignment</button>
-      <div class="deck-ctr" id="deck-ctr"></div>
       <button class="sbtn" id="dstartbtn" onclick="dStart()" disabled>Begin Campaign</button>
     </div>
   </div>
@@ -725,8 +789,9 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
     </div>
     <div class="hst">
       <div class="tb">TURN <span id="dht">1</span>/<span id="dhtl">20</span></div>
-      <button class="chbtn" id="chart-btn" onclick="toggleChart()" style="display:none;">CHART</button>
+      <button class="chbtn" id="analytics-btn" onclick="openAnalytics()" style="display:none;">ANALYTICS</button>
       <button class="chbtn" onclick="openSettings()" title="Settings">⚙ SETTINGS</button>
+      <button class="chbtn" id="newgame-btn" onclick="confirmNewGame()" style="display:none;background:rgba(255,51,85,0.12);color:var(--red);border-color:var(--red);" title="End current campaign and start over">↺ NEW GAME</button>
       <div id="auth-widget" style="display:flex;align-items:center;gap:6px;">
         <span id="auth-email" style="display:none;font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:1px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
         <button class="chbtn" id="auth-btn" onclick="openAuthModal()">SIGN IN</button>
@@ -863,7 +928,7 @@ const DNS=[
 
 let DG={
   playerNation:null,startStats:null,cs:null,turn:1,
-  allies:[],enemies:[],sel:null,nations:{},busy:false,
+  allies:[],enemies:[],sel:null,selISO:null,nations:{},busy:false,
   map:null,sentiments:{},territories:[],
   statDeltas:{influence:0,economy:0,military:0,resources:0,land:0},
   history:[],collateral:[],chatHistory:[],dpsCollapsed:false
@@ -979,15 +1044,9 @@ function assign(){
   const badge=document.getElementById('ddiff');
   badge.textContent=mult.toFixed(2)+'×';
   badge.style.color=col;badge.style.borderColor=col;
-  document.getElementById('ddiff-hint').textContent=lbl+' difficulty · score multiplier '+mult.toFixed(2)+'×';
-  document.getElementById('ddiff-hint').style.color=col;
   document.getElementById('dnrev').style.display='block';
   document.getElementById('dstartbtn').disabled=false;
 
-  // Deck counter
-  const rem=nationDeck.length;
-  document.getElementById('deck-ctr').textContent=
-    rem?rem+' of '+DNS.length+' nations remaining in rotation':'All nations rolled — deck reshuffled';
 }
 window.dAssign=assign;
 
@@ -1013,7 +1072,8 @@ function syncIntroAuth(user){
 
 function dStart(){
   document.getElementById('dsto').style.display='none';
-  document.getElementById('chart-btn').style.display='inline-block';
+  document.getElementById('analytics-btn').style.display='inline-block';
+  document.getElementById('newgame-btn').style.display='inline-block';
   initMap();dRStats();dRHeader();dUpdateRelations();dRenderDirectives();
   dLog('turn','Turn 1');
   dLog('rs','You lead '+DG.playerNation.name+'. The world watches. Issue your first directive.');
@@ -1092,11 +1152,15 @@ function closePanels(){
   document.getElementById('panel-bd').classList.remove('show');
 }
 
-function toggleChart(){
-  const p=document.getElementById('chart-panel');
-  if(p.classList.contains('show'))p.classList.remove('show');
-  else{p.classList.add('show');drawChart();}
+function openAnalytics(){
+  document.getElementById('analytics-modal').classList.add('open');
+  renderAnalytics();
 }
+function closeAnalytics(){
+  document.getElementById('analytics-modal').classList.remove('open');
+}
+// Keep toggleChart as alias so any legacy references don't break
+function toggleChart(){openAnalytics();}
 
 function drawChart(){
   const canvas=document.getElementById('chart-canvas');
@@ -1105,41 +1169,123 @@ function drawChart(){
   if(hist.length<2)return;
   const dpr=window.devicePixelRatio||1;
   const rect=canvas.parentElement.getBoundingClientRect();
-  canvas.width=rect.width*dpr;canvas.height=160*dpr;
-  canvas.style.width=rect.width+'px';canvas.style.height='160px';
+  const H=200;
+  canvas.width=rect.width*dpr;canvas.height=H*dpr;
+  canvas.style.width=rect.width+'px';canvas.style.height=H+'px';
   ctx.scale(dpr,dpr);
-  const w=rect.width-8,h=140;
-  const pad={top:10,right:10,bottom:20,left:30};
+  const w=rect.width,h=H;
+  const pad={top:12,right:12,bottom:24,left:36};
   const pw=w-pad.left-pad.right,ph=h-pad.top-pad.bottom;
-  ctx.clearRect(0,0,w,h+20);
-  ctx.fillStyle='#07091a';ctx.fillRect(0,0,w,h+20);
-  ctx.strokeStyle='#19213d';ctx.lineWidth=0.5;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='#04060e';ctx.fillRect(0,0,w,h);
+  const cap=DS.statCap||200;
+  // Grid lines
   for(let i=0;i<=4;i++){
     const y=pad.top+(ph/4)*i;
+    ctx.strokeStyle='#19213d';ctx.lineWidth=0.5;
     ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(w-pad.right,y);ctx.stroke();
-    ctx.fillStyle='#3a4870';ctx.font='8px Share Tech Mono,monospace';
-    ctx.textAlign='right';ctx.fillText(Math.round((DS.statCap||200)-(((DS.statCap||200))/4)*i),pad.left-5,y+3);
+    ctx.fillStyle='#3a4870';ctx.font='9px Times New Roman,serif';
+    ctx.textAlign='right';ctx.fillText(Math.round(cap-(cap/4)*i),pad.left-5,y+4);
   }
-  ctx.fillStyle='#3a4870';ctx.font='8px Share Tech Mono,monospace';ctx.textAlign='center';
-  const step=Math.max(1,Math.floor((hist.length-1)/9));
+  // Turn labels
+  ctx.fillStyle='#3a4870';ctx.font='9px Times New Roman,serif';ctx.textAlign='center';
+  const step=Math.max(1,Math.floor((hist.length-1)/8));
   for(let i=0;i<hist.length;i+=step){
-    const x=pad.left+(i/(hist.length-1))*pw;
-    ctx.fillText('T'+hist[i].turn,x,h-2);
+    const x=pad.left+(hist.length>1?(i/(hist.length-1))*pw:0);
+    ctx.fillText('T'+hist[i].turn,x,h-4);
   }
+  // Stat lines with area fill
   DSC_KEYS.forEach(key=>{
-    ctx.strokeStyle=DSC[key];ctx.lineWidth=1.6;ctx.beginPath();
+    const col=DSC[key];
+    ctx.beginPath();
     hist.forEach((pt,i)=>{
-      const x=pad.left+(i/(hist.length-1))*pw;
-      const y=pad.top+ph-((pt[key]||0)/(DS.statCap||200))*ph;
+      const x=pad.left+(hist.length>1?(i/(hist.length-1))*pw:pw/2);
+      const y=pad.top+ph-((pt[key]||0)/cap)*ph;
       if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
-    });ctx.stroke();
+    });
+    ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();
+    // Subtle area fill
+    ctx.lineTo(pad.left+pw,pad.top+ph);ctx.lineTo(pad.left,pad.top+ph);ctx.closePath();
+    ctx.fillStyle=col.replace(')',',0.06)').replace('rgb','rgba').replace('#','rgba(0,0,0,').replace('rgba(0,0,0,','');
+    // simpler: just use globalAlpha
+    ctx.save();ctx.globalAlpha=0.06;ctx.fillStyle=col;ctx.fill();ctx.restore();
   });
-  let lx=6;
-  DSC_KEYS.forEach(key=>{
-    ctx.fillStyle=DSC[key];ctx.fillRect(lx,h+2,8,8);
-    ctx.fillStyle='#3a4870';ctx.font='7px Share Tech Mono,monospace';ctx.textAlign='left';
-    ctx.fillText(key[0].toUpperCase()+key.slice(1),lx+10,h+10);lx+=50;
-  });
+}
+
+function renderAnalytics(){
+  drawChart();
+  // Legend
+  const leg=document.getElementById('an-legend');
+  leg.innerHTML=DSC_KEYS.map(k=>`<span style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10px;color:${DSC[k]}"><span style="display:inline-block;width:14px;height:3px;background:${DSC[k]};border-radius:2px;"></span>${k}</span>`).join('');
+
+  // Net stat changes
+  const deltas=document.getElementById('an-deltas');
+  const st=DG.startStats||{};
+  deltas.innerHTML=DSC_KEYS.map(k=>{
+    const cur=Math.round(DG.cs[k]||0);
+    const start=Math.round(st[k]||0);
+    const d=cur-start;
+    const dCls=d>0?'up':d<0?'dn':'eq';
+    const dStr=d>0?'+'+d:String(d);
+    const pct=Math.min(100,(cur/(DS.statCap||200))*100);
+    return `<div class="an-stat-row">
+      <span class="an-stat-name" style="color:${DSC[k]}">${k}</span>
+      <div class="an-bar-track"><div class="an-bar-fill" style="width:${pct}%;background:${DSC[k]};"></div></div>
+      <span class="an-stat-val">${cur}</span>
+      <span class="an-delta ${dCls}">${dStr}</span>
+    </div>`;
+  }).join('');
+
+  // Current power score
+  const power=document.getElementById('an-power');
+  const total=DSC_KEYS.reduce((s,k)=>s+(DG.cs[k]||0),0);
+  const avgPerTurn=DG.turn>1?((total-DSC_KEYS.reduce((s,k)=>s+(DG.startStats[k]||0),0))/(DG.turn-1)).toFixed(1):0;
+  const score=Math.round(total*(DG.playerNation?getNationDifficulty(DG.playerNation):1));
+  power.innerHTML=`
+    <div style="display:flex;gap:20px;flex-wrap:wrap;">
+      <div><div class="an-big">${Math.round(total)}</div><div class="an-big-label">Total Power</div></div>
+      <div><div class="an-big" style="color:var(--cyan);">${score}</div><div class="an-big-label">Score (×diff)</div></div>
+      <div><div class="an-big" style="color:var(--green);font-size:20px;">${avgPerTurn>0?'+':''}${avgPerTurn}</div><div class="an-big-label">Avg/Turn</div></div>
+    </div>`;
+
+  // Diplomacy
+  const dipl=document.getElementById('an-diplomacy');
+  const allCount=DG.allies.length;
+  const envCount=DG.enemies.length;
+  const warmCount=DNS.filter(n=>n.id!==DG.playerNation?.id&&(DG.sentiments[n.id]||0)>10&&!DG.allies.includes(n.id)).length;
+  const hostCount=DNS.filter(n=>n.id!==DG.playerNation?.id&&(DG.sentiments[n.id]||0)<-10&&!DG.enemies.includes(n.id)).length;
+  const neutCount=DNS.length-1-allCount-envCount-warmCount-hostCount;
+  dipl.innerHTML=`
+    <div class="an-stat-row"><span class="an-stat-name" style="color:var(--green)">Allies</span><span class="an-stat-val">${allCount}</span></div>
+    <div class="an-stat-row"><span class="an-stat-name" style="color:var(--green);opacity:.7">Friendly</span><span class="an-stat-val">${warmCount}</span></div>
+    <div class="an-stat-row"><span class="an-stat-name" style="color:var(--text-dim)">Neutral</span><span class="an-stat-val">${Math.max(0,neutCount)}</span></div>
+    <div class="an-stat-row"><span class="an-stat-name" style="color:var(--red);opacity:.7">Hostile</span><span class="an-stat-val">${hostCount}</span></div>
+    <div class="an-stat-row"><span class="an-stat-name" style="color:var(--red)">Enemies</span><span class="an-stat-val">${envCount}</span></div>`;
+
+  // Territories
+  const terr=document.getElementById('an-territories');
+  const tList=DG.territories||[];
+  terr.innerHTML=tList.length
+    ?`<div class="an-big" style="color:var(--purple);">${tList.length}</div><div class="an-big-label">Controlled</div>
+      <div style="margin-top:10px;font-family:var(--font-mono);font-size:10px;color:var(--text-dim);line-height:1.8;">${tList.map(id=>DG.nations[id]?.name||id).join(' · ')}</div>`
+    :`<div style="font-family:var(--font-mono);font-size:10px;color:var(--text-dim);">No territories acquired</div>`;
+
+  // World power ranking
+  const rank=document.getElementById('an-ranking');
+  const scores=DNS.map(n=>{
+    const cs=DG.nations[n.id]?.cs||n.stats;
+    const t=DSC_KEYS.reduce((s,k)=>s+(cs[k]||0),0);
+    const isPlayer=DG.playerNation&&n.id===DG.playerNation.id;
+    return{name:n.name,total:Math.round(t),isPlayer};
+  }).sort((a,b)=>b.total-a.total);
+  const maxT=scores[0]?.total||1;
+  rank.innerHTML=scores.slice(0,10).map((s,i)=>`
+    <div class="an-stat-row" style="${s.isPlayer?'background:rgba(0,200,255,0.04);border-radius:2px;padding:0 4px;':''}">
+      <span class="an-stat-name" style="color:${s.isPlayer?'var(--cyan)':'var(--text-dim)'};min-width:20px;font-size:9px;">#${i+1}</span>
+      <span class="an-stat-name" style="color:${s.isPlayer?'var(--cyan)':'var(--text)'};min-width:110px;">${s.name}</span>
+      <div class="an-bar-track"><div class="an-bar-fill" style="width:${Math.round((s.total/maxT)*100)}%;background:${s.isPlayer?'var(--cyan)':'var(--border2)'};"></div></div>
+      <span class="an-stat-val">${s.total}</span>
+    </div>`).join('');
 }
 
 function dUpdateRelations(){
@@ -1253,8 +1399,12 @@ function initMap(){
   const map=new mapboxgl.Map({
     container:'mapbox-container',
     style:'mapbox://styles/mapbox/standard',
-    projection:'globe',center:[20,20],zoom:1.4,attributionControl:false
+    projection:'mercator',center:[20,20],zoom:1.4,
+    pitch:0,bearing:0,maxPitch:0,
+    attributionControl:false
   });
+  map.dragRotate.disable();
+  map.touchPitch.disable();
   map.on('style.load',()=>{
     map.setConfigProperty('basemap','lightPreset','day');
     map.setConfigProperty('basemap','colorTheme',{name:'Monochrome'});
@@ -1285,8 +1435,12 @@ function initMap(){
         hoverId=e.features[0].id;
         map.setFeatureState({source:'countries',sourceLayer:'country_boundaries',id:hoverId},{hover:true});
         const iso=e.features[0].properties.iso_3166_1;
+        const nameEn=e.features[0].properties.name_en||iso;
         const nation=DNS.find(n=>n.iso===iso);
         const tp=document.getElementById('dtp');
+        const rect=document.getElementById('dmap').getBoundingClientRect();
+        const x=e.originalEvent.clientX-rect.left+14;
+        const y=e.originalEvent.clientY-rect.top+14;
         if(nation){
           if(!DG.nations[nation.id]?.cs)DG.nations[nation.id]={...nation,cs:{...nation.stats}};
           const s=DG.nations[nation.id].cs;
@@ -1294,14 +1448,13 @@ function initMap(){
           const isT=DG.territories.includes(nation.id);
           const isP=DG.playerNation&&nation.id===DG.playerNation.id;
           tp.innerHTML='<b>'+(isP?'▶ ':isT?'⚑ ':'')+nation.name+'</b> &nbsp;·&nbsp; '+getSentimentLabel(sent)+' &nbsp;·&nbsp; MIL:'+Math.round(s.military||0)+' ECO:'+Math.round(s.economy||0);
-          // Follow cursor, offset so it doesn't cover the pointer
-          const rect=document.getElementById('dmap').getBoundingClientRect();
-          const x=e.originalEvent.clientX-rect.left+14;
-          const y=e.originalEvent.clientY-rect.top+14;
-          tp.style.left=Math.min(x,rect.width-tp.offsetWidth-20)+'px';
-          tp.style.top=Math.min(y,rect.height-tp.offsetHeight-10)+'px';
-          tp.style.display='block';
-        }else{tp.style.display='none';}
+        }else{
+          // Country not in DNS — still show name and basic contact status
+          tp.innerHTML='<b>'+nameEn+'</b> &nbsp;·&nbsp; No diplomatic contact';
+        }
+        tp.style.left=Math.min(x,rect.width-tp.offsetWidth-20)+'px';
+        tp.style.top=Math.min(y,rect.height-tp.offsetHeight-10)+'px';
+        tp.style.display='block';
       }
     });
     map.on('mouseleave','country-hit',()=>{
@@ -1311,17 +1464,31 @@ function initMap(){
     map.on('click','country-hit',e=>{
       if(e.features.length>0){
         const iso=e.features[0].properties.iso_3166_1;
+        const nameEn=e.features[0].properties.name_en||iso;
         const nation=DNS.find(n=>n.iso===iso);
         if(nation){
           if(!DG.nations[nation.id]?.cs)DG.nations[nation.id]={...nation,cs:{...nation.stats}};
           dInspect(nation.id);
           map.flyTo({center:nation.center,zoom:3.5,duration:800});
           if(window.innerWidth<=680)togglePanel('drp');
+        }else{
+          // Any country not in DNS — inspect with name from Mapbox feature
+          dInspectUnknown(iso,nameEn);
+          // Fly to click location since we have no center coord for unknown nations
+          map.flyTo({center:e.lngLat,zoom:Math.max(map.getZoom(),3),duration:600});
+          if(window.innerWidth<=680)togglePanel('drp');
         }
       }
     });
     map.getCanvas().style.cursor='pointer';
     highlightPlayer();updateLegend();
+    // Fly to player's home nation on game start
+    if(DG.playerNation){
+      setTimeout(()=>{
+        map.flyTo({center:DG.playerNation.center,zoom:4,duration:1800,essential:true});
+        dInspect(DG.playerNation.id);
+      },400);
+    }
   });
 }
 
@@ -1342,20 +1509,22 @@ function highlightPlayer(){
       ...(DG.playerNation?[DG.playerNation.iso]:[]),
       ...(DG.territories||[]).map(id=>DG.nations[id]?.iso||DNS.find(x=>x.id===id)?.iso).filter(Boolean)
     ];
-    const selISO=(DG.sel&&DG.nations[DG.sel]&&DG.sel!==DG.playerNation?.id&&!DG.territories.includes(DG.sel))
-      ?[DG.nations[DG.sel].iso]:[];
+    // selISO is set directly whenever any country is inspected (DNS or not)
+    const selISOs=DG.selISO&&!goldISOs.includes(DG.selISO)?[DG.selISO]:[];
     DG.map.setPaintProperty('player-fill','fill-opacity',
       ['case',['in',['get','iso_3166_1'],['literal',goldISOs]],0.16,0]);
     DG.map.setPaintProperty('player-outline','line-width',
       ['case',['in',['get','iso_3166_1'],['literal',goldISOs]],2.5,0]);
     DG.map.setPaintProperty('selected-outline','line-width',
-      ['case',['in',['get','iso_3166_1'],['literal',selISO]],1.8,0]);
+      ['case',['in',['get','iso_3166_1'],['literal',selISOs]],1.8,0]);
     updateLegend();
   }catch(e){}
 }
 
 function dInspect(id){
-  DG.sel=id;highlightPlayer();
+  DG.sel=id;
+  DG.selISO=DG.nations[id]?.iso||DNS.find(x=>x.id===id)?.iso||null;
+  highlightPlayer();
   let n=DG.nations[id];
   if(!n){
     const t=DNS.find(x=>x.id===id);
@@ -1391,6 +1560,26 @@ function dInspect(id){
     '<div class="cin">'+n.name+'</div><div class="cir">'+n.region+'</div>'+bars+
     (isP?'<div style="color:var(--cyan);font-family:var(--font-mono);font-size:10px;padding:8px 0;letter-spacing:1px;">▶ THIS IS YOUR NATION</div>':'')+
     (acts?'<div class="at2">Strategic Options</div>'+acts:'');
+}
+
+// Inspect any country not in DNS — show name + sentiment stub + basic actions
+function dInspectUnknown(iso, nameEn){
+  DG.sel=null;DG.selISO=iso;highlightPlayer();
+  const sent=DG.sentiments['iso:'+iso]||0;
+  const sentLabel=getSentimentLabel(sent);
+  const sentCat=getSentimentCategory(sent);
+  document.getElementById('dci').innerHTML=
+    '<div class="cin">'+nameEn+'</div>'+
+    '<div class="cir">Untracked Territory</div>'+
+    '<div class="cis">DIPLOMATIC STATUS&nbsp;<span class="sent '+sentCat+'">'+sentLabel+'</span></div>'+
+    '<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);padding:6px 0 10px;line-height:1.6;">'+
+      'This nation is not yet in your diplomatic network. Basic contact may be established via directive.'+
+    '</div>'+
+    '<div class="ac gn" onclick="dHint(\'Open diplomatic contact with '+nameEn+', establish formal relations, explore trade and mutual interests\')">'+
+      '<h4>Establish Contact</h4><p>Open initial diplomatic channels.</p></div>'+
+    '<div class="ac" onclick="dHint(\'Fund intelligence assets inside '+nameEn+', gather strategic data, assess capabilities and political stability\')">'+
+      '<h4>Intelligence Probe</h4><p>Survey capabilities before committing resources.</p></div>';
+  if(window.innerWidth<=680)togglePanel('drp');
 }
 
 function dHint(t){const el=document.getElementById('dmi');el.value=t;dWC(el);el.focus();}
@@ -1596,7 +1785,6 @@ function closeModal(){
 }
 function closeModalAndChart(){
   document.getElementById('result-modal').style.display='none';
-  toggleChart();
 }
 
 async function dSubmit(){
@@ -1624,12 +1812,13 @@ async function dSubmit(){
     // Keep last 12 messages (6 turns) to stay within token budget
     if(DG.chatHistory.length>12)DG.chatHistory=DG.chatHistory.slice(-12);
     dApply(r);
+    saveDirective(move, r); // fire-and-forget, non-blocking
     worldEvent();
     sentimentDrift();
     DG.history.push({turn:DG.turn,...DG.cs});
     autoSave();
     showResultModal(r);
-    if(document.getElementById('chart-panel').classList.contains('show'))drawChart();
+    if(document.getElementById('analytics-modal').classList.contains('open'))renderAnalytics();
   }catch(e){
     td.remove();
     const msg=e.message||String(e);
@@ -1732,6 +1921,12 @@ function dApply(r){
   }
   highlightPlayer();dRStats();dRHeader();dUpdateRelations();dRenderDirectives();
   if(DG.sel)dInspect(DG.sel);
+}
+
+function confirmNewGame(){
+  if(confirm('Abandon current campaign and return to the start screen?')){
+    location.reload();
+  }
 }
 
 function dEndGame(){
@@ -1901,6 +2096,26 @@ async function autoSave(){
   }catch(e){console.warn('Autosave failed:',e.message);}
 }
 
+async function saveDirective(move, r){
+  if(!currentUser||!fbDb||!DG.playerNation)return;
+  try{
+    await fbDb.collection('users').doc(currentUser.uid).collection('directives').add({
+      savedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      playerNationId: DG.playerNation.id,
+      playerNationName: DG.playerNation.name,
+      turn: DG.turn,
+      directive: move,
+      narrative: r.narrative||'',
+      sideEffect: r.sideEffect||'',
+      statChanges: r.statChanges||{},
+      sentimentShifts: r.sentimentShifts||{},
+      newAllies: r.newAllies||[],
+      newEnemies: r.newEnemies||[],
+      territoryGained: r.territoryGained||[],
+    });
+  }catch(e){console.warn('Directive log failed:',e.message);}
+}
+
 async function manualSave(){
   if(!currentUser||!fbDb){return alert('Sign in to save games');}
   if(!DG.playerNation)return;
@@ -1958,7 +2173,8 @@ async function loadSave(saveId){
     DG.nations[nation.id]={...nation,cs:{...DG.cs}};
     // Hide start screen if visible
     const sto=document.getElementById('dsto');if(sto)sto.style.display='none';
-    const cb=document.getElementById('chart-btn');if(cb)cb.style.display='inline-block';
+    const ab=document.getElementById('analytics-btn');if(ab)ab.style.display='inline-block';
+    const nb=document.getElementById('newgame-btn');if(nb)nb.style.display='inline-block';
     if(!DG.map)initMap();
     dRStats();dRHeader();dUpdateRelations();dRenderDirectives();highlightPlayer();
     const tl=document.getElementById('dhtl');if(tl)tl.textContent=DS.turnLimit;

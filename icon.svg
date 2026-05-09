@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#04060e"/>
+  <!-- Hexagon -->
+  <polygon points="256,48 440,154 440,358 256,464 72,358 72,154"
+    fill="none" stroke="#e0a82a" stroke-width="18"/>
+  <!-- Inner hexagon -->
+  <polygon points="256,96 406,183 406,329 256,416 106,329 106,183"
+    fill="none" stroke="#6e5010" stroke-width="6"/>
+  <!-- D letter -->
+  <text x="256" y="310" font-family="serif" font-size="240" font-weight="bold"
+    fill="#e0a82a" text-anchor="middle" letter-spacing="-8">D</text>
+</svg>

@@ -791,7 +791,7 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <div class="tb">TURN <span id="dht">1</span>/<span id="dhtl">20</span></div>
       <button class="chbtn" id="analytics-btn" onclick="openAnalytics()" style="display:none;">ANALYTICS</button>
       <button class="chbtn" onclick="openSettings()" title="Settings">⚙ SETTINGS</button>
-      <button class="chbtn" id="newgame-btn" onclick="confirmNewGame()" style="display:none;background:rgba(255,51,85,0.12);color:var(--red);border-color:var(--red);" title="End current campaign and start over">↺ NEW GAME</button>
+      <button class="chbtn" id="newgame-btn" onclick="confirmNewGame()" style="background:rgba(255,51,85,0.12);color:var(--red);border-color:var(--red);" title="End current campaign and start over">↺ NEW GAME</button>
       <div id="auth-widget" style="display:flex;align-items:center;gap:6px;">
         <span id="auth-email" style="display:none;font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:1px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
         <button class="chbtn" id="auth-btn" onclick="openAuthModal()">SIGN IN</button>
@@ -1073,7 +1073,6 @@ function syncIntroAuth(user){
 function dStart(){
   document.getElementById('dsto').style.display='none';
   document.getElementById('analytics-btn').style.display='inline-block';
-  document.getElementById('newgame-btn').style.display='inline-block';
   initMap();dRStats();dRHeader();dUpdateRelations();dRenderDirectives();
   dLog('turn','Turn 1');
   dLog('rs','You lead '+DG.playerNation.name+'. The world watches. Issue your first directive.');
@@ -2174,7 +2173,6 @@ async function loadSave(saveId){
     // Hide start screen if visible
     const sto=document.getElementById('dsto');if(sto)sto.style.display='none';
     const ab=document.getElementById('analytics-btn');if(ab)ab.style.display='inline-block';
-    const nb=document.getElementById('newgame-btn');if(nb)nb.style.display='inline-block';
     if(!DG.map)initMap();
     dRStats();dRHeader();dUpdateRelations();dRenderDirectives();highlightPlayer();
     const tl=document.getElementById('dhtl');if(tl)tl.textContent=DS.turnLimit;

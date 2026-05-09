@@ -372,7 +372,23 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 .nrev{background:var(--bg2);border:1px solid var(--amber-dim);border-radius:2px;padding:10px 14px;margin-bottom:14px;display:none;text-align:left;}
 .nrev .nl{font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:3px;}
 .nrev .nn{font-family:var(--font-mono);font-size:17px;color:var(--amber);font-weight:400;letter-spacing:3px;text-transform:uppercase;}
-.nrev .nd{font-size:11px;color:var(--text-dim);margin-top:3px;}
+.nrev .nd{font-size:11px;color:var(--text-dim);margin-top:4px;line-height:1.5;}
+/* Intro bar — auth + settings row */
+.intro-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:2px;}
+.intro-bar-user{font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:1px;display:flex;align-items:center;gap:7px;flex:1;min-width:0;}
+.intro-bar-user span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.abtn-sm{background:transparent;color:var(--cyan);border:1px solid rgba(0,200,255,0.25);border-radius:2px;
+  padding:4px 9px;font-family:var(--font-mono);font-size:8px;letter-spacing:2px;
+  cursor:pointer;text-transform:uppercase;transition:all .15s;white-space:nowrap;flex-shrink:0;}
+.abtn-sm:hover{background:var(--cyan-dim);border-color:var(--cyan);}
+.abtn-sm.amber{color:var(--amber);border-color:rgba(224,168,42,0.25);}
+.abtn-sm.amber:hover{background:var(--amber-faint);border-color:var(--amber);}
+/* Difficulty badge */
+.diff-row{display:flex;align-items:center;justify-content:space-between;margin-top:2px;}
+.diff-badge{font-family:var(--font-mono);font-size:11px;font-weight:400;letter-spacing:1px;padding:2px 8px;border-radius:2px;border:1px solid currentColor;opacity:0.9;}
+.diff-hint{font-family:var(--font-mono);font-size:8px;letter-spacing:1px;color:var(--text-dim);margin-top:5px;text-transform:uppercase;}
+/* Deck counter */
+.deck-ctr{font-family:var(--font-mono);font-size:8px;color:var(--text-dim);letter-spacing:1px;margin:3px 0 8px;text-align:center;}
 .abtn{
   background:transparent;color:var(--cyan);border:1px solid rgba(0,200,255,0.3);
   border-radius:2px;padding:9px;font-family:var(--font-mono);font-size:11px;
@@ -655,20 +671,37 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
   <div class="overlay" id="dsto">
     <div class="ocard">
       <h2>DOMINION</h2>
-      <div class="tl">Strategic Command · 20 Turns</div>
+      <div class="tl">Strategic Command · <span id="intro-turns">20</span> Turns</div>
+
+      <!-- Auth + Settings quick-access -->
+      <div class="intro-bar">
+        <div class="intro-bar-user">
+          <span id="intro-user-label">Not signed in</span>
+          <button class="abtn-sm" id="intro-auth-btn" onclick="openAuthModal()">SIGN IN</button>
+        </div>
+        <button class="abtn-sm amber" onclick="openSettings()">⚙ SETTINGS</button>
+      </div>
+
       <div class="rl"><ul>
-        <li>Lead a randomly assigned nation for 20 turns</li>
-        <li>20-word limit per directive — every word counts</li>
-        <li>Click any country on the globe to inspect &amp; strategize</li>
+        <li>Lead a nation for <span id="intro-turns2">20</span> turns — every directive matters</li>
+        <li>20-word limit per directive — precision over verbosity</li>
+        <li>Click any country to inspect intel &amp; issue strategic actions</li>
         <li>AI resolves each move with Machiavellian realism</li>
-        <li>Final score normalized for starting position — underdogs rewarded</li>
+        <li>Score multiplied by difficulty — underdogs are rewarded</li>
       </ul></div>
+
       <div class="nrev" id="dnrev">
         <div class="nl">Assigned Nation</div>
-        <div class="nn" id="drname"></div>
+        <div class="diff-row">
+          <div class="nn" id="drname"></div>
+          <div class="diff-badge" id="ddiff"></div>
+        </div>
         <div class="nd" id="drdesc"></div>
+        <div class="diff-hint" id="ddiff-hint"></div>
       </div>
+
       <button class="abtn" onclick="dAssign()">▶ Roll Nation Assignment</button>
+      <div class="deck-ctr" id="deck-ctr"></div>
       <button class="sbtn" id="dstartbtn" onclick="dStart()" disabled>Begin Campaign</button>
     </div>
   </div>
@@ -894,24 +927,89 @@ const INITIAL_SENTIMENTS={
   peru:{usa:28,brazil:22,chile:10,colombia:28,argentina:12,china:18,canada:18,bolivia:8}
 };
 
+// ── Difficulty helpers ─────────────────────────────────────
+function getNationDifficulty(n){
+  // Average of key stats; lower = harder
+  const s=n.stats;
+  const avg=(s.influence+s.economy+s.military+s.resources)/4;
+  // Normalize across observed DNS range (~20–90)
+  const norm=Math.max(0,Math.min(1,(avg-20)/70));
+  // Multiplier: easy nations (high stats) → 1.0×, hard → 2.5×
+  return parseFloat((2.5-norm*1.5).toFixed(2));
+}
+function getDifficultyLabel(mult){
+  if(mult<1.4)return'Easy';
+  if(mult<1.8)return'Medium';
+  if(mult<2.1)return'Hard';
+  return'Brutal';
+}
+function getDifficultyColor(mult){
+  if(mult<1.4)return'#22d882';  // green
+  if(mult<1.8)return'#e0a82a';  // amber
+  if(mult<2.1)return'#ff8c00';  // orange
+  return'#ff3355';              // red
+}
+
+// ── Deck-based nation rolling (no repeats until exhausted) ─
+let nationDeck=[];
+function refillDeck(){nationDeck=DNS.map((_,i)=>i);}
+
 function assign(){
-  const n=DNS[Math.floor(Math.random()*DNS.length)];
+  if(!nationDeck.length)refillDeck();
+  const idx=Math.floor(Math.random()*nationDeck.length);
+  const n=DNS[nationDeck.splice(idx,1)[0]];
+
   DG.playerNation=n;DG.startStats={...n.stats};DG.cs={...n.stats};
   DG.statDeltas={influence:0,economy:0,military:0,resources:0,land:0};
   DG.history=[{turn:0,...n.stats}];
-  DG.allies=[];DG.enemies=[];DG.territories=[];
+  DG.allies=[];DG.enemies=[];DG.territories=[];DG.chatHistory=[];
   DNS.forEach(o=>{DG.sentiments[o.id]=0;});
   const init=INITIAL_SENTIMENTS[n.id]||{};
   DNS.forEach(o=>{
-    if(o.id===n.id){DG.sentiments[n.id]=100;}
-    else if(init[o.id]!==undefined){DG.sentiments[o.id]=init[o.id];}
+    if(o.id===n.id)DG.sentiments[n.id]=100;
+    else if(init[o.id]!==undefined)DG.sentiments[o.id]=init[o.id];
   });
+
+  // Render nation card
+  const mult=getNationDifficulty(n);
+  const col=getDifficultyColor(mult);
+  const lbl=getDifficultyLabel(mult);
   document.getElementById('drname').textContent=n.name;
   document.getElementById('drdesc').textContent=n.desc;
+  const badge=document.getElementById('ddiff');
+  badge.textContent=mult.toFixed(2)+'×';
+  badge.style.color=col;badge.style.borderColor=col;
+  document.getElementById('ddiff-hint').textContent=lbl+' difficulty · score multiplier '+mult.toFixed(2)+'×';
+  document.getElementById('ddiff-hint').style.color=col;
   document.getElementById('dnrev').style.display='block';
   document.getElementById('dstartbtn').disabled=false;
+
+  // Deck counter
+  const rem=nationDeck.length;
+  document.getElementById('deck-ctr').textContent=
+    rem?rem+' of '+DNS.length+' nations remaining in rotation':'All nations rolled — deck reshuffled';
 }
 window.dAssign=assign;
+
+// ── Keep intro screen in sync with auth state ──────────────
+function syncIntroAuth(user){
+  const lbl=document.getElementById('intro-user-label');
+  const btn=document.getElementById('intro-auth-btn');
+  const it=document.getElementById('intro-turns');
+  const it2=document.getElementById('intro-turns2');
+  if(it)it.textContent=DS.turnLimit||20;
+  if(it2)it2.textContent=DS.turnLimit||20;
+  if(!lbl||!btn)return;
+  if(user){
+    lbl.textContent=user.email||user.displayName||'Signed in';
+    btn.textContent='SIGN OUT';
+    btn.onclick=fbSignOut;
+  }else{
+    lbl.textContent='Not signed in';
+    btn.textContent='SIGN IN';
+    btn.onclick=openAuthModal;
+  }
+}
 
 function dStart(){
   document.getElementById('dsto').style.display='none';
@@ -1707,6 +1805,7 @@ function initFirebase(){
     fbDb=firebase.firestore();
     fbAuth.onAuthStateChanged(user=>{
       currentUser=user;
+      syncIntroAuth(user);
       const btn=document.getElementById('auth-btn');
       const emailEl=document.getElementById('auth-email');
       const saveBtn=document.getElementById('save-btn');
@@ -1869,10 +1968,11 @@ async function loadSave(saveId){
 
 // Init Firebase when page loads (if configured)
 window.addEventListener('load',()=>{
-  // Small delay to let firebase-config.js run first
   setTimeout(initFirebase,200);
-  // Apply turn limit to header
   const tl=document.getElementById('dhtl');if(tl)tl.textContent=DS.turnLimit;
+  const it=document.getElementById('intro-turns');if(it)it.textContent=DS.turnLimit||20;
+  const it2=document.getElementById('intro-turns2');if(it2)it2.textContent=DS.turnLimit||20;
+  syncIntroAuth(null); // show "not signed in" until Firebase resolves
 });
 </script>
 </body>

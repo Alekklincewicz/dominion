@@ -92,12 +92,45 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 .sp .delta{font-size:9px;margin-left:1px;}
 .sp .delta.up{color:var(--green);}
 .sp .delta.down{color:var(--red);}
+/* Info pills — YEAR, STABILITY — visually distinguished from buttons */
+.sp-info{
+  padding:3px 10px;font-family:var(--font-mono);font-size:10px;
+  color:var(--text-dim);display:flex;gap:5px;align-items:center;
+  letter-spacing:1px;white-space:nowrap;
+  border-bottom:1px solid var(--border2);border-top:none;border-left:none;border-right:none;
+  background:transparent;
+}
+.sp-info .sp-key{font-size:8px;letter-spacing:2px;color:var(--text-dim);opacity:0.7;}
+.sp-info b{color:var(--amber);font-weight:400;font-size:12px;}
+.sp-divider{width:1px;height:18px;background:var(--border);flex-shrink:0;}
 .tb{
   background:var(--amber-faint);border:1px solid var(--amber-dim);
   color:var(--amber);border-radius:2px;
   padding:3px 9px;font-family:var(--font-mono);font-size:10px;
   letter-spacing:2px;white-space:nowrap;
 }
+/* Log filter bar */
+.log-filter-bar{
+  display:flex;gap:3px;padding:5px 8px;border-bottom:1px solid var(--border);
+  flex-shrink:0;background:var(--bg2);
+}
+.log-filter-btn{
+  background:none;border:1px solid transparent;border-radius:2px;
+  color:var(--text-dim);font-family:var(--font-mono);font-size:7px;
+  letter-spacing:1.5px;padding:2px 6px;cursor:pointer;text-transform:uppercase;
+  transition:all .15s;
+}
+.log-filter-btn:hover{color:var(--text-mid);border-color:var(--border);}
+.log-filter-btn.active{color:var(--amber);border-color:var(--amber-dim);background:var(--amber-faint);}
+/* Directive log entry (clickable) */
+.le-directive{
+  cursor:pointer;transition:background .1s;
+  border-left:2px solid var(--cyan);
+  padding-left:8px!important;
+}
+.le-directive:hover{background:rgba(0,200,255,0.05);}
+.le-dir-move{color:var(--cyan);font-size:10px;line-height:1.4;}
+.le-dir-replay{font-size:7px;color:var(--amber-dim);letter-spacing:1px;margin-top:2px;}
 .chbtn{
   background:var(--bg2);border:1px solid var(--border);
   color:var(--text-mid);border-radius:2px;
@@ -115,7 +148,7 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 
 /* ── LEFT PANEL ── */
 #dlp{
-  width:196px;flex-shrink:0;
+  width:260px;flex-shrink:0;
   border-right:1px solid var(--border);
   background:var(--bg1);
   display:flex;flex-direction:column;overflow:hidden;
@@ -139,10 +172,8 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 }
 #dps{
   padding:10px;border-bottom:1px solid var(--border);
-  overflow:hidden;transition:max-height .3s,padding .3s,opacity .3s;
-  max-height:280px;opacity:1;
+  overflow:hidden;
 }
-#dps.collapsed{max-height:0;padding:0 10px;opacity:0;border-bottom-color:transparent;}
 .pn{
   font-family:var(--font-mono);font-size:11px;color:var(--amber);
   margin-bottom:9px;letter-spacing:2px;text-transform:uppercase;
@@ -159,7 +190,7 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 .sd{font-size:8px;margin-left:2px;}
 .sd.pos{color:var(--green);}
 .sd.neg{color:var(--red);}
-#drel{padding:6px 10px;font-size:10px;color:var(--text-dim);max-height:130px;overflow-y:auto;border-bottom:1px solid var(--border);}
+#drel{padding:6px 10px;font-size:10px;color:var(--text-dim);max-height:160px;overflow-y:auto;border-bottom:1px solid var(--border);}
 #dlog{flex:1;overflow-y:auto;padding:2px 0;}
 .le{padding:5px 10px;font-size:10px;line-height:1.5;border-bottom:1px solid rgba(25,33,61,0.6);color:var(--text-dim);}
 .le.pl{color:var(--cyan);font-family:var(--font-mono);font-size:10px;}
@@ -215,16 +246,9 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 .rh::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   width:1px;height:40px;background:var(--border2);pointer-events:none;}
 
-/* Collapsible empire + history */
+/* Collapsible empire */
 #dter{overflow:hidden;transition:max-height .3s ease,opacity .3s;max-height:400px;opacity:1;}
 #dter.collapsed{max-height:0!important;opacity:0;border-bottom:none;}
-#dhist{overflow-y:auto;transition:max-height .3s ease,opacity .3s;max-height:340px;opacity:1;border-bottom:1px solid var(--border);}
-#dhist.collapsed{max-height:0!important;opacity:0;border-bottom:none;}
-.dh-entry{padding:7px 10px;border-bottom:1px solid rgba(25,33,61,0.55);}
-.dh-entry:last-child{border-bottom:none;}
-.dh-turn{font-family:var(--font-mono);font-size:8px;color:var(--amber-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;}
-.dh-move{font-size:10px;color:var(--cyan);margin-bottom:4px;line-height:1.4;}
-.dh-outcome{font-size:9px;color:var(--text-dim);line-height:1.5;}
 
 /* Land total in Empire */
 .ter-total{padding:6px 10px 5px;font-family:var(--font-mono);font-size:9px;
@@ -517,7 +541,7 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
-  #dlp{width:178px;}
+  #dlp{width:220px;}
   #drp{width:200px;}
 }
 /* ── MOBILE TAB BAR ── */
@@ -650,8 +674,8 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
   #dexb{width:100%;height:44px;min-height:44px;font-size:12px;letter-spacing:2px;padding:0;flex-shrink:0;align-self:auto;}
   label{font-size:10px;letter-spacing:2px;}
 
-  /* Nation status always fully expanded */
-  #dps,#dps.collapsed{max-height:none!important;padding:10px!important;opacity:1!important;}
+  /* Nation status */
+  #dps{max-height:none;}
 }
 @media(max-width:460px){
   .ocard{padding:20px;}
@@ -868,16 +892,17 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
     </div>
     <div class="hst">
       <div class="tb">TURN <span id="dht">1</span>/<span id="dhtl">20</span></div>
-      <div class="sp">YEAR <b id="dyear">—</b></div>
-      <div class="sp">STABILITY <b id="dstab">—</b></div>
+      <div class="sp-divider"></div>
+      <div class="sp-info"><span class="sp-key">YEAR</span><b id="dyear">—</b></div>
+      <div class="sp-info"><span class="sp-key">STABILITY</span><b id="dstab">—</b></div>
+      <div class="sp-divider"></div>
       <button class="chbtn" id="analytics-btn" onclick="openAnalytics()" style="display:none;">ANALYTICS</button>
-      <button class="chbtn" onclick="openSettings()" title="Settings">⚙ SETTINGS</button>
-      <button class="chbtn" id="newgame-btn" onclick="confirmNewGame()" style="background:rgba(255,51,85,0.12);color:var(--red);border-color:var(--red);" title="End current campaign and start over">↺ NEW GAME</button>
+      <button class="chbtn" id="newgame-btn" onclick="confirmNewGame()" style="background:rgba(255,51,85,0.12);color:var(--red);border-color:rgba(255,51,85,0.5);" title="End current campaign and start over">↺ NEW GAME</button>
       <div id="auth-widget" style="display:flex;align-items:center;gap:6px;">
-        <span id="auth-email" style="display:none;font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:1px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
         <button class="chbtn" id="auth-btn" onclick="openAuthModal()">SIGN IN</button>
         <button class="chbtn" id="save-btn" onclick="manualSave()" style="display:none;">SAVE</button>
         <button class="chbtn" id="load-btn" onclick="openLoadModal()" style="display:none;">LOAD</button>
+        <button class="chbtn" onclick="openSettings()" title="Settings">⚙ SETTINGS</button>
       </div>
     </div>
     <!-- Mobile-only controls -->
@@ -897,7 +922,7 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 
     <!-- Left Panel -->
     <div id="dlp">
-      <div class="pt" onclick="toggleSection('dps')">Nation Status <span class="toggle-icon">▼</span></div>
+      <div class="pl">Nation Status</div>
       <div id="dps">
         <div class="pn" id="dpnn">—</div>
         <div id="dpbars"></div>
@@ -906,9 +931,13 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <div id="drel"></div>
       <div class="pt" onclick="toggleSection('dter')">Empire <span class="toggle-icon" id="ter-icon">▼</span></div>
       <div id="dter"></div>
-      <div class="pt" onclick="toggleSection('dhist')">Directive History <span class="toggle-icon">▼</span></div>
-      <div id="dhist"></div>
-      <div class="pl">Operational Log</div>
+      <div class="pl" style="padding-bottom:0;">Operational Log</div>
+      <div class="log-filter-bar">
+        <button class="log-filter-btn active" data-filter="all" onclick="setLogFilter('all')">ALL</button>
+        <button class="log-filter-btn" data-filter="directive" onclick="setLogFilter('directive')">DIRECTIVES</button>
+        <button class="log-filter-btn" data-filter="events" onclick="setLogFilter('events')">EVENTS</button>
+        <button class="log-filter-btn" data-filter="info" onclick="setLogFilter('info')">INFO</button>
+      </div>
       <div id="dlog"></div>
     </div>
 
@@ -1166,7 +1195,7 @@ let DG={
   statDeltas:{influence:0,economy:0,military:0,resources:0,land:0},
   history:[],collateral:[],chatHistory:[],dpsCollapsed:false,
   year:new Date().getFullYear(),yearStart:new Date().getFullYear(),
-  stability:78,stabHistory:[78],pending:[]
+  stability:78,stabHistory:[78],pending:[],directives:[]
 };
 
 DNS.forEach(n=>{DG.nations[n.id]={...n,cs:{...n.stats}};DG.sentiments[n.id]=0;});
@@ -1312,7 +1341,7 @@ function dStart(){
   switchMobTab('map');
   DG.year=new Date().getFullYear();DG.yearStart=DG.year;DG.stability=78;DG.stabHistory=[78];
   dRecomputeStability();dRenderYear();dRenderStability();
-  initMap();dRStats();dRHeader();dUpdateRelations();dRenderDirectives();
+  initMap();dRStats();dRHeader();dUpdateRelations();
   dLog('turn','Turn 1');
   dLog('rs','You lead '+DG.playerNation.name+'. The world watches. Issue your first directive.');
 }
@@ -1410,13 +1439,11 @@ function getSentimentLabel(v){
 }
 
 function toggleSection(id){
-  // Never collapse nation status on mobile
-  if(id==='dps'&&window.innerWidth<=680)return;
+  if(id==='dps')return; // Nation Status is always visible
   const el=document.getElementById(id);if(!el)return;
   const hdr=el.previousElementSibling;
   const collapsed=el.classList.toggle('collapsed');
   if(hdr){hdr.classList.toggle('collapsed',collapsed);const ic=hdr.querySelector('.toggle-icon');if(ic)ic.textContent=collapsed?'▶':'▼';}
-  if(id==='dps')DG.dpsCollapsed=collapsed;
 }
 
 function startResize(e,side){
@@ -1610,22 +1637,38 @@ function dUpdateRelations(){
     list.push({id:n.id,name:n.name,sentiment:DG.sentiments[n.id]||0});
   });
   list.sort((a,b)=>Math.abs(b.sentiment)-Math.abs(a.sentiment));
-  const allies=list.filter(c=>c.sentiment>10).slice(0,3);
-  const enemies=list.filter(c=>c.sentiment<-10).slice(0,3);
-  let html='<div style="font-family:var(--font-mono);font-size:8px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase;">Allies</div>';
-  allies.forEach(a=>{
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">'+
-      '<span style="color:var(--green);font-size:10px;">'+a.name+'</span>'+
-      '<span class="sent '+getSentimentCategory(a.sentiment)+'">'+getSentimentLabel(a.sentiment)+'</span></div>';
-  });
-  if(!allies.length)html+='<div style="font-size:10px;color:var(--text-dim);margin-bottom:4px;">None established</div>';
-  html+='<div style="font-family:var(--font-mono);font-size:8px;letter-spacing:2px;color:var(--text-dim);margin:6px 0 4px;text-transform:uppercase;">Rivals</div>';
-  enemies.forEach(a=>{
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">'+
-      '<span style="color:var(--red);font-size:10px;">'+a.name+'</span>'+
-      '<span class="sent '+getSentimentCategory(a.sentiment)+'">'+getSentimentLabel(a.sentiment)+'</span></div>';
-  });
-  if(!enemies.length)html+='<div style="font-size:10px;color:var(--text-dim);">None established</div>';
+  const allies=list.filter(c=>c.sentiment>10).slice(0,6);
+  const enemies=list.filter(c=>c.sentiment<-10).slice(0,6);
+
+  // Helper: render a nation chip
+  function nationChip(a, colorVar){
+    const lbl=getSentimentLabel(a.sentiment);
+    // Short label to save space
+    const shortLbl=lbl.replace('Devoted Ally','Devoted').replace('Strong Ally','Strong').replace('Existential Threat','Threat');
+    return '<div style="display:flex;flex-direction:column;gap:2px;min-width:0;">'+
+      '<span style="color:'+colorVar+';font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;" onclick="dInspect(\''+a.id+'\')">'+a.name+'</span>'+
+      '<span class="sent '+getSentimentCategory(a.sentiment)+'" style="font-size:7px;padding:1px 4px;letter-spacing:0.5px;">'+shortLbl+'</span>'+
+      '</div>';
+  }
+
+  let html='<div style="font-family:var(--font-mono);font-size:7px;letter-spacing:2px;color:var(--text-dim);margin-bottom:5px;text-transform:uppercase;">ALLIES</div>';
+  if(allies.length){
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-bottom:8px;">';
+    allies.forEach(a=>{ html+=nationChip(a,'var(--green)'); });
+    html+='</div>';
+  }else{
+    html+='<div style="font-size:9px;color:var(--text-dim);margin-bottom:8px;">None established</div>';
+  }
+
+  html+='<div style="font-family:var(--font-mono);font-size:7px;letter-spacing:2px;color:var(--text-dim);margin-bottom:5px;text-transform:uppercase;border-top:1px solid var(--border);padding-top:6px;">RIVALS</div>';
+  if(enemies.length){
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;">';
+    enemies.forEach(a=>{ html+=nationChip(a,'var(--red)'); });
+    html+='</div>';
+  }else{
+    html+='<div style="font-size:9px;color:var(--text-dim);">None established</div>';
+  }
+
   el.innerHTML=html;
   dUpdateTerritories();
 }
@@ -1932,11 +1975,43 @@ function dRHeader(){
   const m=document.getElementById('mob-dht');if(m)m.textContent=DG.turn;
 }
 
+const _LOG_TYPE_MAP={pl:'directive',rs:'directive',ps:'directive',spy:'directive',ev:'events',nt:'info',wn:'info',turn:'turn'};
+let _logFilter='all';
+
 function dLog(type,text){
-  const p=document.getElementById('dlog'),d=document.createElement('div');
+  const p=document.getElementById('dlog');
+  const d=document.createElement('div');
+  const filterGroup=_LOG_TYPE_MAP[type]||'info';
+  d.setAttribute('data-logtype',filterGroup);
   if(type==='turn'){d.className='lt';d.textContent='— '+text+' —';}
   else{d.className='le '+type;d.textContent=text;}
+  // Apply current filter
+  if(_logFilter!=='all'&&filterGroup!=='turn'&&filterGroup!==_logFilter)d.style.display='none';
   p.appendChild(d);p.scrollTop=p.scrollHeight;
+}
+
+function dLogDirective(move,result,dirIdx){
+  const p=document.getElementById('dlog');
+  const d=document.createElement('div');
+  d.className='le le-directive';
+  d.setAttribute('data-logtype','directive');
+  if(_logFilter!=='all'&&_logFilter!=='directive')d.style.display='none';
+  d.innerHTML='<div class="le-dir-move">▶ "'+move+'"</div>'+
+    '<div class="le-dir-replay">↩ click to view result</div>';
+  d.onclick=()=>showStoredDirective(dirIdx);
+  p.appendChild(d);p.scrollTop=p.scrollHeight;
+}
+
+function setLogFilter(filter){
+  _logFilter=filter;
+  document.querySelectorAll('.log-filter-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.filter===filter);
+  });
+  const entries=document.querySelectorAll('#dlog [data-logtype]');
+  entries.forEach(e=>{
+    const et=e.getAttribute('data-logtype');
+    e.style.display=(filter==='all'||et==='turn'||et===filter)?'':'none';
+  });
 }
 
 function dWC(el){
@@ -2036,7 +2111,7 @@ function worldEvent(){
   }
   if(evt.sentDelta>0)dLog('ps',nation.name+' is now more open to engagement (+'+evt.sentDelta+' sentiment)');
   else if(evt.sentDelta<0)dLog('wn',nation.name+' turns hostile ('+evt.sentDelta+' sentiment)');
-  dUpdateRelations();highlightPlayer();dRenderDirectives();
+  dUpdateRelations();highlightPlayer();
 }
 
 function sentimentDrift(){
@@ -2050,12 +2125,16 @@ function sentimentDrift(){
   });
 }
 
-function showResultModal(result){
+function showResultModal(result, atTurn, atYear, atStability){
   const mc=document.getElementById('modal-content');
+  const dispTurn = atTurn || DG.turn;
+  const dispYear = atYear || DG.year;
+  const dispStab = atStability != null ? atStability : DG.stability;
+  const dispTier = dStabilityTier(dispStab);
   const statChanges=result.statChanges||{};
   let statHtml='';
   DSC_KEYS.forEach(k=>{
-    const delta=statChanges[k]||0,newVal=Math.round(DG.cs[k]);
+    const delta=statChanges[k]||0,newVal=Math.round((result._snapStats||DG.cs)[k]);
     statHtml+='<div class="modal-stat"><span class="modal-stat-name">'+k+'</span><div><span class="modal-stat-val">'+newVal+'</span>'+
       (delta!==0?'<span class="modal-stat-delta '+(delta>0?'up':'down')+'">'+(delta>0?'+':'')+delta+'</span>':'')+
       '</div></div>';
@@ -2084,7 +2163,11 @@ function showResultModal(result){
   mc.innerHTML=
     '<button class="modal-close" onclick="closeModal()">✕</button>'+
     '<div class="modal-nation">'+(DG.playerNation?.name||'—')+'</div>'+
-    '<div class="modal-turn">TURN '+DG.turn+' · DIRECTIVE RESOLVED</div>'+
+    '<div class="modal-turn" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">'+
+      '<span>TURN '+dispTurn+'</span>'+
+      '<span style="color:var(--amber);">'+dispYear+'</span>'+
+      '<span style="color:'+dispTier.color+';">'+dispTier.label.toUpperCase()+' '+dispStab+'%</span>'+
+    '</div>'+
     '<div class="modal-narrative">'+(result.narrative||'No narrative provided.')+'</div>'+
     (result.sideEffect&&result.sideEffect.trim()?'<div class="modal-spy">⚠ INTEL: '+result.sideEffect+'</div>':'')+
     '<div class="modal-section" style="margin-top:14px;"><div class="modal-section-title">Stat Changes</div><div class="modal-stats">'+statHtml+'</div></div>'+
@@ -2092,6 +2175,13 @@ function showResultModal(result){
     (sentHtml?'<div class="modal-section"><div class="modal-section-title">Sentiment Shifts</div><div class="modal-tags">'+sentHtml+'</div></div>':'')+
     '<div class="modal-chart-toggle" onclick="closeModalAndChart()">TREND CHART →</div>';
   document.getElementById('result-modal').style.display='flex';
+}
+
+function showStoredDirective(idx){
+  const d=DG.directives[idx];
+  if(!d)return;
+  DG._lastResult=d.result;
+  showResultModal(d.result, d.turn, d.year, d.stability);
 }
 
 function closeModal(){
@@ -2110,9 +2200,10 @@ async function dSubmit(){
   document.getElementById('dexb').disabled=true;
   document.getElementById('dexb').textContent='Processing...';
   el.disabled=true;
-  dLog('pl','You: "'+move+'"');
   const td=document.createElement('div');
-  td.className='le';td.innerHTML='<div class="thk"><span></span><span></span><span></span></div>';
+  td.className='le';td.setAttribute('data-logtype','directive');
+  td.innerHTML='<div style="color:var(--cyan);font-size:10px;">▶ "'+move+'"</div><div class="thk" style="margin-top:4px;"><span></span><span></span><span></span></div>';
+  if(_logFilter!=='all'&&_logFilter!=='directive')td.style.display='none';
   document.getElementById('dlog').appendChild(td);
   document.getElementById('dlog').scrollTop=99999;
   try{
@@ -2126,7 +2217,16 @@ async function dSubmit(){
     );
     // Keep last 12 messages (6 turns) to stay within token budget
     if(DG.chatHistory.length>12)DG.chatHistory=DG.chatHistory.slice(-12);
+    // Store directive entry + clickable log header BEFORE narrative entries
+    DG.directives=DG.directives||[];
+    const dirIdx=DG.directives.length;
+    DG.directives.push({turn:DG.turn,year:DG.year,stability:DG.stability,move,result:r});
+    dLogDirective(move,r,dirIdx);
+    // Apply result (logs narrative, allies, side effects, etc.)
     dApply(r);
+    r._snapStats={...DG.cs};
+    // Update stored snap retroactively (same object ref)
+    DG.directives[dirIdx].result=r;
     saveDirective(move, r); // fire-and-forget, non-blocking
     const yrs=dAdvanceYear(move,r);
     dRecomputeStability();
@@ -2137,7 +2237,7 @@ async function dSubmit(){
     sentimentDrift();
     DG.history.push({turn:DG.turn,...DG.cs});
     autoSave();
-    showResultModal(r);
+    showResultModal(r,DG.turn,DG.year,DG.stability);
     if(document.getElementById('analytics-modal').classList.contains('open'))renderAnalytics();
   }catch(e){
     td.remove();
@@ -2239,7 +2339,7 @@ function dApply(r){
     const names=r.territoryGained.map(id=>resolveNationName(id)).filter(Boolean);
     if(names.length)dLog('ps','⚑ Territory gained: '+names.join(', '));
   }
-  highlightPlayer();dRStats();dRHeader();dUpdateRelations();dRenderDirectives();
+  highlightPlayer();dRStats();dRHeader();dUpdateRelations();
   if(DG.sel)dInspect(DG.sel);
 }
 
@@ -2386,17 +2486,14 @@ function initFirebase(){
       syncIntroAuth(user);
       syncMobAuth(user);
       const btn=document.getElementById('auth-btn');
-      const emailEl=document.getElementById('auth-email');
       const saveBtn=document.getElementById('save-btn');
       const loadBtn=document.getElementById('load-btn');
       if(user){
         if(btn){btn.textContent='SIGN OUT';btn.onclick=fbSignOut;}
-        if(emailEl){emailEl.textContent=user.email||user.displayName||'Signed in';emailEl.style.display='inline';}
         if(saveBtn)saveBtn.style.display='inline-block';
         if(loadBtn)loadBtn.style.display='inline-block';
       }else{
         if(btn){btn.textContent='SIGN IN';btn.onclick=openAuthModal;}
-        if(emailEl)emailEl.style.display='none';
         if(saveBtn)saveBtn.style.display='none';
         if(loadBtn)loadBtn.style.display='none';
       }
@@ -2559,7 +2656,7 @@ async function loadSave(saveId){
     const sto=document.getElementById('dsto');if(sto)sto.style.display='none';
     const ab=document.getElementById('analytics-btn');if(ab)ab.style.display='inline-block';
     if(!DG.map)initMap();
-    dRStats();dRHeader();dUpdateRelations();dRenderDirectives();highlightPlayer();
+    dRStats();dRHeader();dUpdateRelations();highlightPlayer();
     const tl=document.getElementById('dhtl');if(tl)tl.textContent=DS.turnLimit;
     dLog('rs','Game loaded: '+nation.name+', Turn '+DG.turn);
   }catch(e){dLog('wn','Load failed: '+e.message);}

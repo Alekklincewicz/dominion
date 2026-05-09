@@ -143,6 +143,20 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 }
 .log-filter-btn:hover{color:var(--text-mid);border-color:var(--border);}
 .log-filter-btn.active{color:var(--amber);border-color:var(--amber-dim);background:var(--amber-faint);}
+/* World event notification badge */
+.ev-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--red);color:#fff;
+  font-family:var(--font-mono);font-size:8px;font-weight:400;
+  border-radius:8px;min-width:16px;height:16px;padding:0 4px;
+  letter-spacing:0;margin-left:6px;
+  animation:ev-pulse 1.8s ease-in-out infinite;
+  vertical-align:middle;flex-shrink:0;
+}
+@keyframes ev-pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,51,85,0.5);}
+  50%{box-shadow:0 0 0 4px rgba(255,51,85,0);}
+}
 /* Directive log entry (clickable) */
 .le-directive{
   cursor:pointer;transition:background .1s;
@@ -922,13 +936,6 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 
       <button class="abtn" onclick="dAssign()">▶ Roll Nation Assignment</button>
       <button class="sbtn" id="dstartbtn" onclick="dStart()" disabled>Begin Campaign</button>
-
-      <!-- PWA install — only rendered on mobile, hidden once installed -->
-      <div id="intro-pwa" style="display:none;margin-top:10px;">
-        <button class="abtn" style="color:var(--amber);border-color:var(--amber-dim);background:var(--amber-faint);margin-bottom:0;" onclick="pwaAddToHome()">
-          ⬡ ADD AS MOBILE APP
-        </button>
-      </div>
     </div>
   </div>
 
@@ -1011,11 +1018,11 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <div id="drel"></div>
       <div class="pt" onclick="toggleSection('dter')">Empire <span class="toggle-icon" id="ter-icon">▼</span></div>
       <div id="dter"></div>
-      <div class="pl" style="padding-bottom:0;">Operational Log</div>
+      <div class="pl" style="padding-bottom:0;">Operational Log<span id="ev-badge-log" class="ev-badge" style="display:none;">0</span></div>
       <div class="log-filter-bar">
-        <button class="log-filter-btn active" data-filter="all" onclick="setLogFilter('all')">ALL</button>
+        <button class="log-filter-btn active" data-filter="all" onclick="setLogFilter('all');evBadgeClear()">ALL</button>
         <button class="log-filter-btn" data-filter="directive" onclick="setLogFilter('directive')">DIRECTIVES</button>
-        <button class="log-filter-btn" data-filter="events" onclick="setLogFilter('events')">EVENTS</button>
+        <button class="log-filter-btn" data-filter="events" onclick="setLogFilter('events');evBadgeClear()">EVENTS</button>
         <button class="log-filter-btn" data-filter="info" onclick="setLogFilter('info')">INFO</button>
       </div>
       <div id="dlog"></div>
@@ -1055,7 +1062,7 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <span class="ti">◉</span>INTEL
     </button>
     <button class="mob-tab" id="mob-tab-log" onclick="switchMobTab('log')">
-      <span class="ti">≡</span>LOG
+      <span class="ti">≡</span>LOG<span id="ev-badge-mob" class="ev-badge" style="display:none;font-size:7px;min-width:13px;height:13px;margin-left:3px;">0</span>
     </button>
   </div>
 
@@ -2092,6 +2099,8 @@ function dLog(type,text){
   // Apply current filter
   if(_logFilter!=='all'&&filterGroup!=='turn'&&filterGroup!==_logFilter)d.style.display='none';
   p.appendChild(d);p.scrollTop=p.scrollHeight;
+  // Badge world events when log isn't in focus
+  if(type==='ev')evBadgePush();
 }
 
 function dLogDirective(move,result,dirIdx){
@@ -2163,6 +2172,34 @@ const WORLD_EVENTS=[
   {type:'trade',msg:'{n1} and {n2} sign a landmark trade agreement, deepening economic ties and locking in supply chains.'},
   {type:'collapse',msg:'The alliance between {n1} and {n2} collapses in mutual recriminations — both are now seeking new partners.'},
 ];
+
+// ── WORLD EVENT BADGE ────────────────────────────────────────
+let _evUnread=0;
+function evBadgePush(){
+  // Don't badge if the log panel is currently visible
+  const logEl=document.getElementById('dlog');
+  if(logEl&&isLogVisible())return;
+  _evUnread++;
+  ['ev-badge-log','ev-badge-mob'].forEach(id=>{
+    const b=document.getElementById(id);
+    if(!b)return;
+    b.textContent=_evUnread;
+    b.style.display='inline-flex';
+  });
+}
+function evBadgeClear(){
+  _evUnread=0;
+  ['ev-badge-log','ev-badge-mob'].forEach(id=>{
+    const b=document.getElementById(id);
+    if(b)b.style.display='none';
+  });
+}
+function isLogVisible(){
+  // Desktop: log panel is always in the left panel which is always shown
+  if(window.innerWidth>680)return true;
+  // Mobile: only visible when LOG tab is active
+  return _mobTab==='log';
+}
 
 function worldEvent(){
   if(!DG.playerNation||Math.random()>(DS?.eventFrequency??0.30))return;
@@ -2465,8 +2502,9 @@ function switchMobTab(tab){
                 :document.getElementById('drp');
     if(panel)panel.classList.toggle('mob-active',t===panelTab);
   });
-  // If log tab, scroll left panel to bottom of log
+  // If log tab, scroll left panel to bottom of log and clear badge
   if(tab==='log'){
+    evBadgeClear();
     const log=document.getElementById('dlog');
     if(log)setTimeout(()=>log.scrollIntoView({behavior:'smooth',block:'end'}),80);
   }
@@ -2796,9 +2834,6 @@ function pwaIsInstalled(){
 function pwaShowEntryPoints(){
   // Only show on mobile and only when not already installed
   if(!pwaIsMobile()||pwaIsInstalled())return;
-  // Show button on launch screen
-  const ip=document.getElementById('intro-pwa');
-  if(ip)ip.style.display='block';
   // Show section in settings
   const sp=document.getElementById('smod-pwa-section');
   if(sp)sp.style.display='block';
@@ -2860,7 +2895,7 @@ async function pwaAddToHome(){
     if(outcome==='accepted'){
       window._pwaPrompt=null;
       // Hide all install UI
-      ['pwa-banner','intro-pwa','smod-pwa-section'].forEach(id=>{
+      ['pwa-banner','smod-pwa-section'].forEach(id=>{
         const el=document.getElementById(id);if(el)el.style.display='none';
       });
     }

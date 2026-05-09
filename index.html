@@ -187,6 +187,23 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 .ltag.owned{color:var(--amber);border-color:var(--amber-dim);}
 .ltag.allied{color:var(--green);border-color:rgba(34,216,130,0.35);}
 .ltag.enemy{color:var(--red);border-color:rgba(255,51,85,0.35);}
+/* ── SETTINGS / AUTH MODALS ── */
+.smod-section{font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--amber-dim);text-transform:uppercase;padding:4px 0 8px;border-bottom:1px solid var(--border);margin-bottom:10px;}
+.smod-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.smod-label{font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:1px;flex:1;text-transform:uppercase;}
+.smod-ctrl{display:flex;align-items:center;gap:8px;}
+.smod-range{-webkit-appearance:none;appearance:none;width:120px;height:3px;background:var(--bg0);border-radius:2px;outline:none;cursor:pointer;}
+.smod-range::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:var(--amber);border-radius:50%;cursor:pointer;}
+.smod-val{font-family:var(--font-mono);font-size:10px;color:var(--amber);min-width:36px;text-align:right;}
+.smod-select{background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:9px;padding:4px 8px;border-radius:2px;letter-spacing:1px;cursor:pointer;width:100%;}
+.smod-input{background:var(--bg0);border:1px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:10px;padding:7px 10px;border-radius:2px;width:100%;box-sizing:border-box;letter-spacing:1px;}
+.smod-input:focus{outline:none;border-color:var(--cyan);}
+.save-entry{display:flex;align-items:center;justify-content:space-between;padding:10px;border:1px solid var(--border);border-radius:2px;margin-bottom:8px;background:var(--bg2);}
+.save-entry-info{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);letter-spacing:1px;}
+.save-entry-info b{color:var(--text);display:block;margin-bottom:3px;}
+.save-load-btn{font-family:var(--font-mono);font-size:9px;color:var(--cyan);background:none;border:1px solid rgba(0,200,255,.3);border-radius:2px;padding:4px 10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;}
+.save-load-btn:hover{border-color:var(--cyan);color:#fff;}
+
 /* Resize handles (desktop only) */
 .rh{width:5px;flex-shrink:0;cursor:col-resize;background:transparent;
   position:relative;z-index:10;transition:background .2s;}
@@ -530,6 +547,11 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
   .modal-content{padding:16px;}
 }
 </style>
+<!-- Firebase SDK (compat v9 — no ES module conversion needed) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
 </head>
 <body>
@@ -538,6 +560,86 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
   <!-- Result Modal -->
   <div class="modal-overlay" id="result-modal" style="display:none;">
     <div class="modal-content" id="modal-content"></div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settings-modal" style="display:none;" onclick="if(event.target===this)closeSettings()">
+    <div class="modal-content" style="max-width:420px;max-height:80vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div class="modal-nation">⚙ SETTINGS</div>
+        <button class="chart-close" onclick="closeSettings()">✕</button>
+      </div>
+
+      <div class="smod-section">GAMEPLAY</div>
+      <div class="smod-row">
+        <label class="smod-label">World Event Frequency</label>
+        <div class="smod-ctrl"><input type="range" class="smod-range" id="s-freq" min="0" max="100" value="30" oninput="document.getElementById('freq-val').textContent=this.value+'%'"><span class="smod-val" id="freq-val">30%</span></div>
+      </div>
+      <div class="smod-row">
+        <label class="smod-label">Event Intensity</label>
+        <div class="smod-ctrl"><input type="range" class="smod-range" id="s-int" min="0.1" max="3.0" step="0.1" value="1.0" oninput="document.getElementById('int-val').textContent=parseFloat(this.value).toFixed(1)+'×'"><span class="smod-val" id="int-val">1.0×</span></div>
+      </div>
+      <div class="smod-row">
+        <label class="smod-label">Turn Limit</label>
+        <div class="smod-ctrl"><input type="range" class="smod-range" id="s-turns" min="10" max="60" value="20" oninput="document.getElementById('turns-val').textContent=this.value"><span class="smod-val" id="turns-val">20</span></div>
+      </div>
+      <div class="smod-row">
+        <label class="smod-label">Stat Cap</label>
+        <div class="smod-ctrl"><input type="range" class="smod-range" id="s-statcap" min="100" max="500" step="25" value="200" oninput="document.getElementById('statcap-val').textContent=this.value"><span class="smod-val" id="statcap-val">200</span></div>
+      </div>
+
+      <div class="smod-section" style="margin-top:14px;">AI</div>
+      <div class="smod-row">
+        <label class="smod-label">Model</label>
+        <select class="smod-select" id="s-model">
+          <option value="deepseek-chat">deepseek-chat (fast)</option>
+          <option value="deepseek-reasoner">deepseek-reasoner (smarter, slower)</option>
+        </select>
+      </div>
+      <div class="smod-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <label class="smod-label">Personal DeepSeek API Key <span style="color:var(--text-dim);font-size:8px;">(overrides server key)</span></label>
+        <input type="password" class="smod-input" id="s-apikey" placeholder="sk-... leave blank to use server key" autocomplete="off">
+      </div>
+
+      <button class="sbtn" style="margin-top:18px;width:100%;" onclick="applySettings()">SAVE SETTINGS</button>
+    </div>
+  </div>
+
+  <!-- Auth Modal -->
+  <div class="modal-overlay" id="auth-modal" style="display:none;" onclick="if(event.target===this)closeAuthModal()">
+    <div class="modal-content" style="max-width:360px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div class="modal-nation" id="auth-modal-title">SIGN IN</div>
+        <button class="chart-close" onclick="closeAuthModal()">✕</button>
+      </div>
+      <div id="auth-error" style="display:none;color:var(--red);font-family:var(--font-mono);font-size:10px;margin-bottom:10px;letter-spacing:1px;"></div>
+      <div class="smod-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <label class="smod-label">Email</label>
+        <input type="email" class="smod-input" id="auth-email-input" placeholder="commander@example.com" autocomplete="email">
+      </div>
+      <div class="smod-row" style="flex-direction:column;align-items:flex-start;gap:4px;margin-top:8px;">
+        <label class="smod-label">Password</label>
+        <input type="password" class="smod-input" id="auth-pass-input" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')authSubmit()">
+      </div>
+      <button class="sbtn" style="margin-top:16px;width:100%;" onclick="authSubmit()">SIGN IN</button>
+      <div style="text-align:center;margin:10px 0;font-family:var(--font-mono);font-size:9px;color:var(--text-dim);">— OR —</div>
+      <button class="sbtn" style="width:100%;background:var(--bg2);border-color:var(--border2);" onclick="authGoogle()">CONTINUE WITH GOOGLE</button>
+      <div style="margin-top:14px;text-align:center;">
+        <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);" id="auth-toggle-text">No account? </span>
+        <button style="background:none;border:none;color:var(--cyan);font-family:var(--font-mono);font-size:9px;cursor:pointer;letter-spacing:1px;" onclick="toggleAuthMode()" id="auth-toggle-btn">REGISTER</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Game Modal -->
+  <div class="modal-overlay" id="load-modal" style="display:none;" onclick="if(event.target===this)closeLoadModal()">
+    <div class="modal-content" style="max-width:380px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div class="modal-nation">LOAD GAME</div>
+        <button class="chart-close" onclick="closeLoadModal()">✕</button>
+      </div>
+      <div id="load-list"></div>
+    </div>
   </div>
 
   <!-- Chart -->
@@ -589,8 +691,15 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <h1>DOMINION</h1>
     </div>
     <div class="hst">
-      <div class="tb">TURN <span id="dht">1</span>/20</div>
+      <div class="tb">TURN <span id="dht">1</span>/<span id="dhtl">20</span></div>
       <button class="chbtn" id="chart-btn" onclick="toggleChart()" style="display:none;">CHART</button>
+      <button class="chbtn" onclick="openSettings()" title="Settings">⚙ SETTINGS</button>
+      <div id="auth-widget" style="display:flex;align-items:center;gap:6px;">
+        <span id="auth-email" style="display:none;font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:1px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+        <button class="chbtn" id="auth-btn" onclick="openAuthModal()">SIGN IN</button>
+        <button class="chbtn" id="save-btn" onclick="manualSave()" style="display:none;">SAVE</button>
+        <button class="chbtn" id="load-btn" onclick="openLoadModal()" style="display:none;">LOAD</button>
+      </div>
     </div>
   </div>
 
@@ -911,7 +1020,7 @@ function drawChart(){
     const y=pad.top+(ph/4)*i;
     ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(w-pad.right,y);ctx.stroke();
     ctx.fillStyle='#3a4870';ctx.font='8px Share Tech Mono,monospace';
-    ctx.textAlign='right';ctx.fillText(Math.round(100-(100/4)*i),pad.left-5,y+3);
+    ctx.textAlign='right';ctx.fillText(Math.round((DS.statCap||200)-(((DS.statCap||200))/4)*i),pad.left-5,y+3);
   }
   ctx.fillStyle='#3a4870';ctx.font='8px Share Tech Mono,monospace';ctx.textAlign='center';
   const step=Math.max(1,Math.floor((hist.length-1)/9));
@@ -923,7 +1032,7 @@ function drawChart(){
     ctx.strokeStyle=DSC[key];ctx.lineWidth=1.6;ctx.beginPath();
     hist.forEach((pt,i)=>{
       const x=pad.left+(i/(hist.length-1))*pw;
-      const y=pad.top+ph-((pt[key]||0)/100)*ph;
+      const y=pad.top+ph-((pt[key]||0)/(DS.statCap||200))*ph;
       if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
     });ctx.stroke();
   });
@@ -1167,7 +1276,7 @@ function dInspect(id){
     if(delta>0)dh='<span class="sd pos">+'+delta+'</span>';
     else if(delta<0)dh='<span class="sd neg">'+delta+'</span>';
     bars+='<div class="sr"><div class="sl">'+k[0].toUpperCase()+k.slice(1)+'</div>'+
-      '<div class="sbw"><div class="sb" style="width:'+Math.max(2,v)+'%;background:'+DSC[k]+'"></div></div>'+
+      '<div class="sbw"><div class="sb" style="width:'+Math.max(1,statToBarPct(v))+'%;background:'+DSC[k]+'"></div></div>'+
       '<div class="sv" style="color:'+DSC[k]+'">'+Math.round(v)+dh+'</div></div>';
   });
   let acts='';
@@ -1188,6 +1297,9 @@ function dInspect(id){
 
 function dHint(t){const el=document.getElementById('dmi');el.value=t;dWC(el);el.focus();}
 
+// Convert raw stat value (possibly >100) to a 0–100 bar percentage
+function statToBarPct(v){return Math.min(100,Math.max(0,(v/(DS.statCap||200))*100));}
+
 function dRStats(){
   if(!DG.playerNation)return;
   document.getElementById('dpnn').textContent=DG.playerNation.name.toUpperCase();
@@ -1201,10 +1313,14 @@ function dRStats(){
     let dh='';
     if(delta>0)dh='<span class="sd pos">+'+delta+'</span>';
     else if(delta<0)dh='<span class="sd neg">'+delta+'</span>';
+    const bv=statToBarPct(Math.round(v));
+    const bbase=statToBarPct(Math.max(0,Math.round(v)-(delta>0?delta:0)));
+    const bgain=delta>0?statToBarPct(delta):0;
+    const bloss=delta<0?statToBarPct(-delta):0;
     bars+='<div class="sr"><div class="sl">'+k[0].toUpperCase()+k.slice(1)+'</div><div class="sbw">'+
-      (delta>0?'<div class="sbs gain" style="width:'+gainPct+'%;left:'+Math.min(98,basePct)+'%;"></div>':'')+
-      (delta<0?'<div class="sbs loss" style="width:'+lossPct+'%;left:'+Math.min(98,Math.round(v))+'%;"></div>':'')+
-      '<div class="sb" style="width:'+Math.max(2,Math.round(v))+'%;background:'+DSC[k]+'"></div></div>'+
+      (delta>0?'<div class="sbs gain" style="width:'+bgain+'%;left:'+Math.min(98,bbase)+'%;"></div>':'')+
+      (delta<0?'<div class="sbs loss" style="width:'+bloss+'%;left:'+Math.min(98,bv)+'%;"></div>':'')+
+      '<div class="sb" style="width:'+Math.max(1,bv)+'%;background:'+DSC[k]+'"></div></div>'+
       '<div class="sv" style="color:'+DSC[k]+'">'+Math.round(v)+dh+'</div></div>';
   });
   document.getElementById('dpbars').innerHTML=bars;
@@ -1268,13 +1384,13 @@ const WORLD_EVENTS=[
 ];
 
 function worldEvent(){
-  if(!DG.playerNation||Math.random()>0.30)return;
+  if(!DG.playerNation||Math.random()>(DS?.eventFrequency??0.30))return;
   const evt=WORLD_EVENTS[Math.floor(Math.random()*WORLD_EVENTS.length)];
   const eligible=DNS.filter(n=>n.id!==DG.playerNation.id);
 
   if(evt.type==='windfall'){
     const key=evt.statKey;
-    DG.cs[key]=Math.min(100,DG.cs[key]+evt.statDelta);
+    DG.cs[key]=Math.min(DS.statCap||200,DG.cs[key]+Math.round(evt.statDelta*(DS?.eventIntensity??1)));
     DG.statDeltas[key]=(DG.statDeltas[key]||0)+evt.statDelta;
     dLog('ev','⚡ WORLD EVENT: '+evt.msg);
     dRStats();dRHeader();
@@ -1293,13 +1409,13 @@ function worldEvent(){
       if(DG.allies.includes(n1.id))dApplySentimentEffects(n2.id,-14);
       if(DG.allies.includes(n2.id))dApplySentimentEffects(n1.id,-14);
     } else if(evt.type==='alliance'){
-      if(DG.nations[n1.id])DG.nations[n1.id].cs.economy=Math.min(100,DG.nations[n1.id].cs.economy+5);
-      if(DG.nations[n2.id])DG.nations[n2.id].cs.economy=Math.min(100,DG.nations[n2.id].cs.economy+5);
+      if(DG.nations[n1.id])DG.nations[n1.id].cs.economy=Math.min(DS.statCap||200,DG.nations[n1.id].cs.economy+5);
+      if(DG.nations[n2.id])DG.nations[n2.id].cs.economy=Math.min(DS.statCap||200,DG.nations[n2.id].cs.economy+5);
       if(DG.enemies.includes(n1.id))dApplySentimentEffects(n2.id,-10);
       if(DG.enemies.includes(n2.id))dApplySentimentEffects(n1.id,-10);
     } else if(evt.type==='trade'){
-      if(DG.nations[n1.id])DG.nations[n1.id].cs.economy=Math.min(100,DG.nations[n1.id].cs.economy+7);
-      if(DG.nations[n2.id])DG.nations[n2.id].cs.economy=Math.min(100,DG.nations[n2.id].cs.economy+7);
+      if(DG.nations[n1.id])DG.nations[n1.id].cs.economy=Math.min(DS.statCap||200,DG.nations[n1.id].cs.economy+7);
+      if(DG.nations[n2.id])DG.nations[n2.id].cs.economy=Math.min(DS.statCap||200,DG.nations[n2.id].cs.economy+7);
     } else if(evt.type==='collapse'){
       if(DG.allies.includes(n1.id))dApplySentimentEffects(n1.id,15);
       if(DG.allies.includes(n2.id))dApplySentimentEffects(n2.id,15);
@@ -1314,7 +1430,7 @@ function worldEvent(){
   dApplySentimentEffects(nation.id,evt.sentDelta);
   if(evt.statKey&&DG.nations[nation.id]){
     const nc=DG.nations[nation.id].cs;
-    nc[evt.statKey]=Math.max(5,Math.min(100,nc[evt.statKey]+evt.statDelta));
+    nc[evt.statKey]=Math.max(5,Math.min(DS.statCap||200,nc[evt.statKey]+Math.round(evt.statDelta*(DS?.eventIntensity??1))));
   }
   if(evt.sentDelta>0)dLog('ps',nation.name+' is now more open to engagement (+'+evt.sentDelta+' sentiment)');
   else if(evt.sentDelta<0)dLog('wn',nation.name+' turns hostile ('+evt.sentDelta+' sentiment)');
@@ -1413,6 +1529,7 @@ async function dSubmit(){
     worldEvent();
     sentimentDrift();
     DG.history.push({turn:DG.turn,...DG.cs});
+    autoSave();
     showResultModal(r);
     if(document.getElementById('chart-panel').classList.contains('show'))drawChart();
   }catch(e){
@@ -1425,7 +1542,7 @@ async function dSubmit(){
   }
   DG.busy=false;el.disabled=false;el.value='';
   dWC(el);document.getElementById('dexb').textContent='EXECUTE →';
-  if(DG.turn<20){
+  if(DG.turn<(DS.turnLimit||20)){
     DG.turn++;dRHeader();dRStats();dUpdateRelations();
     dLog('turn','Turn '+DG.turn);
     if(DG.sel)dInspect(DG.sel);
@@ -1448,7 +1565,7 @@ Scale stat changes to ambition and precision (max ±18 per stat, rarely above ±
 NEVER use markdown. Return ONLY valid JSON. Use only these exact nation IDs: usa,china,russia,germany,india,brazil,uk,france,japan,nigeria,turkey,iran,australia,saudi,s_africa,mexico,indonesia,s_korea,argentina,pakistan,canada,ukraine,poland,italy,spain,netherlands,sweden,romania,greece,israel,uae,iraq,qatar,vietnam,thailand,philippines,malaysia,kazakhstan,bangladesh,taiwan,n_korea,myanmar,ethiopia,kenya,algeria,morocco,d_congo,ghana,angola,colombia,chile,venezuela,peru`;
   const userPrompt=`PLAYER: ${n.name} (${n.region})
 STATS: Influence:${Math.round(s.influence)}, Economy:${Math.round(s.economy)}, Military:${Math.round(s.military)}, Resources:${Math.round(s.resources)}, Land:${Math.round(s.land)}
-TURN: ${DG.turn}/20
+TURN: ${DG.turn}/${DS.turnLimit||20}
 ALLIES: ${DG.allies.map(id=>DG.nations[id]?.name||id).join(', ')||'None'}
 AT WAR: ${DG.enemies.map(id=>DG.nations[id]?.name||id).join(', ')||'None'}
 TERRITORIES: ${DG.territories.map(id=>DG.nations[id]?.name||id).join(', ')||'None'}
@@ -1462,7 +1579,7 @@ RULES: Territory conquest requires target military<40 AND your military>70, OR c
   const resp=await fetch('/api/ai',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({messages:[{role:'system',content:sysPrompt},...DG.chatHistory,{role:'user',content:userPrompt}]})
+    body:JSON.stringify({messages:[{role:'system',content:sysPrompt},...DG.chatHistory,{role:'user',content:userPrompt}],...(DS.apiKey?{apiKey:DS.apiKey}:{}),model:DS.model||'deepseek-chat'})
   });
   if(!resp.ok){
     let detail='';
@@ -1484,7 +1601,7 @@ function dApply(r){
   Object.keys(r.statChanges||{}).forEach(k=>{
     if(DG.cs[k]!==undefined){
       const ch=r.statChanges[k];
-      DG.cs[k]=Math.max(1,Math.min(100,DG.cs[k]+ch));
+      DG.cs[k]=Math.max(1,Math.min(DS.statCap||200,DG.cs[k]+ch));
       DG.statDeltas[k]=(DG.statDeltas[k]||0)+ch;
     }
   });
@@ -1541,6 +1658,222 @@ function dEndGame(){
 }
 
 dWC(document.getElementById('dmi'));
+
+// ── SETTINGS ──────────────────────────────────────────────
+const DEFAULT_SETTINGS={eventFrequency:0.30,eventIntensity:1.0,turnLimit:20,statCap:200,apiKey:'',model:'deepseek-chat'};
+let DS=JSON.parse(localStorage.getItem('dominion_settings')||'null')||{...DEFAULT_SETTINGS};
+// Ensure all keys present (handles old saved settings missing new keys)
+Object.keys(DEFAULT_SETTINGS).forEach(k=>{if(DS[k]===undefined)DS[k]=DEFAULT_SETTINGS[k];});
+
+function saveSettings(){localStorage.setItem('dominion_settings',JSON.stringify(DS));}
+
+function openSettings(){
+  document.getElementById('s-freq').value=Math.round(DS.eventFrequency*100);
+  document.getElementById('freq-val').textContent=Math.round(DS.eventFrequency*100)+'%';
+  document.getElementById('s-int').value=DS.eventIntensity;
+  document.getElementById('int-val').textContent=DS.eventIntensity.toFixed(1)+'×';
+  document.getElementById('s-turns').value=DS.turnLimit;
+  document.getElementById('turns-val').textContent=DS.turnLimit;
+  document.getElementById('s-statcap').value=DS.statCap;
+  document.getElementById('statcap-val').textContent=DS.statCap;
+  document.getElementById('s-model').value=DS.model;
+  document.getElementById('s-apikey').value=DS.apiKey||'';
+  document.getElementById('settings-modal').style.display='flex';
+}
+function closeSettings(){document.getElementById('settings-modal').style.display='none';}
+function applySettings(){
+  DS.eventFrequency=parseInt(document.getElementById('s-freq').value)/100;
+  DS.eventIntensity=parseFloat(document.getElementById('s-int').value);
+  DS.turnLimit=parseInt(document.getElementById('s-turns').value);
+  DS.statCap=parseInt(document.getElementById('s-statcap').value);
+  DS.apiKey=document.getElementById('s-apikey').value.trim();
+  DS.model=document.getElementById('s-model').value;
+  saveSettings();
+  closeSettings();
+  // Update turn counter display
+  const tl=document.getElementById('dhtl');if(tl)tl.textContent=DS.turnLimit;
+  dRHeader();
+}
+
+// ── FIREBASE AUTH + FIRESTORE ──────────────────────────────
+let fbApp=null,fbAuth=null,fbDb=null,currentUser=null,authMode='signin';
+
+function initFirebase(){
+  try{
+    if(typeof firebase==='undefined'||!window.FIREBASE_CONFIG_READY){return;}
+    if(fbApp)return; // already init
+    fbApp=firebase.app();
+    fbAuth=firebase.auth();
+    fbDb=firebase.firestore();
+    fbAuth.onAuthStateChanged(user=>{
+      currentUser=user;
+      const btn=document.getElementById('auth-btn');
+      const emailEl=document.getElementById('auth-email');
+      const saveBtn=document.getElementById('save-btn');
+      const loadBtn=document.getElementById('load-btn');
+      if(user){
+        if(btn){btn.textContent='SIGN OUT';btn.onclick=fbSignOut;}
+        if(emailEl){emailEl.textContent=user.email||user.displayName||'Signed in';emailEl.style.display='inline';}
+        if(saveBtn)saveBtn.style.display='inline-block';
+        if(loadBtn)loadBtn.style.display='inline-block';
+      }else{
+        if(btn){btn.textContent='SIGN IN';btn.onclick=openAuthModal;}
+        if(emailEl)emailEl.style.display='none';
+        if(saveBtn)saveBtn.style.display='none';
+        if(loadBtn)loadBtn.style.display='none';
+      }
+    });
+  }catch(e){console.warn('Firebase not configured:',e.message);}
+}
+
+function openAuthModal(){
+  authMode='signin';
+  document.getElementById('auth-modal-title').textContent='SIGN IN';
+  document.getElementById('auth-toggle-text').textContent='No account? ';
+  document.getElementById('auth-toggle-btn').textContent='REGISTER';
+  document.getElementById('auth-error').style.display='none';
+  document.getElementById('auth-email-input').value='';
+  document.getElementById('auth-pass-input').value='';
+  document.getElementById('auth-modal').style.display='flex';
+}
+function closeAuthModal(){document.getElementById('auth-modal').style.display='none';}
+function toggleAuthMode(){
+  authMode=authMode==='signin'?'register':'signin';
+  const isReg=authMode==='register';
+  document.getElementById('auth-modal-title').textContent=isReg?'CREATE ACCOUNT':'SIGN IN';
+  document.getElementById('auth-toggle-text').textContent=isReg?'Have an account? ':'No account? ';
+  document.getElementById('auth-toggle-btn').textContent=isReg?'SIGN IN':'REGISTER';
+  document.getElementById('auth-error').style.display='none';
+}
+function showAuthError(msg){
+  const el=document.getElementById('auth-error');
+  el.textContent=msg;el.style.display='block';
+}
+async function authSubmit(){
+  if(!fbAuth)return showAuthError('Firebase not configured — see firebase-config.js');
+  const email=document.getElementById('auth-email-input').value.trim();
+  const pass=document.getElementById('auth-pass-input').value;
+  if(!email||!pass)return showAuthError('Email and password required');
+  try{
+    if(authMode==='signin'){
+      await fbAuth.signInWithEmailAndPassword(email,pass);
+    }else{
+      await fbAuth.createUserWithEmailAndPassword(email,pass);
+    }
+    closeAuthModal();
+  }catch(e){showAuthError(e.message||'Authentication failed');}
+}
+async function authGoogle(){
+  if(!fbAuth)return showAuthError('Firebase not configured — see firebase-config.js');
+  try{
+    const provider=new firebase.auth.GoogleAuthProvider();
+    await fbAuth.signInWithPopup(provider);
+    closeAuthModal();
+  }catch(e){showAuthError(e.message||'Google sign-in failed');}
+}
+async function fbSignOut(){
+  if(!fbAuth)return;
+  await fbAuth.signOut();
+}
+
+// ── SAVE / LOAD ────────────────────────────────────────────
+function buildSavePayload(label){
+  return{
+    label:label||'Turn '+DG.turn,
+    savedAt:firebase.firestore.FieldValue.serverTimestamp(),
+    playerNationId:DG.playerNation?.id,
+    turn:DG.turn,
+    cs:{...DG.cs},
+    startStats:{...DG.startStats},
+    statDeltas:{...DG.statDeltas},
+    sentiments:{...DG.sentiments},
+    allies:[...DG.allies],
+    enemies:[...DG.enemies],
+    territories:[...DG.territories],
+    chatHistory:(DG.chatHistory||[]).slice(-12),
+    history:DG.history||[],
+  };
+}
+
+async function autoSave(){
+  if(!currentUser||!fbDb||!DG.playerNation)return;
+  try{
+    await fbDb.collection('users').doc(currentUser.uid).collection('saves').doc('autosave').set(buildSavePayload('Autosave — Turn '+DG.turn));
+  }catch(e){console.warn('Autosave failed:',e.message);}
+}
+
+async function manualSave(){
+  if(!currentUser||!fbDb){return alert('Sign in to save games');}
+  if(!DG.playerNation)return;
+  const label=DG.playerNation.name+' — Turn '+DG.turn;
+  const id='save_'+Date.now();
+  try{
+    await fbDb.collection('users').doc(currentUser.uid).collection('saves').doc(id).set(buildSavePayload(label));
+    dLog('rs','Game saved: '+label);
+  }catch(e){dLog('wn','Save failed: '+e.message);}
+}
+
+async function openLoadModal(){
+  if(!currentUser||!fbDb)return alert('Sign in to load games');
+  const listEl=document.getElementById('load-list');
+  listEl.innerHTML='<div class="ter-empty">Loading saves…</div>';
+  document.getElementById('load-modal').style.display='flex';
+  try{
+    const snap=await fbDb.collection('users').doc(currentUser.uid).collection('saves').orderBy('savedAt','desc').limit(10).get();
+    if(snap.empty){listEl.innerHTML='<div class="ter-empty">No saved games found</div>';return;}
+    listEl.innerHTML='';
+    snap.forEach(doc=>{
+      const d=doc.data();
+      const date=d.savedAt?.toDate?d.savedAt.toDate().toLocaleString():'Unknown date';
+      const div=document.createElement('div');div.className='save-entry';
+      div.innerHTML=`<div class="save-entry-info"><b>${d.label||doc.id}</b>${date}</div><button class="save-load-btn" onclick="loadSave('${doc.id}')">LOAD</button>`;
+      listEl.appendChild(div);
+    });
+  }catch(e){listEl.innerHTML='<div class="ter-empty" style="color:var(--red)">Error: '+e.message+'</div>';}
+}
+function closeLoadModal(){document.getElementById('load-modal').style.display='none';}
+
+async function loadSave(saveId){
+  if(!currentUser||!fbDb)return;
+  closeLoadModal();
+  try{
+    const snap=await fbDb.collection('users').doc(currentUser.uid).collection('saves').doc(saveId).get();
+    if(!snap.exists)return dLog('wn','Save not found');
+    const d=snap.data();
+    const nation=DNS.find(n=>n.id===d.playerNationId);
+    if(!nation)return dLog('wn','Save references unknown nation');
+    // Restore DG
+    DG.playerNation=nation;
+    DG.startStats=d.startStats||{...nation.stats};
+    DG.cs=d.cs||{...nation.stats};
+    DG.statDeltas=d.statDeltas||{influence:0,economy:0,military:0,resources:0,land:0};
+    DG.turn=d.turn||1;
+    DG.sentiments=d.sentiments||{};
+    DG.allies=d.allies||[];
+    DG.enemies=d.enemies||[];
+    DG.territories=d.territories||[];
+    DG.chatHistory=d.chatHistory||[];
+    DG.history=d.history||[{turn:0,...DG.cs}];
+    // Reconstruct nations from DNS
+    DNS.forEach(n=>{if(!DG.nations[n.id])DG.nations[n.id]={...n,cs:{...n.stats}};});
+    DG.nations[nation.id]={...nation,cs:{...DG.cs}};
+    // Hide start screen if visible
+    const sto=document.getElementById('dsto');if(sto)sto.style.display='none';
+    const cb=document.getElementById('chart-btn');if(cb)cb.style.display='inline-block';
+    if(!DG.map)initMap();
+    dRStats();dRHeader();dUpdateRelations();dRenderDirectives();highlightPlayer();
+    const tl=document.getElementById('dhtl');if(tl)tl.textContent=DS.turnLimit;
+    dLog('rs','Game loaded: '+nation.name+', Turn '+DG.turn);
+  }catch(e){dLog('wn','Load failed: '+e.message);}
+}
+
+// Init Firebase when page loads (if configured)
+window.addEventListener('load',()=>{
+  // Small delay to let firebase-config.js run first
+  setTimeout(initFirebase,200);
+  // Apply turn limit to header
+  const tl=document.getElementById('dhtl');if(tl)tl.textContent=DS.turnLimit;
+});
 </script>
 </body>
 </html>

@@ -268,8 +268,11 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 .smod-select{background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:9px;padding:4px 8px;border-radius:2px;letter-spacing:1px;cursor:pointer;width:100%;}
 .smod-input{background:var(--bg0);border:1px solid var(--border2);color:var(--text);font-family:var(--font-mono);font-size:10px;padding:7px 10px;border-radius:2px;width:100%;box-sizing:border-box;letter-spacing:1px;}
 .smod-input:focus{outline:none;border-color:var(--cyan);}
-.save-entry{display:flex;align-items:center;justify-content:space-between;padding:10px;border:1px solid var(--border);border-radius:2px;margin-bottom:8px;background:var(--bg2);}
+.save-entry{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:2px;margin-bottom:8px;background:var(--bg2);}
 .save-entry-info{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);letter-spacing:1px;}
+.save-star-btn{background:none;border:none;cursor:pointer;font-size:15px;color:var(--border2);padding:0 2px;transition:color .15s;flex-shrink:0;line-height:1;}
+.save-star-btn.starred{color:var(--amber);}
+.save-star-btn:hover{color:var(--amber-dim);}
 .save-entry-info b{color:var(--text);display:block;margin-bottom:3px;}
 .save-load-btn{font-family:var(--font-mono);font-size:9px;color:var(--cyan);background:none;border:1px solid rgba(0,200,255,.3);border-radius:2px;padding:4px 10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;}
 .save-load-btn:hover{border-color:var(--cyan);color:#fff;}
@@ -1552,6 +1555,7 @@ function assign(){
   DG.statDeltas={influence:0,economy:0,military:0,resources:0,land:0};
   DG.history=[{turn:0,...n.stats}];
   DG.allies=[];DG.enemies=[];DG.territories=[];DG.chatHistory=[];DG.sentimentTurns={};DG.surpriseAttacksLeft=3;
+  DG.gameId='game_'+Date.now();
   DNS.forEach(o=>{DG.sentiments[o.id]=0;});
   const init=INITIAL_SENTIMENTS[n.id]||{};
   DNS.forEach(o=>{
@@ -2129,6 +2133,10 @@ function initMap(){
   map.on('style.load',()=>{
     map.setConfigProperty('basemap','lightPreset','day');
     map.setConfigProperty('basemap','colorTheme',{name:'Monochrome'});
+    // Hide city/capital labels so surprise attack targeting isn't trivial
+    map.setConfigProperty('basemap','showPlaceLabels',false);
+    map.setConfigProperty('basemap','showPointOfInterestLabels',false);
+    map.setConfigProperty('basemap','showTransitLabels',false);
   });
   DG.map=map;
   map.on('load',()=>{
@@ -2332,6 +2340,22 @@ function _saResolve(lngLat){
   },750);
 }
 
+function _saAdvanceTurn(){
+  // Advance year slightly (covert op = 1yr), recompute stability, log, then tick turn
+  DG.year+=1;dRenderYear();
+  dRecomputeStability();dRenderStability();
+  DG.history.push({turn:DG.turn,...DG.cs});
+  lsSaveSession();
+  if(dCheckDefeat())return;
+  if(DG.turn<(DS.turnLimit||20)){
+    DG.turn++;dRHeader();dRStats();dUpdateRelations();
+    dLog('turn','Turn '+DG.turn);
+    if(DG.sel)dInspect(DG.sel);
+  }else{
+    dEndGame();
+  }
+}
+
 function _saRetribution(n,targetId){
   const milLoss=18,infLoss=10;
   DG.cs.military=Math.max(1,(DG.cs.military||0)-milLoss);
@@ -2339,6 +2363,7 @@ function _saRetribution(n,targetId){
   dApplySentimentEffects(targetId,-25);DG.sentimentTurns[targetId]=DG.turn;
   dLog('wn','⚡ STRIKE DETECTED — '+n.name+' intercepted the operation. −'+milLoss+' military, −'+infLoss+' influence.');
   showResultModal({narrative:n.name+'\'s classified early-warning network detected the inbound strike before impact. Interceptors destroyed the payload; our operatives were captured. The failed attack costs us dearly — militarily and diplomatically.',statChanges:{military:-milLoss,influence:-infLoss},sentimentShifts:{[targetId]:-25},sideEffect:'Operatives compromised. Launch signatures recorded by hostile intelligence.',newAllies:[],newEnemies:[],removedAllies:[],territoryGained:[],territoryLost:[]},DG.turn,DG.year,DG.stability);
+  _saAdvanceTurn();
 }
 
 function _saHit(n,targetId,distMi){
@@ -2352,6 +2377,7 @@ function _saHit(n,targetId,distMi){
   if(!DG.enemies.includes(targetId))DG.enemies.push(targetId);
   dLog('ps','⚡ STRIKE HIT — '+n.name+' capital ('+accuracy+', '+Math.round(distMi)+'mi). −'+milDmg+' their military.');
   showResultModal({narrative:'A classified strike executed a '+accuracy+' hit on '+n.name+'\'s capital — '+Math.round(distMi)+' miles from the seat of power. Command infrastructure collapsed. Their military capacity degraded by an estimated '+milDmg+' points. Attribution denied.',statChanges:{military:-4,influence:6},sentimentShifts:{[targetId]:-30},sideEffect:'Strike confirmed ('+accuracy+', '+Math.round(distMi)+'mi). '+milDmg+' enemy military capacity neutralized.',newAllies:[],newEnemies:[targetId],removedAllies:[],territoryGained:[],territoryLost:[]},DG.turn,DG.year,DG.stability);
+  _saAdvanceTurn();
 }
 
 function _saMiss(n,targetId,distMi,toleranceMi){
@@ -2361,6 +2387,7 @@ function _saMiss(n,targetId,distMi,toleranceMi){
   dApplySentimentEffects(targetId,-8);DG.sentimentTurns[targetId]=DG.turn;
   dLog('wn','⚡ STRIKE MISSED — '+Math.round(distMi)+'mi from capital ('+overby+'mi outside radius). −'+milLoss+' military.');
   showResultModal({narrative:'The strike package failed navigation — impact '+Math.round(distMi)+' miles from target, '+overby+' miles beyond the required radius. '+n.name+'\'s defense forces intercepted the payload and our military absorbed significant losses.',statChanges:{military:-milLoss},sentimentShifts:{[targetId]:-8},sideEffect:'Strike neutralized. Targeting failure under internal investigation.',newAllies:[],newEnemies:[],removedAllies:[],territoryGained:[],territoryLost:[]},DG.turn,DG.year,DG.stability);
+  _saAdvanceTurn();
 }
 
 /* ── PLAYER SUGGESTIONS ── */
@@ -2900,6 +2927,7 @@ async function dSubmit(){
     worldEvent();
     sentimentDrift();
     DG.history.push({turn:DG.turn,...DG.cs});
+    lsSaveSession();
     autoSave();
     showResultModal(r,DG.turn,DG.year,DG.stability);
     if(document.getElementById('analytics-modal').classList.contains('open'))renderAnalytics();
@@ -3035,6 +3063,7 @@ function dApply(r){
 
 function confirmNewGame(){
   if(confirm('Abandon current campaign and return to the start screen?')){
+    lsClearSession();
     location.reload();
   }
 }
@@ -3165,7 +3194,7 @@ function dEndGame(){
 dWC(document.getElementById('dmi'));
 
 // ── SETTINGS ──────────────────────────────────────────────
-const DEFAULT_SETTINGS={eventFrequency:0.30,eventIntensity:1.0,turnLimit:20,statCap:200,apiKey:'',model:'deepseek-chat',surpriseAttack:false};
+const DEFAULT_SETTINGS={eventFrequency:0.30,eventIntensity:1.0,turnLimit:20,statCap:200,apiKey:'',model:'deepseek-chat',surpriseAttack:true};
 let DS=JSON.parse(localStorage.getItem('dominion_settings')||'null')||{...DEFAULT_SETTINGS};
 // Ensure all keys present (handles old saved settings missing new keys)
 Object.keys(DEFAULT_SETTINGS).forEach(k=>{if(DS[k]===undefined)DS[k]=DEFAULT_SETTINGS[k];});
@@ -3285,28 +3314,49 @@ async function fbSignOut(){
 }
 
 // ── SAVE / LOAD ────────────────────────────────────────────
-function buildSavePayload(label){
+function buildSavePayload(label, useServerTs=true){
   return{
-    label:label||'Turn '+DG.turn,
-    savedAt:firebase.firestore.FieldValue.serverTimestamp(),
-    playerNationId:DG.playerNation?.id,
-    turn:DG.turn,
-    cs:{...DG.cs},
-    startStats:{...DG.startStats},
-    statDeltas:{...DG.statDeltas},
-    sentiments:{...DG.sentiments},
-    allies:[...DG.allies],
-    enemies:[...DG.enemies],
-    territories:[...DG.territories],
-    chatHistory:(DG.chatHistory||[]).slice(-12),
-    history:DG.history||[],
+    label:label||DG.playerNation?.name+' · Turn '+DG.turn,
+    savedAt: useServerTs&&typeof firebase!=='undefined'&&firebase.firestore
+      ? firebase.firestore.FieldValue.serverTimestamp()
+      : Date.now(),
+    gameId: DG.gameId||'game_unknown',
+    playerNationId: DG.playerNation?.id,
+    turn: DG.turn,
+    year: DG.year,
+    yearStart: DG.yearStart,
+    stability: DG.stability,
+    stabHistory: DG.stabHistory||[],
+    cs: {...DG.cs},
+    startStats: {...DG.startStats},
+    statDeltas: {...DG.statDeltas},
+    sentiments: {...DG.sentiments},
+    sentimentTurns: {...(DG.sentimentTurns||{})},
+    allies: [...DG.allies],
+    enemies: [...DG.enemies],
+    territories: [...DG.territories],
+    chatHistory: (DG.chatHistory||[]).slice(-12),
+    history: DG.history||[],
+    surpriseAttacksLeft: DG.surpriseAttacksLeft??3,
   };
 }
 
 async function autoSave(){
+  // Always save to localStorage (protects against mobile tab eviction)
+  lsSaveSession();
+  // Firebase: only every 5 turns, and only if signed in
   if(!currentUser||!fbDb||!DG.playerNation)return;
+  if(DG.turn%5!==0)return;
   try{
-    await fbDb.collection('users').doc(currentUser.uid).collection('saves').doc('autosave').set(buildSavePayload('Autosave — Turn '+DG.turn));
+    const col=fbDb.collection('users').doc(currentUser.uid).collection('saves');
+    const gid=DG.gameId||'game_unknown';
+    await col.doc(gid).set(buildSavePayload(DG.playerNation.name+' · Turn '+DG.turn));
+    // Prune: keep max 5 non-starred games
+    const all=await col.orderBy('savedAt','asc').get();
+    const nonStarred=all.docs.filter(d=>!d.data().starred&&d.id!==gid);
+    if(nonStarred.length>4){
+      await Promise.all(nonStarred.slice(0,nonStarred.length-4).map(d=>d.ref.delete()));
+    }
   }catch(e){console.warn('Autosave failed:',e.message);}
 }
 
@@ -3333,10 +3383,11 @@ async function saveDirective(move, r){
 async function manualSave(){
   if(!currentUser||!fbDb){return alert('Sign in to save games');}
   if(!DG.playerNation)return;
-  const label=DG.playerNation.name+' — Turn '+DG.turn;
-  const id='save_'+Date.now();
+  const label=DG.playerNation.name+' · Turn '+DG.turn;
+  const gid=DG.gameId||'game_unknown';
   try{
-    await fbDb.collection('users').doc(currentUser.uid).collection('saves').doc(id).set(buildSavePayload(label));
+    await fbDb.collection('users').doc(currentUser.uid).collection('saves').doc(gid).set(buildSavePayload(label));
+    lsSaveSession();
     dLog('rs','Game saved: '+label);
   }catch(e){dLog('wn','Save failed: '+e.message);}
 }
@@ -3347,19 +3398,60 @@ async function openLoadModal(){
   listEl.innerHTML='<div class="ter-empty">Loading saves…</div>';
   document.getElementById('load-modal').style.display='flex';
   try{
-    const snap=await fbDb.collection('users').doc(currentUser.uid).collection('saves').orderBy('savedAt','desc').limit(10).get();
+    const snap=await fbDb.collection('users').doc(currentUser.uid).collection('saves').orderBy('savedAt','desc').limit(20).get();
     if(snap.empty){listEl.innerHTML='<div class="ter-empty">No saved games found</div>';return;}
     listEl.innerHTML='';
     snap.forEach(doc=>{
       const d=doc.data();
-      const date=d.savedAt?.toDate?d.savedAt.toDate().toLocaleString():'Unknown date';
+      const date=d.savedAt?.toDate?d.savedAt.toDate().toLocaleString():'—';
+      const starred=!!d.starred;
       const div=document.createElement('div');div.className='save-entry';
-      div.innerHTML=`<div class="save-entry-info"><b>${d.label||doc.id}</b>${date}</div><button class="save-load-btn" onclick="loadSave('${doc.id}')">LOAD</button>`;
+      div.innerHTML=
+        `<button class="save-star-btn${starred?' starred':''}" title="${starred?'Unstar (unprotect)':'Star to protect from pruning'}" onclick="toggleStar('${doc.id}',this)">${starred?'★':'☆'}</button>`+
+        `<div class="save-entry-info" style="flex:1;min-width:0;"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.label||doc.id}</b><span style="font-size:8px;opacity:.6;">${date}</span></div>`+
+        `<button class="save-load-btn" onclick="loadSave('${doc.id}')">LOAD</button>`;
       listEl.appendChild(div);
     });
   }catch(e){listEl.innerHTML='<div class="ter-empty" style="color:var(--red)">Error: '+e.message+'</div>';}
 }
 function closeLoadModal(){document.getElementById('load-modal').style.display='none';}
+
+async function toggleStar(saveId, btn){
+  if(!currentUser||!fbDb)return;
+  const isStarred=btn.classList.contains('starred');
+  try{
+    await fbDb.collection('users').doc(currentUser.uid).collection('saves').doc(saveId).update({starred:!isStarred});
+    btn.classList.toggle('starred',!isStarred);
+    btn.textContent=!isStarred?'★':'☆';
+    btn.title=!isStarred?'Unstar (unprotect)':'Star to protect from pruning';
+  }catch(e){console.warn('Star toggle failed:',e.message);}
+}
+
+function _applyLoadData(d){
+  const nation=DNS.find(n=>n.id===d.playerNationId);
+  if(!nation)return false;
+  DG.playerNation=nation;
+  DG.gameId=d.gameId||'game_'+Date.now();
+  DG.startStats=d.startStats||{...nation.stats};
+  DG.cs=d.cs||{...nation.stats};
+  DG.statDeltas=d.statDeltas||{influence:0,economy:0,military:0,resources:0,land:0};
+  DG.turn=d.turn||1;
+  DG.year=d.year||(new Date().getFullYear());
+  DG.yearStart=d.yearStart||DG.year;
+  DG.stability=d.stability??78;
+  DG.stabHistory=d.stabHistory||[DG.stability];
+  DG.sentiments=d.sentiments||{};
+  DG.sentimentTurns=d.sentimentTurns||{};
+  DG.allies=d.allies||[];
+  DG.enemies=d.enemies||[];
+  DG.territories=d.territories||[];
+  DG.chatHistory=d.chatHistory||[];
+  DG.history=d.history||[{turn:0,...DG.cs}];
+  DG.surpriseAttacksLeft=d.surpriseAttacksLeft??3;
+  DNS.forEach(n=>{if(!DG.nations[n.id])DG.nations[n.id]={...n,cs:{...n.stats}};});
+  DG.nations[nation.id]={...nation,cs:{...DG.cs}};
+  return true;
+}
 
 async function loadSave(saveId){
   if(!currentUser||!fbDb)return;
@@ -3367,33 +3459,57 @@ async function loadSave(saveId){
   try{
     const snap=await fbDb.collection('users').doc(currentUser.uid).collection('saves').doc(saveId).get();
     if(!snap.exists)return dLog('wn','Save not found');
-    const d=snap.data();
-    const nation=DNS.find(n=>n.id===d.playerNationId);
-    if(!nation)return dLog('wn','Save references unknown nation');
-    // Restore DG
-    DG.playerNation=nation;
-    DG.startStats=d.startStats||{...nation.stats};
-    DG.cs=d.cs||{...nation.stats};
-    DG.statDeltas=d.statDeltas||{influence:0,economy:0,military:0,resources:0,land:0};
-    DG.turn=d.turn||1;
-    DG.sentiments=d.sentiments||{};
-    DG.allies=d.allies||[];
-    DG.enemies=d.enemies||[];
-    DG.territories=d.territories||[];
-    DG.chatHistory=d.chatHistory||[];
-    DG.history=d.history||[{turn:0,...DG.cs}];
-    // Reconstruct nations from DNS
-    DNS.forEach(n=>{if(!DG.nations[n.id])DG.nations[n.id]={...n,cs:{...n.stats}};});
-    DG.nations[nation.id]={...nation,cs:{...DG.cs}};
-    // Hide start screen if visible
-    const sto=document.getElementById('dsto');if(sto)sto.style.display='none';
-    const ab=document.getElementById('analytics-btn');if(ab)ab.style.display='inline-block';
-    if(!DG.map)initMap();
-    dRStats();dRHeader();dUpdateRelations();highlightPlayer();
-    const tl=document.getElementById('dhtl');if(tl)tl.textContent=DS.turnLimit;
-    dLog('rs','Game loaded: '+nation.name+', Turn '+DG.turn);
+    if(!_applyLoadData(snap.data()))return dLog('wn','Save references unknown nation');
+    _activateLoadedGame();
+    dLog('rs','Game loaded: '+DG.playerNation.name+' · Turn '+DG.turn);
   }catch(e){dLog('wn','Load failed: '+e.message);}
 }
+
+function _activateLoadedGame(){
+  const sto=document.getElementById('dsto');if(sto)sto.style.display='none';
+  const ab=document.getElementById('analytics-btn');if(ab)ab.style.display='inline-block';
+  const ma=document.getElementById('mob-analytics-btn');if(ma)ma.style.display='';
+  if(!DG.map)initMap();
+  else highlightPlayer();
+  dRenderYear();dRenderStability();
+  dRStats();dRHeader();dUpdateRelations();highlightPlayer();
+  const tl=document.getElementById('dhtl');if(tl)tl.textContent=DS.turnLimit;
+  switchMobTab('map');
+}
+
+// ── LOCAL SESSION PERSISTENCE (mobile tab-eviction guard) ──────
+const LS_SESSION_KEY='dominion_session';
+const LS_SESSION_TTL=28*60*60*1000; // 28 hours
+
+function lsSaveSession(){
+  if(!DG.playerNation)return;
+  try{
+    const p=buildSavePayload(null,false);
+    p._ts=Date.now();
+    localStorage.setItem(LS_SESSION_KEY,JSON.stringify(p));
+  }catch(e){/* storage full — ignore */}
+}
+
+function lsRestoreSession(){
+  try{
+    const raw=localStorage.getItem(LS_SESSION_KEY);
+    if(!raw)return false;
+    const d=JSON.parse(raw);
+    if(!d||!d.playerNationId)return false;
+    if(Date.now()-(d._ts||0)>LS_SESSION_TTL){localStorage.removeItem(LS_SESSION_KEY);return false;}
+    if(!_applyLoadData(d))return false;
+    _activateLoadedGame();
+    dLog('rs','Session restored — '+DG.playerNation.name+' · Turn '+DG.turn);
+    return true;
+  }catch(e){return false;}
+}
+
+function lsClearSession(){localStorage.removeItem(LS_SESSION_KEY);}
+
+// Save to localStorage whenever the tab goes into the background (mobile eviction guard)
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden')lsSaveSession();
+});
 
 // Init Firebase when page loads (if configured)
 window.addEventListener('load',()=>{
@@ -3401,7 +3517,12 @@ window.addEventListener('load',()=>{
   const tl=document.getElementById('dhtl');if(tl)tl.textContent=DS.turnLimit;
   const it=document.getElementById('intro-turns');if(it)it.textContent=DS.turnLimit||20;
   const it2=document.getElementById('intro-turns2');if(it2)it2.textContent=DS.turnLimit||20;
-  syncIntroAuth(null); // show "not signed in" until Firebase resolves
+  // Try to restore a running session before showing start screen
+  if(!lsRestoreSession()){
+    syncIntroAuth(null); // show "not signed in" until Firebase resolves
+  }else{
+    syncIntroAuth(null); // still update auth UI
+  }
   pwaInit();
 });
 

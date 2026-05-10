@@ -582,7 +582,7 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 .mat-filter-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,200,255,0.06);}
 .mat-row{
   display:grid;
-  grid-template-columns:22px 1fr 70px 80px 42px 88px;
+  grid-template-columns:22px 1fr 80px 42px 36px 88px;
   gap:6px;align-items:center;
   padding:5px 4px;border-bottom:1px solid rgba(25,33,61,0.4);
   font-family:var(--font-mono);font-size:10px;cursor:pointer;transition:background .1s;
@@ -597,8 +597,64 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 .mat-bar-track{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;}
 .mat-bar-fill{height:100%;border-radius:2px;}
 .mat-empty{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);padding:12px 4px;}
+
+/* ── PLAYER SUGGESTIONS ── */
+.sug-risk-bar{display:flex;gap:4px;margin:10px 0 12px;}
+.sug-risk-btn{
+  flex:1;font-family:var(--font-mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;
+  background:none;border:1px solid var(--border);border-radius:2px;
+  color:var(--text-dim);cursor:pointer;padding:4px 0;transition:all .15s;
+}
+.sug-risk-btn.low.active{border-color:var(--green);color:var(--green);background:rgba(34,216,130,0.07);}
+.sug-risk-btn.med.active{border-color:var(--amber);color:var(--amber);background:rgba(224,168,42,0.07);}
+.sug-risk-btn.high.active{border-color:var(--red);color:var(--red);background:rgba(255,51,85,0.07);}
+.sug-card{
+  border-left:2px solid var(--border2);padding:8px 10px;margin-bottom:7px;
+  cursor:pointer;transition:background .12s;border-radius:0 2px 2px 0;
+  background:rgba(7,10,26,0.5);
+}
+.sug-card:hover{background:rgba(0,200,255,0.06);}
+.sug-card h4{font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.sug-card p{font-family:var(--font-serif);font-size:11px;color:var(--text-dim);line-height:1.5;}
+
+/* ── SETTINGS TOGGLE ── */
+.smod-toggle{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  background:var(--bg0);border:1px solid var(--border2);border-radius:2px;
+  color:var(--text-dim);cursor:pointer;padding:4px 10px;transition:all .15s;min-width:42px;text-align:center;
+}
+.smod-toggle.on{border-color:var(--amber);color:var(--amber);background:var(--amber-faint);}
+
+/* ── SURPRISE ATTACK OVERLAY ── */
+#sa-overlay{
+  position:fixed;inset:0;z-index:600;flex-direction:column;background:#000;
+}
+#sa-mapbox{position:absolute;inset:0;cursor:crosshair!important;}
+#sa-mapbox canvas{cursor:crosshair!important;}
+.sa-hud-top{
+  position:absolute;top:0;left:0;right:0;z-index:10;pointer-events:none;
+  padding:16px 20px 40px;
+  background:linear-gradient(180deg,rgba(4,6,14,0.96) 0%,rgba(4,6,14,0.5) 70%,transparent 100%);
+  display:flex;align-items:flex-start;justify-content:space-between;
+}
+.sa-hud-bottom{
+  position:absolute;bottom:0;left:0;right:0;z-index:10;pointer-events:none;
+  padding:40px 20px 18px;
+  background:linear-gradient(0deg,rgba(4,6,14,0.96) 0%,rgba(4,6,14,0.5) 70%,transparent 100%);
+  display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+.sa-abort{
+  pointer-events:all;font-family:var(--font-mono);font-size:9px;letter-spacing:1.5px;
+  background:none;border:1px solid rgba(255,51,85,0.4);border-radius:2px;
+  color:var(--red);cursor:pointer;padding:5px 14px;transition:all .15s;margin-top:8px;
+}
+.sa-abort:hover{background:rgba(255,51,85,0.1);border-color:var(--red);}
+@keyframes sa-scan{
+  0%{opacity:1;}50%{opacity:0.4;}100%{opacity:1;}
+}
+.sa-scanning{animation:sa-scan 1.1s ease-in-out infinite;}
 @media(max-width:680px){
-  .mat-row{grid-template-columns:18px 1fr 52px 50px 36px 72px;font-size:9px;gap:4px;}
+  .mat-row{grid-template-columns:16px 1fr 52px 32px 28px 68px;font-size:9px;gap:4px;}
 }
 
 @keyframes fo{from{opacity:0}to{opacity:1}}
@@ -831,6 +887,16 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
         <div class="smod-ctrl"><input type="range" class="smod-range" id="s-statcap" min="100" max="500" step="25" value="200" oninput="document.getElementById('statcap-val').textContent=this.value"><span class="smod-val" id="statcap-val">200</span></div>
       </div>
 
+      <div class="smod-row" style="margin-top:4px;">
+        <div>
+          <div class="smod-label">Surprise Attack Mode</div>
+          <div style="font-family:var(--font-mono);font-size:8px;color:var(--text-dim);margin-top:2px;letter-spacing:.5px;">3 strikes/game · military &gt;30 required · satellite targeting</div>
+        </div>
+        <div class="smod-ctrl">
+          <button class="smod-toggle" id="s-surprise" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'ON':'OFF'">OFF</button>
+        </div>
+      </div>
+
       <div class="smod-section" style="margin-top:14px;">AI</div>
       <div class="smod-row">
         <label class="smod-label">Model</label>
@@ -952,6 +1018,28 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
     </div>
   </div>
 
+  <!-- Surprise Attack Overlay -->
+  <div id="sa-overlay" style="display:none;">
+    <div id="sa-mapbox"></div>
+    <div class="sa-hud-top">
+      <div>
+        <div class="sa-scanning" style="font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--red);text-transform:uppercase;">⚡ TARGET ACQUISITION</div>
+        <div id="sa-target-name" style="font-family:var(--font-serif);font-size:20px;color:var(--text);margin-top:4px;letter-spacing:1px;"></div>
+        <div id="sa-instruction" style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);margin-top:6px;max-width:340px;line-height:1.6;"></div>
+      </div>
+      <div style="text-align:right;pointer-events:all;">
+        <div id="sa-attacks-left" style="font-family:var(--font-mono);font-size:9px;color:var(--amber);letter-spacing:2px;"></div>
+        <div id="sa-diff-badge" style="font-family:var(--font-mono);font-size:8px;letter-spacing:1.5px;margin-top:4px;padding:3px 8px;border-radius:2px;display:inline-block;"></div>
+        <br>
+        <button class="sa-abort" onclick="dCloseSurpriseAttack()">✕ ABORT MISSION</button>
+      </div>
+    </div>
+    <div class="sa-hud-bottom">
+      <div id="sa-coords" style="font-family:var(--font-mono);font-size:9px;color:rgba(184,203,255,0.4);letter-spacing:1px;"></div>
+      <div id="sa-click-hint" style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:1px;text-align:right;">CLICK MAP TO FIRE</div>
+    </div>
+  </div>
+
   <!-- Start Screen -->
   <div class="overlay" id="dsto">
     <div class="ocard">
@@ -997,6 +1085,17 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <div class="fs" id="dfsc"></div>
       <div class="sn" id="dsbrk"></div>
       <button class="sbtn" onclick="location.reload()">New Campaign</button>
+    </div>
+  </div>
+
+  <!-- Defeat Screen -->
+  <div class="overlay" id="ddef" style="display:none;">
+    <div class="ocard" style="border-color:rgba(255,51,85,0.5);box-shadow:0 0 40px rgba(255,51,85,0.15);">
+      <h2 style="color:var(--red);letter-spacing:6px;">FALLEN</h2>
+      <div id="ddef-type" style="font-family:var(--font-mono);color:var(--red);opacity:.7;font-size:9px;letter-spacing:3px;margin-bottom:8px;text-transform:uppercase;"></div>
+      <div id="ddef-msg" style="font-family:var(--font-serif);color:var(--text-mid);font-size:13px;line-height:1.7;margin-bottom:18px;"></div>
+      <div id="ddef-stats" style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);margin-bottom:18px;line-height:1.8;"></div>
+      <button class="sbtn" style="background:rgba(255,51,85,0.12);border-color:rgba(255,51,85,0.4);color:var(--red);" onclick="location.reload()">New Campaign</button>
     </div>
   </div>
 
@@ -1452,7 +1551,7 @@ function assign(){
   DG.playerNation=n;DG.startStats={...n.stats};DG.cs={...n.stats};
   DG.statDeltas={influence:0,economy:0,military:0,resources:0,land:0};
   DG.history=[{turn:0,...n.stats}];
-  DG.allies=[];DG.enemies=[];DG.territories=[];DG.chatHistory=[];
+  DG.allies=[];DG.enemies=[];DG.territories=[];DG.chatHistory=[];DG.sentimentTurns={};DG.surpriseAttacksLeft=3;
   DNS.forEach(o=>{DG.sentiments[o.id]=0;});
   const init=INITIAL_SENTIMENTS[n.id]||{};
   DNS.forEach(o=>{
@@ -1505,6 +1604,8 @@ function dStart(){
   initMap();dRStats();dRHeader();dUpdateRelations();
   dLog('turn','Turn 1');
   dLog('rs','You lead '+DG.playerNation.name+'. The world watches. Issue your first directive.');
+  // Show advisory panel for own nation immediately
+  setTimeout(()=>dInspect(DG.playerNation.id),400);
 }
 
 // ── YEAR CLOCK + GLOBAL STABILITY ─────────────────────────────────
@@ -1539,22 +1640,49 @@ function dAdvanceYear(directive,moveResult){
 // Inter-nation sentiment proxy using INITIAL_SENTIMENTS
 function dRel(aId,bId){return(INITIAL_SENTIMENTS[aId]&&INITIAL_SENTIMENTS[aId][bId])||0;}
 
-function dRecomputeStability(){
-  let s=100;
-  s-=(DG.pending||[]).length*3;
-  const allCS=DNS.map(n=>n.id===DG.playerNation?.id?DG.cs:DG.nations[n.id]?.cs||n.stats);
-  const avgMil=allCS.reduce((t,c)=>t+(c.military||0),0)/allCS.length;
-  if(avgMil>60)s-=(avgMil-60)*0.4;
-  let hostilePairs=0;
-  DNS.forEach((a,ai)=>DNS.forEach((b,bi)=>{
-    if(bi<=ai)return;
-    if(dRel(a.id,b.id)<-50||dRel(b.id,a.id)<-50)hostilePairs++;
-  }));
-  s-=hostilePairs*1.2;
-  const avgEco=allCS.reduce((t,c)=>t+(c.economy||0),0)/allCS.length;
-  if(avgEco<50)s-=(50-avgEco)*0.5;
-  if(DG.turn>14)s-=(DG.turn-14)*1.5;
-  DG.stability=Math.max(0,Math.min(100,Math.round(s)));
+function dRecomputeStability(moveResult){
+  // Delta-based: stability shifts each turn based on player actions and world state
+  let delta=0;
+
+  // Player economy health — economic decline erodes global confidence
+  const eco=DG.cs?.economy||0;
+  if(eco<20)delta-=5;
+  else if(eco<35)delta-=3;
+  else if(eco<50)delta-=1.5;
+  else if(eco>80)delta+=0.8;
+
+  // Military weakness creates power vacuums
+  const mil=DG.cs?.military||0;
+  if(mil<15)delta-=2;
+
+  // Active wars are highly destabilizing
+  delta-=(DG.enemies?.length||0)*3;
+
+  // Hostile nations pile on instability
+  const hostile=DNS.filter(n=>n.id!==DG.playerNation?.id&&(DG.sentiments[n.id]||0)<-30).length;
+  delta-=hostile*0.25;
+
+  // Overextension: holding territory is draining
+  delta-=(DG.territories?.length||0)*0.5;
+
+  // Directive impact: economic and influence gains stabilize, military spikes concern neighbors
+  if(moveResult?.statChanges){
+    const ec=moveResult.statChanges.economy||0;
+    const inf=moveResult.statChanges.influence||0;
+    const mi=moveResult.statChanges.military||0;
+    delta+=ec*0.18;
+    delta+=inf*0.1;
+    if(mi>8)delta-=0.6; // rapid rearmament unsettles others
+  }
+
+  // Natural reversion: stable world drifts toward equilibrium, crises self-reinforce
+  if(DG.stability>72)delta-=0.4;
+  else if(DG.stability<40)delta-=0.5; // crises cascade
+
+  // Late-game entropy — the world grows more fractious
+  if(DG.turn>10)delta-=(DG.turn-10)*0.7;
+
+  DG.stability=Math.max(0,Math.min(100,Math.round(DG.stability+delta)));
   DG.stabHistory.push(DG.stability);
   return DG.stability;
 }
@@ -1848,18 +1976,20 @@ function renderMatrix(){
     const marker=n.isAlly?'<span style="color:var(--green);font-size:8px;margin-right:2px;">★</span>':n.isRival?'<span style="color:var(--red);font-size:8px;margin-right:2px;">✕</span>':'';
     const scoreStr=(n.sentiment>0?'+':'')+n.sentiment;
     const scoreColor=n.sentiment>=40?'var(--green)':n.sentiment<=-30?'var(--red)':'var(--text-dim)';
+    const lastT=DG.sentimentTurns[n.id]?'T'+DG.sentimentTurns[n.id]:'—';
+    const lastTColor=DG.sentimentTurns[n.id]?'var(--amber-dim)':'var(--border2)';
     return `<div class="mat-row" onclick="closeAnalytics();setTimeout(()=>dInspect('${n.id}'),80)" title="${n.name} — click to inspect">
       <span style="color:var(--text-dim);font-size:8px;">${i+1}</span>
       <span style="color:${nameColor};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${marker}${n.name}</span>
-      <span style="color:var(--text-dim);font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.region}</span>
       <div class="mat-bar-track"><div class="mat-bar-fill" style="width:${pct}%;background:${barColor};"></div></div>
       <span style="color:${scoreColor};text-align:right;font-size:10px;">${scoreStr}</span>
+      <span style="color:${lastTColor};font-size:8px;text-align:right;">${lastT}</span>
       <span class="sent ${cat}" style="font-size:7.5px;padding:2px 5px;white-space:nowrap;">${lbl}</span>
     </div>`;
   }).join('');
 
   el.innerHTML=`<div class="mat-row mat-row-hdr">
-    <span>#</span><span>NATION</span><span>REGION</span><span>SENTIMENT</span><span style="text-align:right;">SCORE</span><span>STATUS</span>
+    <span>#</span><span>NATION</span><span>SENTIMENT</span><span style="text-align:right;">SCORE</span><span style="text-align:right;">TURN</span><span>STATUS</span>
   </div>${rows}`;
 }
 
@@ -2112,6 +2242,250 @@ function highlightPlayer(){
   }catch(e){}
 }
 
+/* ── SURPRISE ATTACK MODE ── */
+let _saMap=null;
+let _saTargetId=null;
+
+function haversineKm(lat1,lon1,lat2,lon2){
+  const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function dStartSurpriseAttack(targetId){
+  const n=DG.nations[targetId]||DNS.find(x=>x.id===targetId);
+  if(!n)return;
+  if((DG.cs.military||0)<=30){alert('Military strength must exceed 30 to execute a surprise attack.');return;}
+  if((DG.surpriseAttacksLeft||0)<=0){alert('No surprise attack strikes remaining this campaign.');return;}
+  _saTargetId=targetId;
+  const mult=getNationDifficulty(n);
+  const isEasy=mult<1.4;
+  const isMed=mult>=1.4&&mult<2.1;
+  const toleranceMi=isEasy?0:isMed?50:200;
+  document.getElementById('sa-target-name').textContent=n.name;
+  document.getElementById('sa-attacks-left').textContent='⚡ '+DG.surpriseAttacksLeft+' STRIKE'+(DG.surpriseAttacksLeft!==1?'S':'')+' REMAINING';
+  if(isEasy){
+    document.getElementById('sa-instruction').textContent='WARNING: '+n.name+' operates advanced early-warning systems. Any attempted strike will be detected and met with overwhelming retribution.';
+    document.getElementById('sa-diff-badge').textContent='PROTECTED — RETRIBUTION';
+    document.getElementById('sa-diff-badge').style.cssText='background:rgba(34,216,130,0.1);color:var(--green);border:1px solid rgba(34,216,130,0.3);padding:3px 8px;border-radius:2px;font-family:var(--font-mono);font-size:8px;letter-spacing:1.5px;';
+    document.getElementById('sa-click-hint').textContent='CLICK ANYWHERE TO ATTEMPT';
+  }else{
+    const precisionStr=isMed?'50 mile':'200 mile';
+    document.getElementById('sa-instruction').textContent='Locate the enemy capital on the satellite view. Click within '+precisionStr+' radius to execute. No borders — use geography.';
+    const dc=getDifficultyColor(mult);
+    document.getElementById('sa-diff-badge').textContent=getDifficultyLabel(mult).toUpperCase()+' · '+toleranceMi+'mi RADIUS';
+    document.getElementById('sa-diff-badge').style.cssText='color:'+dc+';border:1px solid '+dc+'55;padding:3px 8px;border-radius:2px;font-family:var(--font-mono);font-size:8px;letter-spacing:1.5px;';
+    document.getElementById('sa-click-hint').textContent='CLICK MAP TO FIRE';
+  }
+  document.getElementById('sa-overlay').style.display='flex';
+  if(_saMap){try{_saMap.remove();}catch(e){}_saMap=null;}
+  // Satellite style — pure imagery, no borders, no labels, no country indicators
+  const jitter=[(Math.random()-0.5)*35,(Math.random()-0.5)*18];
+  const c=n.center||[0,0];
+  _saMap=new mapboxgl.Map({
+    container:'sa-mapbox',
+    style:'mapbox://styles/mapbox/satellite-v9',
+    center:[c[0]+jitter[0],c[1]+jitter[1]],
+    zoom:2.6,projection:'mercator',attributionControl:false
+  });
+  _saMap.dragRotate.disable();_saMap.touchPitch.disable();
+  _saMap.on('mousemove',e=>{
+    const{lat,lng}=e.lngLat;
+    document.getElementById('sa-coords').textContent=
+      Math.abs(lat).toFixed(2)+'°'+(lat>=0?'N':'S')+'  '+Math.abs(lng).toFixed(2)+'°'+(lng>=0?'E':'W');
+  });
+  _saMap.on('mouseleave',()=>{document.getElementById('sa-coords').textContent='';});
+  _saMap.on('click',e=>{if(_saTargetId)_saResolve(e.lngLat);});
+}
+
+function dCloseSurpriseAttack(){
+  document.getElementById('sa-overlay').style.display='none';
+  if(_saMap){try{_saMap.remove();}catch(e){}_saMap=null;}
+  _saTargetId=null;
+}
+
+function _saResolve(lngLat){
+  const targetId=_saTargetId;
+  if(!targetId)return;
+  _saTargetId=null; // prevent double-click
+  const n=DG.nations[targetId]||DNS.find(x=>x.id===targetId);
+  if(!n)return;
+  const capital=n.center||[0,0];
+  const distKm=haversineKm(lngLat.lat,lngLat.lng,capital[1],capital[0]);
+  const distMi=distKm*0.621371;
+  const mult=getNationDifficulty(n);
+  const isEasy=mult<1.4;
+  const isMed=mult>=1.4&&mult<2.1;
+  const toleranceMi=isMed?50:200;
+  // Drop red dot marker at click
+  const el=document.createElement('div');
+  el.style.cssText='width:16px;height:16px;border:2px solid #ff3355;border-radius:50%;background:rgba(255,51,85,0.45);box-shadow:0 0 12px rgba(255,51,85,0.9);pointer-events:none;';
+  if(_saMap)new mapboxgl.Marker({element:el}).setLngLat([lngLat.lng,lngLat.lat]).addTo(_saMap);
+  DG.surpriseAttacksLeft=Math.max(0,(DG.surpriseAttacksLeft||1)-1);
+  setTimeout(()=>{
+    dCloseSurpriseAttack();
+    if(isEasy)_saRetribution(n,targetId);
+    else if(distMi<=toleranceMi)_saHit(n,targetId,distMi);
+    else _saMiss(n,targetId,distMi,toleranceMi);
+    dRStats();dUpdateRelations();
+    if(DG.sel===targetId)dInspect(targetId);
+  },750);
+}
+
+function _saRetribution(n,targetId){
+  const milLoss=18,infLoss=10;
+  DG.cs.military=Math.max(1,(DG.cs.military||0)-milLoss);
+  DG.cs.influence=Math.max(1,(DG.cs.influence||0)-infLoss);
+  dApplySentimentEffects(targetId,-25);DG.sentimentTurns[targetId]=DG.turn;
+  dLog('wn','⚡ STRIKE DETECTED — '+n.name+' intercepted the operation. −'+milLoss+' military, −'+infLoss+' influence.');
+  showResultModal({narrative:n.name+'\'s classified early-warning network detected the inbound strike before impact. Interceptors destroyed the payload; our operatives were captured. The failed attack costs us dearly — militarily and diplomatically.',statChanges:{military:-milLoss,influence:-infLoss},sentimentShifts:{[targetId]:-25},sideEffect:'Operatives compromised. Launch signatures recorded by hostile intelligence.',newAllies:[],newEnemies:[],removedAllies:[],territoryGained:[],territoryLost:[]},DG.turn,DG.year,DG.stability);
+}
+
+function _saHit(n,targetId,distMi){
+  const accuracy=distMi<5?'surgical':distMi<15?'precise':distMi<30?'accurate':'marginal';
+  const milDmg=Math.round(18+Math.random()*17);
+  const tn=DG.nations[targetId];
+  if(tn)tn.cs.military=Math.max(1,(tn.cs.military||0)-milDmg);
+  DG.cs.military=Math.max(1,(DG.cs.military||0)-4);
+  DG.cs.influence=Math.min(DS.statCap||200,(DG.cs.influence||0)+6);
+  dApplySentimentEffects(targetId,-30);DG.sentimentTurns[targetId]=DG.turn;
+  if(!DG.enemies.includes(targetId))DG.enemies.push(targetId);
+  dLog('ps','⚡ STRIKE HIT — '+n.name+' capital ('+accuracy+', '+Math.round(distMi)+'mi). −'+milDmg+' their military.');
+  showResultModal({narrative:'A classified strike executed a '+accuracy+' hit on '+n.name+'\'s capital — '+Math.round(distMi)+' miles from the seat of power. Command infrastructure collapsed. Their military capacity degraded by an estimated '+milDmg+' points. Attribution denied.',statChanges:{military:-4,influence:6},sentimentShifts:{[targetId]:-30},sideEffect:'Strike confirmed ('+accuracy+', '+Math.round(distMi)+'mi). '+milDmg+' enemy military capacity neutralized.',newAllies:[],newEnemies:[targetId],removedAllies:[],territoryGained:[],territoryLost:[]},DG.turn,DG.year,DG.stability);
+}
+
+function _saMiss(n,targetId,distMi,toleranceMi){
+  const overby=Math.round(distMi-toleranceMi);
+  const milLoss=Math.round(6+Math.random()*7);
+  DG.cs.military=Math.max(1,(DG.cs.military||0)-milLoss);
+  dApplySentimentEffects(targetId,-8);DG.sentimentTurns[targetId]=DG.turn;
+  dLog('wn','⚡ STRIKE MISSED — '+Math.round(distMi)+'mi from capital ('+overby+'mi outside radius). −'+milLoss+' military.');
+  showResultModal({narrative:'The strike package failed navigation — impact '+Math.round(distMi)+' miles from target, '+overby+' miles beyond the required radius. '+n.name+'\'s defense forces intercepted the payload and our military absorbed significant losses.',statChanges:{military:-milLoss},sentimentShifts:{[targetId]:-8},sideEffect:'Strike neutralized. Targeting failure under internal investigation.',newAllies:[],newEnemies:[],removedAllies:[],territoryGained:[],territoryLost:[]},DG.turn,DG.year,DG.stability);
+}
+
+/* ── PLAYER SUGGESTIONS ── */
+let _sugRisk='low';
+let _sugTexts=[]; // cache so onclick index references work without escaping
+
+const _SUGGESTIONS={
+  influence:{
+    low:[
+      'Host an international diplomatic summit in {nation}, invite neutral and friendly nations to sign cultural exchange agreements and multilateral cooperation frameworks.',
+      'Launch a global public diplomacy initiative — fund international broadcasting, open cultural institutes, and sponsor educational exchanges across three key regions.',
+      'Commission {nation} as a mediator in a regional dispute — offer neutral arbitration and humanitarian aid to raise international standing.'
+    ],
+    medium:[
+      'Establish a covert intelligence partnership with a mid-tier ally — share signals intelligence, coordinate disinformation countermeasures, and co-fund opposition media in rival states.',
+      'Orchestrate a coordinated diplomatic offensive: simultaneously court three neutral nations with tailored economic offers and mutual defense assurances.',
+      'Fund civil society organizations and think tanks in rival nations to shift public opinion, undermine adversarial leadership credibility, and build long-term soft power.'
+    ],
+    high:[
+      'Launch a coordinated information warfare campaign against our primary rival — flood global media with damaging intelligence leaks, manufacture diplomatic scandals, and discredit their leadership internationally.',
+      'Orchestrate a proxy diplomatic crisis to isolate the rival bloc — fabricate a border provocation, demand UN emergency sessions, and force allies to take sides.',
+      'Conduct a sweeping intelligence operation to compromise rival government networks — blackmail key officials, turn assets, and leak damaging internal communications.'
+    ]
+  },
+  economy:{
+    low:[
+      'Negotiate a comprehensive bilateral trade agreement with our most resource-rich neighbor — open export corridors, reduce tariffs, and secure long-term supply chain access.',
+      'Establish a sovereign wealth fund and invite foreign direct investment from friendly nations — offer tax incentives and joint venture frameworks.',
+      'Sign a multilateral free trade agreement with three regional partners to create a common market, stimulating export growth and domestic industry.'
+    ],
+    medium:[
+      'Create a regional economic bloc and impose strategic tariffs on imports from rival powers — use economic leverage to draw neutral nations into our orbit.',
+      'Nationalize strategic industries in a key sector while aggressively courting multinational corporations with preferential contracts to offset the impact.',
+      'Execute a currency devaluation strategy to boost export competitiveness — coordinate with allied central banks to cushion the domestic impact.'
+    ],
+    high:[
+      'Launch economic warfare against our primary rival — weaponize our currency reserves, trigger a debt crisis in their financial system, and capture critical supply chains through hostile acquisitions.',
+      'Impose a total trade blockade on an isolated rival nation — coordinate with allied shipping nations to enforce maritime interdiction and collapse their export economy.',
+      'Covertly sabotage a rival\'s flagship infrastructure project — fund legal challenges, bribe regulators in third countries, and leak damaging feasibility reports.'
+    ]
+  },
+  military:{
+    low:[
+      'Modernize our defense forces through a comprehensive procurement program — negotiate discounted arms deals with allied manufacturers and launch joint training exercises.',
+      'Establish a regional security alliance with our closest neighbors — formalize mutual defense obligations, share intelligence infrastructure, and create joint rapid-reaction forces.',
+      'Commission a strategic defense review — restructure the armed forces, invest in cyber capabilities, and upgrade command-and-control systems.'
+    ],
+    medium:[
+      'Accelerate domestic weapons production through emergency defense appropriations — establish forward operating bases in friendly nations and pre-position strategic materiel.',
+      'Fund and train proxy military forces in a contested border region — provide deniable support for a friendly faction and tie down a rival without direct confrontation.',
+      'Execute a covert military buildup near a contested zone — move assets under the guise of exercises, establish facts on the ground before rivals can respond.'
+    ],
+    high:[
+      'Launch a preemptive strike against the weakest enemy military installation — demonstrate overwhelming force, destroy their command infrastructure, and demand immediate concessions.',
+      'Execute a rapid military surge into a contested zone — overwhelming force, air superiority, and swift territorial control before international response can be organized.',
+      'Conduct a decapitation strike against enemy military leadership — special forces operation targeting command nodes, communications, and critical defense infrastructure.'
+    ]
+  },
+  resources:{
+    low:[
+      'Secure a 30-year energy supply agreement with a resource-rich nation — offer infrastructure investment and diplomatic backing in exchange for exclusive extraction rights.',
+      'Develop strategic reserves by importing surplus commodities at current prices — store critical minerals, fuel, and agricultural stocks against future supply disruptions.',
+      'Negotiate mineral rights access in an underdeveloped partner nation — offer development aid, infrastructure loans, and technical assistance in exchange for long-term extraction concessions.'
+    ],
+    medium:[
+      'Establish exclusive resource corridors through neutral territory — fund the infrastructure, lock in transit agreements, and price out rival access through preferential contracts.',
+      'Engineer a state-owned enterprise to acquire foreign resource assets — use sovereign guarantees to outbid rivals and gain controlling stakes in critical supply chains.',
+      'Fund separatist or autonomy movements in a rival\'s resource-rich region — destabilize their extraction capacity while positioning to offer the region future partnership.'
+    ],
+    high:[
+      'Seize a resource-rich territory through military or economic coercion — occupy extraction infrastructure, nationalize foreign-owned assets, and force rivals out of the market.',
+      'Execute a hostile economic takeover of a rival\'s state-owned resource company — use sovereign debt leverage, legal warfare, and financial pressure to force a distress sale.',
+      'Blockade a critical resource chokepoint — deploy naval assets to interdict rival supply lines and force renegotiation of extraction treaties under duress.'
+    ]
+  },
+  land:{
+    low:[
+      'Negotiate a bilateral territory access agreement with a neighboring state — establish a special economic zone, secure port rights, and create a formal buffer arrangement.',
+      'Pursue a formal territorial exchange through diplomatic channels — offer economic concessions and diplomatic support to a neighbor in exchange for contested boundary adjustments.',
+      'Establish a military basing agreement with a strategically located friendly nation — sign a status-of-forces treaty and fund base infrastructure in exchange for permanent access.'
+    ],
+    medium:[
+      'Fund autonomy movements in a contested neighboring region — provide covert financial and political support, positioning the region for eventual formal integration.',
+      'Establish a protectorate relationship with a small, vulnerable neighbor — offer security guarantees and economic lifelines in exchange for ceding foreign policy control.',
+      'Conduct a creeping territorial expansion — establish economic exclusion zones, position border infrastructure forward, and present neighbors with fait accompli boundaries.'
+    ],
+    high:[
+      'Invade and annex a contested territory — full military commitment, rapid occupation, and immediate civilian administration to establish facts on the ground before international response.',
+      'Execute a blitzkrieg operation against a militarily weak neighbor — overwhelming armor and air support, rapid encirclement, and forced capitulation within 72 hours.',
+      'Launch a coordinated multi-axis military offensive — simultaneous strikes across three contested border zones, collapsing enemy defenses before reinforcements can arrive.'
+    ]
+  }
+};
+
+function _pickSuggestion(stat, risk, n){
+  const pool=_SUGGESTIONS[stat][risk];
+  // Rotate through pool based on nation name hash for variety
+  const idx=n.name.charCodeAt(0)%pool.length;
+  return pool[idx].replace('{nation}',n.name);
+}
+
+function dRenderPlayerSuggestions(risk){
+  _sugRisk=risk;
+  if(!DG.playerNation)return;
+  const n=DG.playerNation,s=DG.cs;
+  // Update button states
+  document.querySelectorAll('.sug-risk-btn').forEach(b=>b.classList.toggle('active',b.dataset.risk===risk));
+  // Sort stats weakest first
+  const sorted=[...DSC_KEYS].sort((a,b)=>(s[a]||0)-(s[b]||0));
+  _sugTexts=[];
+  const cards=sorted.map((k,i)=>{
+    const v=Math.round(s[k]||0);
+    const text=_pickSuggestion(k,risk,n);
+    _sugTexts.push(text);
+    const col=DSC[k];
+    const riskLabel=risk==='low'?'LOW RISK':risk==='medium'?'MED RISK':'HIGH RISK';
+    return `<div class="sug-card" style="border-left-color:${col};" onclick="dHint(_sugTexts[${i}])">
+      <h4 style="color:${col}">${k.charAt(0).toUpperCase()+k.slice(1)} <span style="opacity:.45;">(${v})</span> <span style="float:right;opacity:.4;">${riskLabel}</span></h4>
+      <p>${text}</p>
+    </div>`;
+  }).join('');
+  const el=document.getElementById('player-suggestions');
+  if(el)el.innerHTML=cards;
+}
+
 function dInspect(id){
   DG.sel=id;
   DG.selISO=DG.nations[id]?.iso||DNS.find(x=>x.id===id)?.iso||null;
@@ -2140,6 +2514,18 @@ function dInspect(id){
   let acts='';
   if(!isP){
     acts='<div class="cis">'+getSentimentLabel(sent).toUpperCase()+'<span class="sent '+getSentimentCategory(sent)+'">'+getSentimentLabel(sent)+'</span>'+(isT?' <span class="rb ra">⚑ Controlled</span>':'')+'</div>';
+    // Surprise Attack button (mode must be enabled, 3 per game, military > 30)
+    if(DS.surpriseAttack&&(DG.cs.military||0)>30&&(DG.surpriseAttacksLeft||0)>0){
+      const tMult=getNationDifficulty(n);
+      const tCol=getDifficultyColor(tMult);
+      const tLbl=getDifficultyLabel(tMult);
+      const tTol=tMult<1.4?'PROTECTED':tMult<2.1?'50 mi precision':'200 mi precision';
+      acts+='<div class="ac rd" style="border-color:rgba(255,51,85,0.5);background:rgba(255,51,85,0.05);" onclick="dStartSurpriseAttack(\''+id+'\')">'+
+        '<h4 style="color:var(--red)">⚡ Surprise Attack'+
+          '<span style="float:right;font-family:var(--font-mono);font-size:8px;color:'+tCol+';font-weight:normal;">'+tLbl.toUpperCase()+'</span></h4>'+
+        '<p>Satellite targeting mode. Locate the enemy capital on a classified globe. <b style="color:var(--text-dim);">'+tTol+'</b> · '+DG.surpriseAttacksLeft+' strike'+(DG.surpriseAttacksLeft!==1?'s':'')+' remaining.</p>'+
+        '</div>';
+    }
     if(sent<40)acts+='<div class="ac gn" onclick="dHint(\'Forge alliance with '+n.name+', mutual defense pact, open trade corridors and joint investment\')"><h4>Alliance</h4><p>Influence and economy synergy. Strong partners stabilize; weak ones carry risk.</p></div>';
     if(sent>-60&&!isT)acts+='<div class="ac rd" onclick="dHint(\'Invade '+n.name+', full military commitment, seize territory and critical resource assets\')"><h4>Attack / Invade</h4><p>High escalatory risk. Rewards scale with their land and resources.</p></div>';
     if(sent>=40)acts+='<div class="ac gd" onclick="dHint(\'Betray '+n.name+', exploit shared intelligence, launch coordinated surprise offensive immediately\')"><h4>Betray Alliance</h4><p>Surprise advantage, but permanent influence collapse. Global reputation destroyed.</p></div>';
@@ -2147,10 +2533,23 @@ function dInspect(id){
     acts+='<div class="ac gn" onclick="dHint(\'Open bilateral trade with '+n.name+', investment agreements, secure resource access and supply chains\')"><h4>Trade Deal</h4><p>Mutual economy growth. Strongest with resource-rich partners.</p></div>';
     acts+='<div class="ac" onclick="dHint(\'Fund covert proxy forces inside '+n.name+', destabilize government, quietly extend sphere of influence\')"><h4>Covert Operation</h4><p>Deniable influence gain. Backfires severely if attributed.</p></div>';
   }
+  let playerPanel='';
+  if(isP){
+    playerPanel=
+      '<div style="color:var(--cyan);font-family:var(--font-mono);font-size:9px;padding:8px 0 4px;letter-spacing:1.5px;">▶ COMMAND ADVISORY</div>'+
+      '<div style="font-family:var(--font-mono);font-size:8px;color:var(--text-dim);margin-bottom:2px;letter-spacing:1px;">Select directive risk appetite:</div>'+
+      '<div class="sug-risk-bar">'+
+        '<button class="sug-risk-btn low'+((_sugRisk==='low')?' active':'')+'" data-risk="low" onclick="dRenderPlayerSuggestions(\'low\')">⬡ LOW</button>'+
+        '<button class="sug-risk-btn med'+((_sugRisk==='medium')?' active':'')+'" data-risk="medium" onclick="dRenderPlayerSuggestions(\'medium\')">◈ MED</button>'+
+        '<button class="sug-risk-btn high'+((_sugRisk==='high')?' active':'')+'" data-risk="high" onclick="dRenderPlayerSuggestions(\'high\')">✦ HIGH</button>'+
+      '</div>'+
+      '<div id="player-suggestions"></div>';
+  }
   document.getElementById('dci').innerHTML=
     '<div class="cin">'+n.name+'</div><div class="cir">'+n.region+'</div>'+bars+
-    (isP?'<div style="color:var(--cyan);font-family:var(--font-mono);font-size:10px;padding:8px 0;letter-spacing:1px;">▶ THIS IS YOUR NATION</div>':'')+
+    playerPanel+
     (acts?'<div class="at2">Strategic Options</div>'+acts:'');
+  if(isP)dRenderPlayerSuggestions(_sugRisk);
 }
 
 // Inspect any country not in DNS — show name + sentiment stub + basic actions
@@ -2494,7 +2893,7 @@ async function dSubmit(){
     DG.directives[dirIdx].result=r;
     saveDirective(move, r); // fire-and-forget, non-blocking
     const yrs=dAdvanceYear(move,r);
-    dRecomputeStability();
+    dRecomputeStability(r);
     dRenderYear();
     dRenderStability();
     dLog('nt',`📅 ${yrs} year${yrs>1?'s':''} pass — now ${DG.year} · Stability ${DG.stability}% (${dStabilityTier(DG.stability).label})`);
@@ -2507,6 +2906,7 @@ async function dSubmit(){
     // ── SUCCESS: clear box, advance turn ──────────────────────
     DG.busy=false;el.disabled=false;el.value='';
     dWC(el);document.getElementById('dexb').textContent='EXECUTE →';
+    if(dCheckDefeat())return;
     if(DG.turn<(DS.turnLimit||20)){
       DG.turn++;dRHeader();dRStats();dUpdateRelations();
       dLog('turn','Turn '+DG.turn);
@@ -2599,10 +2999,13 @@ function dApply(r){
       DG.statDeltas[k]=(DG.statDeltas[k]||0)+ch;
     }
   });
-  if(r.sentimentShifts)Object.entries(r.sentimentShifts).forEach(([id,delta])=>{dApplySentimentEffects(id,delta);});
-  (r.newAllies||[]).forEach(id=>{dApplySentimentEffects(id,40);});
-  (r.newEnemies||[]).forEach(id=>{dApplySentimentEffects(id,-40);});
-  (r.removedAllies||[]).forEach(id=>{dApplySentimentEffects(id,-50);});
+  if(r.sentimentShifts)Object.entries(r.sentimentShifts).forEach(([id,delta])=>{
+    dApplySentimentEffects(id,delta);
+    if(Math.abs(delta)>=5)DG.sentimentTurns[id]=DG.turn;
+  });
+  (r.newAllies||[]).forEach(id=>{dApplySentimentEffects(id,40);DG.sentimentTurns[id]=DG.turn;});
+  (r.newEnemies||[]).forEach(id=>{dApplySentimentEffects(id,-40);DG.sentimentTurns[id]=DG.turn;});
+  (r.removedAllies||[]).forEach(id=>{dApplySentimentEffects(id,-50);DG.sentimentTurns[id]=DG.turn;});
   (r.territoryGained||[]).forEach(id=>{
     if(!DG.territories.includes(id)){
       DG.territories.push(id);
@@ -2700,6 +3103,44 @@ function syncMobAuth(user){
   if(ma)ma.style.display=DG.playerNation?'':'none';
 }
 
+function dTriggerDefeat(type,msg){
+  dLog('wn','💀 '+msg);
+  setTimeout(()=>{
+    const s=DG.cs;
+    document.getElementById('ddef-type').textContent=type==='collapse'?'National Collapse':type==='invasion'?'Military Defeat':'Regime Fall';
+    document.getElementById('ddef-msg').textContent=msg;
+    document.getElementById('ddef-stats').textContent=
+      'Turn '+DG.turn+' · '+DG.year+
+      '\nInf '+Math.round(s.influence)+' · Eco '+Math.round(s.economy)+' · Mil '+Math.round(s.military)+
+      ' · Res '+Math.round(s.resources)+' · Land '+Math.round(s.land)+
+      '\nAllies: '+(DG.allies.length||0)+' · Enemies: '+(DG.enemies.length||0)+' · Territories: '+(DG.territories.length||0);
+    document.getElementById('ddef').style.display='flex';
+  },700);
+}
+
+function dCheckDefeat(){
+  if(!DG.playerNation)return false;
+  const s=DG.cs;
+  const total=DSC_KEYS.reduce((t,k)=>t+(s[k]||0),0);
+  // Collapse: total strategic power falls below 12
+  if(total<12){
+    dTriggerDefeat('collapse',DG.playerNation.name+' has collapsed. Decades of misrule drained every reserve — economically bankrupt, militarily hollowed, diplomatically invisible. The state dissolves into chaos.');
+    return true;
+  }
+  // Invasion: military + influence < 24 AND active enemies
+  const milInf=(s.military||0)+(s.influence||0);
+  if(milInf<24&&DG.enemies.length>0){
+    const chance=Math.min(0.85,(24-milInf)/20);
+    if(Math.random()<chance){
+      const invId=DG.enemies[0];
+      const invName=DG.nations[invId]?.name||'Enemy forces';
+      dTriggerDefeat('invasion',invName+' moved without hesitation. Your military shattered, your alliances silent — invasion came swiftly and without mercy. '+DG.playerNation.name+' falls under occupation.');
+      return true;
+    }
+  }
+  return false;
+}
+
 function dEndGame(){
   setTimeout(()=>{
     const s=DG.cs,st=DG.startStats;
@@ -2724,7 +3165,7 @@ function dEndGame(){
 dWC(document.getElementById('dmi'));
 
 // ── SETTINGS ──────────────────────────────────────────────
-const DEFAULT_SETTINGS={eventFrequency:0.30,eventIntensity:1.0,turnLimit:20,statCap:200,apiKey:'',model:'deepseek-chat'};
+const DEFAULT_SETTINGS={eventFrequency:0.30,eventIntensity:1.0,turnLimit:20,statCap:200,apiKey:'',model:'deepseek-chat',surpriseAttack:false};
 let DS=JSON.parse(localStorage.getItem('dominion_settings')||'null')||{...DEFAULT_SETTINGS};
 // Ensure all keys present (handles old saved settings missing new keys)
 Object.keys(DEFAULT_SETTINGS).forEach(k=>{if(DS[k]===undefined)DS[k]=DEFAULT_SETTINGS[k];});
@@ -2743,6 +3184,8 @@ function openSettings(){
   document.getElementById('statcap-val').textContent=DS.statCap;
   document.getElementById('s-model').value=DS.model;
   document.getElementById('s-apikey').value=DS.apiKey||'';
+  const sb=document.getElementById('s-surprise');
+  if(sb){sb.classList.toggle('on',!!DS.surpriseAttack);sb.textContent=DS.surpriseAttack?'ON':'OFF';}
   document.getElementById('settings-modal').style.display='flex';
 }
 function closeSettings(){document.getElementById('settings-modal').style.display='none';}
@@ -2753,6 +3196,7 @@ function applySettings(){
   DS.statCap=parseInt(document.getElementById('s-statcap').value);
   DS.apiKey=document.getElementById('s-apikey').value.trim();
   DS.model=document.getElementById('s-model').value;
+  DS.surpriseAttack=document.getElementById('s-surprise')?.classList.contains('on')||false;
   saveSettings();
   closeSettings();
   // Update turn counter display

@@ -913,6 +913,15 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
         <input type="password" class="smod-input" id="s-apikey" placeholder="sk-... leave blank to use server key" autocomplete="off">
       </div>
 
+      <div id="smod-account-section" style="display:none;margin-top:14px;">
+        <div class="smod-section">ACCOUNT</div>
+        <div class="smod-row">
+          <label class="smod-label">Display Name <span style="color:var(--text-dim);font-size:8px;">(shown on leaderboard)</span></label>
+          <input type="text" class="smod-input" id="s-username" placeholder="e.g. StrategistX" maxlength="24" autocomplete="off" style="flex:1;min-width:0;">
+        </div>
+        <div id="username-status" style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);margin-top:3px;min-height:14px;"></div>
+      </div>
+
       <div id="smod-pwa-section" style="display:none;margin-top:14px;">
         <div class="smod-section">MOBILE APP</div>
         <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:0.5px;line-height:1.8;margin-bottom:10px;">
@@ -942,6 +951,10 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <div class="smod-row" style="flex-direction:column;align-items:flex-start;gap:4px;margin-top:8px;">
         <label class="smod-label">Password</label>
         <input type="password" class="smod-input" id="auth-pass-input" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')authSubmit()">
+      </div>
+      <div class="smod-row" id="auth-username-row" style="flex-direction:column;align-items:flex-start;gap:4px;margin-top:8px;display:none;">
+        <label class="smod-label">Display Name <span style="color:var(--text-dim);font-size:8px;">(leaderboard name)</span></label>
+        <input type="text" class="smod-input" id="auth-username-input" placeholder="e.g. StrategistX" maxlength="24" autocomplete="off">
       </div>
       <button class="sbtn" style="margin-top:16px;width:100%;" onclick="authSubmit()">SIGN IN</button>
       <div style="text-align:center;margin:10px 0;font-family:var(--font-mono);font-size:9px;color:var(--text-dim);">— OR —</div>
@@ -998,6 +1011,19 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
         <div class="an-section-title">World Power Ranking</div>
         <div id="an-ranking"></div>
       </div>
+      <!-- Leaderboard section -->
+      <div class="an-section" id="an-lb-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div class="an-section-title" style="margin-bottom:0;">⬡ Leaderboard</div>
+          <div style="display:flex;gap:4px;">
+            <button class="mat-filter-btn active" data-lb="daily" onclick="setLbTab('daily')">TODAY</button>
+            <button class="mat-filter-btn" data-lb="weekly" onclick="setLbTab('weekly')">THIS WEEK</button>
+            <button class="mat-filter-btn" data-lb="alltime" onclick="setLbTab('alltime')">ALL TIME</button>
+          </div>
+        </div>
+        <div id="an-leaderboard"><div class="mat-empty">Open Analytics while signed in to see rankings</div></div>
+      </div>
+
       <div class="an-section">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
           <div class="an-section-title" style="margin-bottom:0;">International Relations Matrix</div>
@@ -1043,29 +1069,64 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
     </div>
   </div>
 
-  <!-- Start Screen -->
+  <!-- Start Screen (mode picker) -->
   <div class="overlay" id="dsto">
-    <div class="ocard">
-      <h2>DOMINION</h2>
-      <div class="tl">Strategic Command · <span id="intro-turns">20</span> Turns</div>
-
-      <!-- Auth + Settings quick-access -->
-      <div class="intro-bar">
-        <div class="intro-bar-user">
-          <span id="intro-user-label">Not signed in</span>
-          <button class="abtn-sm" id="intro-auth-btn" onclick="openAuthModal()">SIGN IN</button>
-        </div>
-        <button class="abtn-sm amber" onclick="openSettings()">⚙ SETTINGS</button>
+    <!-- Auth bar (always visible) -->
+    <div class="intro-bar" style="position:absolute;top:0;left:0;right:0;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;z-index:2;">
+      <div class="intro-bar-user">
+        <span id="intro-user-label">Not signed in</span>
+        <button class="abtn-sm" id="intro-auth-btn" onclick="openAuthModal()">SIGN IN</button>
       </div>
+      <button class="abtn-sm amber" onclick="openSettings()">⚙</button>
+    </div>
 
+    <!-- Mode picker panel -->
+    <div class="ocard" id="dsto-picker" style="max-width:440px;">
+      <h2>DOMINION</h2>
+      <div class="tl" style="margin-bottom:18px;">Strategic Command</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <!-- Daily -->
+        <div style="border:1px solid var(--border2);border-radius:4px;padding:16px;cursor:pointer;transition:all .15s;background:var(--bg2);" onclick="startDaily()" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)'">
+          <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:3px;color:var(--amber);margin-bottom:6px;">◈ DAILY</div>
+          <div style="font-family:var(--font-serif);font-size:15px;color:var(--text);margin-bottom:6px;">Daily Challenge</div>
+          <div style="font-family:var(--font-mono);font-size:8px;color:var(--text-dim);line-height:1.6;">Same nation, same day, for everyone. 12 turns. Compete on the global leaderboard.</div>
+          <div id="daily-date-badge" style="font-family:var(--font-mono);font-size:8px;color:var(--amber-dim);margin-top:8px;letter-spacing:1px;"></div>
+        </div>
+        <!-- Campaign -->
+        <div style="border:1px solid var(--border2);border-radius:4px;padding:16px;cursor:pointer;transition:all .15s;background:var(--bg2);" onclick="startCampaign()" onmouseover="this.style.borderColor='var(--cyan)'" onmouseout="this.style.borderColor='var(--border2)'">
+          <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:3px;color:var(--cyan);margin-bottom:6px;">▶ CAMPAIGN</div>
+          <div style="font-family:var(--font-serif);font-size:15px;color:var(--text);margin-bottom:6px;">Custom Campaign</div>
+          <div style="font-family:var(--font-mono);font-size:8px;color:var(--text-dim);line-height:1.6;">Roll any nation. Choose your difficulty. Adjustable turns and settings.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily setup panel -->
+    <div class="ocard" id="dsto-daily" style="display:none;max-width:400px;">
+      <div style="font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--amber);margin-bottom:4px;">◈ DAILY CHALLENGE</div>
+      <div id="daily-date-sub" style="font-family:var(--font-mono);font-size:8px;color:var(--text-dim);margin-bottom:12px;"></div>
+      <div class="nrev" style="display:block;">
+        <div class="nl">Today's Nation</div>
+        <div class="nn" id="daily-nation-name"></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+          <div class="diff-badge" id="daily-diff-badge"></div>
+        </div>
+        <div class="nd" id="daily-nation-desc" style="margin-top:6px;"></div>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:8px;color:var(--text-dim);margin:10px 0;line-height:1.7;">12 turns · fixed nation · score submitted to leaderboard</div>
+      <button class="sbtn" id="daily-start-btn" onclick="dStartDaily()" disabled>▶ Begin Daily</button>
+      <button class="abtn" style="margin-top:8px;font-size:9px;" onclick="document.getElementById('dsto-daily').style.display='none';document.getElementById('dsto-picker').style.display='block';">← Back</button>
+    </div>
+
+    <!-- Campaign setup panel -->
+    <div class="ocard" id="dsto-main" style="display:none;max-width:400px;">
+      <div style="font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--cyan);margin-bottom:12px;">▶ CAMPAIGN</div>
       <div class="rl"><ul>
-        <li>Lead a nation for <span id="intro-turns2">20</span> turns — every directive matters</li>
-        <li>20-word limit per directive — precision over verbosity</li>
-        <li>Click any country to inspect intel &amp; issue strategic actions</li>
-        <li>AI resolves each move with Machiavellian realism</li>
+        <li>Lead a nation for <span id="intro-turns">12</span> turns — every directive matters</li>
+        <li>20-word limit · precision over verbosity</li>
+        <li>Click any country to inspect intel &amp; strategic options</li>
         <li>Score multiplied by difficulty — underdogs are rewarded</li>
       </ul></div>
-
       <div class="nrev" id="dnrev">
         <div class="nl">Assigned Nation</div>
         <div class="diff-row">
@@ -1074,9 +1135,9 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
         </div>
         <div class="nd" id="drdesc"></div>
       </div>
-
       <button class="abtn" onclick="dAssign()">▶ Roll Nation Assignment</button>
       <button class="sbtn" id="dstartbtn" onclick="dStart()" disabled>Begin Campaign</button>
+      <button class="abtn" style="margin-top:8px;font-size:9px;" onclick="document.getElementById('dsto-main').style.display='none';document.getElementById('dsto-picker').style.display='block';">← Back</button>
     </div>
   </div>
 
@@ -1542,6 +1603,29 @@ function getDifficultyColor(mult){
   return'#ff3355';              // red
 }
 
+// ── Daily challenge helpers ────────────────────────────────
+let DG_MODE='campaign'; // 'campaign' | 'daily'
+
+function getDailyDateKey(){
+  return new Date().toISOString().slice(0,10); // YYYY-MM-DD
+}
+function getDailyWeekKey(){
+  const d=new Date();
+  const jan1=new Date(d.getFullYear(),0,1);
+  const week=Math.ceil(((d-jan1)/86400000+jan1.getDay()+1)/7);
+  return d.getFullYear()+'-W'+String(week).padStart(2,'0');
+}
+function _lcgNext(s){return((s*1664525+1013904223)>>>0);}
+function getDailyNation(){
+  // Deterministic daily nation — cycles through all 173 without repeat
+  const dayNum=Math.floor(Date.now()/86400000);
+  // Build a seeded permutation of DNS indices (fixed seed 7)
+  const arr=DNS.map((_,i)=>i);
+  let s=7;
+  for(let i=arr.length-1;i>0;i--){s=_lcgNext(s);const j=s%(i+1);[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return DNS[arr[dayNum%arr.length]];
+}
+
 // ── Deck-based nation rolling (no repeats until exhausted) ─
 let nationDeck=[];
 function refillDeck(){nationDeck=DNS.map((_,i)=>i);}
@@ -1578,6 +1662,48 @@ function assign(){
 }
 window.dAssign=assign;
 
+function assignNation(n){
+  DG.playerNation=n;DG.startStats={...n.stats};DG.cs={...n.stats};
+  DG.statDeltas={influence:0,economy:0,military:0,resources:0,land:0};
+  DG.history=[{turn:0,...n.stats}];
+  DG.allies=[];DG.enemies=[];DG.territories=[];DG.chatHistory=[];DG.sentimentTurns={};DG.surpriseAttacksLeft=3;
+  DG.gameId='game_'+Date.now();
+  DNS.forEach(o=>{DG.sentiments[o.id]=0;});
+  const init=INITIAL_SENTIMENTS[n.id]||{};
+  DNS.forEach(o=>{if(o.id===n.id)DG.sentiments[n.id]=100;else if(init[o.id]!==undefined)DG.sentiments[o.id]=init[o.id];});
+}
+
+function startDaily(){
+  DG_MODE='daily';
+  const n=getDailyNation();
+  assignNation(n);
+  const dk=getDailyDateKey();
+  document.getElementById('daily-nation-name').textContent=n.name;
+  document.getElementById('daily-nation-desc').textContent=n.desc;
+  const mult=getNationDifficulty(n);
+  const badge=document.getElementById('daily-diff-badge');
+  badge.textContent=mult.toFixed(2)+'× '+getDifficultyLabel(mult);
+  badge.style.color=getDifficultyColor(mult);
+  const dsub=document.getElementById('daily-date-sub');if(dsub)dsub.textContent=dk;
+  document.getElementById('daily-start-btn').disabled=false;
+  document.getElementById('dsto-picker').style.display='none';
+  document.getElementById('dsto-daily').style.display='block';
+  document.getElementById('dsto-main').style.display='none';
+}
+
+function dStartDaily(){
+  // Daily always uses 12 turns
+  DS.turnLimit=12;
+  dStart();
+}
+
+function startCampaign(){
+  DG_MODE='campaign';
+  document.getElementById('dsto-picker').style.display='none';
+  document.getElementById('dsto-daily').style.display='none';
+  document.getElementById('dsto-main').style.display='block';
+}
+
 // ── Keep intro screen in sync with auth state ──────────────
 function syncIntroAuth(user){
   const lbl=document.getElementById('intro-user-label');
@@ -1588,7 +1714,7 @@ function syncIntroAuth(user){
   if(it2)it2.textContent=DS.turnLimit||20;
   if(!lbl||!btn)return;
   if(user){
-    lbl.textContent=user.email||user.displayName||'Signed in';
+    lbl.textContent=_currentUsername||user.email||user.displayName||'Signed in';
     btn.textContent='SIGN OUT';
     btn.onclick=fbSignOut;
   }else{
@@ -1848,6 +1974,7 @@ function drawChart(){
 function renderAnalytics(){
   drawChart();
   renderMatrix();
+  renderLeaderboard();
   // Legend
   const leg=document.getElementById('an-legend');
   leg.innerHTML=DSC_KEYS.map(k=>`<span style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10px;color:${DSC[k]}"><span style="display:inline-block;width:14px;height:3px;background:${DSC[k]};border-radius:2px;"></span>${k}</span>`).join('');
@@ -2970,6 +3097,7 @@ You resolve player moves with Machiavellian realism — nations are opportunisti
 CRITICAL DEALING RULES: Neutral nations (sentiment label "Neutral" or "Warm") have NO reason to refuse reasonable propositions — they should respond positively to well-crafted overtures. Nations in economic crisis (economy<40) are desperate and will accept almost any deal. Smaller nations eagerly accept partnerships with major powers. DO NOT make every interaction fail — that is bad game design. Deals with neutral or friendly nations should generally succeed with moderate stat rewards.
 Bold overextension backfires. Economic growth is gradual. Betrayals destroy influence permanently. Military aggression risks retaliation.
 Scale stat changes to ambition and precision (max ±18 per stat, rarely above ±12). Territory conquest requires target military<40 AND player military>70, or total collapse.
+VAGUE DIRECTIVE RULE: If the directive is generic or non-specific (e.g. "collect more resources", "improve the economy", "build influence", "develop the military", "expand territory" with no named target or method), award MAXIMUM ±3 per stat with minimal narrative. Reward only specific, named, actionable geopolitical moves with significant outcomes.
 NEVER use markdown. Return ONLY valid JSON. Use only these exact nation IDs: usa,china,russia,germany,india,brazil,uk,france,japan,turkey,iran,australia,saudi,nigeria,s_africa,mexico,indonesia,s_korea,argentina,pakistan,canada,ukraine,poland,italy,spain,netherlands,sweden,romania,greece,israel,uae,iraq,qatar,vietnam,thailand,philippines,malaysia,kazakhstan,bangladesh,taiwan,n_korea,myanmar,ethiopia,kenya,algeria,morocco,d_congo,ghana,angola,colombia,chile,venezuela,peru,norway,finland,denmark,switzerland,belgium,austria,portugal,czech,slovakia,hungary,ireland,croatia,serbia,bulgaria,albania,north_macedonia,montenegro,bosnia,slovenia,lithuania,latvia,estonia,belarus,moldova,iceland,luxembourg,malta,cyprus,kosovo,egypt,syria,lebanon,jordan,kuwait,bahrain,oman,yemen,libya,tunisia,armenia,azerbaijan,georgia,uzbekistan,turkmenistan,kyrgyzstan,tajikistan,afghanistan,singapore,sri_lanka,nepal,mongolia,cambodia,laos,brunei,timor_leste,maldives,bhutan,new_zealand,papua_ng,fiji,sudan,south_sudan,somalia,tanzania,uganda,rwanda,mozambique,zimbabwe,zambia,madagascar,senegal,ivory_coast,cameroon,mali,niger,burkina,chad,guinea,caf,congo_rep,gabon,namibia,botswana,malawi,eritrea,djibouti,togo,benin,mauritania,sierra_leone,liberia,mauritius,eswatini,lesotho,cape_verde,seychelles,comoros,guinea_bissau,gambia,eq_guinea,sao_tome,ecuador,bolivia,paraguay,uruguay,cuba,dom_rep,haiti,guatemala,honduras,el_salvador,nicaragua,costa_rica,panama,jamaica,trinidad,guyana,belize,suriname,barbados. Current world stability: ${DG.stability}% (${dStabilityTier(DG.stability).label}). Tone your narrative accordingly — low stability means cascading consequences, high stability means contained outcomes.`;
   const userPrompt=`PLAYER: ${n.name} (${n.region})
 STATS: Influence:${Math.round(s.influence)}, Economy:${Math.round(s.economy)}, Military:${Math.round(s.military)}, Resources:${Math.round(s.resources)}, Land:${Math.round(s.land)}
@@ -3171,30 +3299,73 @@ function dCheckDefeat(){
 }
 
 function dEndGame(){
-  setTimeout(()=>{
+  setTimeout(async()=>{
     const s=DG.cs,st=DG.startStats;
+    const turns=DS.turnLimit||12;
     const tot=DSC_KEYS.reduce((a,k)=>a+s[k],0);
     const totSt=DSC_KEYS.reduce((a,k)=>a+st[k],0);
     const avg=totSt/5;
-    const mult=1+Math.max(0,(50-avg)/50)*0.55;
-    const score=Math.round((tot/totSt)*100*mult);
-    const terrBonus=DG.territories.length*8;
-    const final=score+terrBonus;
-    const label=final>=155?'World Hegemon':final>=130?'Regional Superpower':final>=110?'Rising Power':final>=90?'Holding Ground':'Declining Power';
-    document.getElementById('dslbl').textContent=DG.playerNation.name+' · '+label;
+    // Difficulty multiplier (harder nation = higher reward)
+    const diffMult=1+Math.max(0,(50-avg)/50)*0.55;
+    // Growth ratio normalized to 12-turn baseline
+    const turnFactor=12/Math.max(1,turns);
+    const rawRatio=(tot/totSt);
+    const score=Math.round(rawRatio*100*diffMult*Math.sqrt(turnFactor));
+    const terrBonus=DG.territories.length*10;
+    const allyBonus=DG.allies.length*3;
+    const stabBonus=DG.stability>=70?5:DG.stability>=50?2:0;
+    const final=score+terrBonus+allyBonus+stabBonus;
+    // Label thresholds scale with turn count
+    const t=turns/12;
+    const label=final>=Math.round(155*t)?'World Hegemon':final>=Math.round(130*t)?'Regional Superpower':final>=Math.round(110*t)?'Rising Power':final>=Math.round(90*t)?'Holding Ground':'Declining Power';
+    document.getElementById('dslbl').textContent=(DG_MODE==='daily'?'◈ DAILY · ':'')+DG.playerNation.name+' · '+label;
     document.getElementById('dfsc').textContent=final;
-    document.getElementById('dsbrk').innerHTML=
-      'Final: Inf '+Math.round(s.influence)+', Eco '+Math.round(s.economy)+', Mil '+Math.round(s.military)+', Res '+Math.round(s.resources)+', Land '+Math.round(s.land)+'\n\n'+
-      'Starting total: '+Math.round(totSt)+' → Final: '+Math.round(tot)+'\n'+
-      'Territories: '+DG.territories.length+' (+'+terrBonus+' pts)\nUnderdog multiplier: ×'+mult.toFixed(2);
+    // Build narrative summary
+    const summary=buildGameSummary(s,st,tot,totSt,terrBonus,allyBonus,stabBonus,final,label,diffMult);
+    document.getElementById('dsbrk').innerHTML=summary;
     document.getElementById('dsov').style.display='flex';
+    // Daily: submit to leaderboard
+    if(DG_MODE==='daily')await submitDailyScore(final,label);
   },800);
+}
+
+function buildGameSummary(s,st,tot,totSt,terrBonus,allyBonus,stabBonus,final,label,diffMult){
+  const n=DG.playerNation;
+  const turns=DS.turnLimit||12;
+  const statLines=DSC_KEYS.map(k=>{
+    const d=Math.round(s[k]-st[k]);
+    const dStr=d>0?'+'+d:String(d);
+    return k.charAt(0).toUpperCase()+k.slice(1)+': '+Math.round(st[k])+'→'+Math.round(s[k])+' ('+dStr+')';
+  }).join(' · ');
+  const topAllies=DG.allies.slice(0,3).map(id=>DG.nations[id]?.name||id).join(', ')||'None';
+  const topRivals=DG.enemies.slice(0,3).map(id=>DG.nations[id]?.name||id).join(', ')||'None';
+  const terrs=DG.territories.map(id=>DG.nations[id]?.name||id).join(', ')||'None';
+  const stabArc=DG.stabHistory&&DG.stabHistory.length>1
+    ?DG.stabHistory[0]+'% → '+DG.stabHistory[DG.stabHistory.length-1]+'% ('+dStabilityTier(DG.stability).label+')'
+    :DG.stability+'%';
+  return `<div style="font-family:var(--font-mono);font-size:9px;line-height:1.9;letter-spacing:.5px;">
+<b style="color:var(--text);">CAMPAIGN RECORD</b>
+${n.name} · ${turns} Turns · ${DG.year}
+
+<b style="color:var(--text);">STATS</b>
+${statLines}
+
+<b style="color:var(--text);">DIPLOMACY</b>
+Allies: ${topAllies}
+Enemies: ${topRivals}
+Territories: ${terrs}
+Stability: ${stabArc}
+
+<b style="color:var(--text);">SCORE BREAKDOWN</b>
+Growth: ${Math.round((tot/totSt-1)*100)}%  ×${diffMult.toFixed(2)} difficulty
+Territory: +${terrBonus}  Allies: +${allyBonus}  Stability: +${stabBonus}
+</div>`;
 }
 
 dWC(document.getElementById('dmi'));
 
 // ── SETTINGS ──────────────────────────────────────────────
-const DEFAULT_SETTINGS={eventFrequency:0.30,eventIntensity:1.0,turnLimit:20,statCap:200,apiKey:'',model:'deepseek-chat',surpriseAttack:true};
+const DEFAULT_SETTINGS={eventFrequency:0.30,eventIntensity:1.0,turnLimit:12,statCap:200,apiKey:'',model:'deepseek-chat',surpriseAttack:true};
 let DS=JSON.parse(localStorage.getItem('dominion_settings')||'null')||{...DEFAULT_SETTINGS};
 // Ensure all keys present (handles old saved settings missing new keys)
 Object.keys(DEFAULT_SETTINGS).forEach(k=>{if(DS[k]===undefined)DS[k]=DEFAULT_SETTINGS[k];});
@@ -3215,6 +3386,19 @@ function openSettings(){
   document.getElementById('s-apikey').value=DS.apiKey||'';
   const sb=document.getElementById('s-surprise');
   if(sb){sb.classList.toggle('on',!!DS.surpriseAttack);sb.textContent=DS.surpriseAttack?'ON':'OFF';}
+  // Account section — only when signed in
+  const acctSec=document.getElementById('smod-account-section');
+  if(acctSec){
+    if(currentUser){
+      acctSec.style.display='block';
+      const uInput=document.getElementById('s-username');
+      if(uInput)uInput.value=_currentUsername||'';
+      const uStatus=document.getElementById('username-status');
+      if(uStatus)uStatus.textContent='';
+    }else{
+      acctSec.style.display='none';
+    }
+  }
   document.getElementById('settings-modal').style.display='flex';
 }
 function closeSettings(){document.getElementById('settings-modal').style.display='none';}
@@ -3227,6 +3411,17 @@ function applySettings(){
   DS.model=document.getElementById('s-model').value;
   DS.surpriseAttack=document.getElementById('s-surprise')?.classList.contains('on')||false;
   saveSettings();
+  // Save username if signed in and changed
+  if(currentUser&&fbDb){
+    const uInput=document.getElementById('s-username');
+    const newName=(uInput?.value||'').trim().slice(0,24);
+    if(newName&&newName!==_currentUsername){
+      _currentUsername=newName;
+      fbDb.collection('users').doc(currentUser.uid).set({username:newName},{merge:true})
+        .then(()=>{const st=document.getElementById('username-status');if(st){st.textContent='Saved ✓';st.style.color='var(--green)';}})
+        .catch(e=>{const st=document.getElementById('username-status');if(st){st.textContent='Save failed';st.style.color='var(--red)';}});
+    }
+  }
   closeSettings();
   // Update turn counter display
   const tl=document.getElementById('dhtl');if(tl)tl.textContent=DS.turnLimit;
@@ -3235,6 +3430,25 @@ function applySettings(){
 
 // ── FIREBASE AUTH + FIRESTORE ──────────────────────────────
 let fbApp=null,fbAuth=null,fbDb=null,currentUser=null,authMode='signin';
+let _currentUsername=null; // cached display name for leaderboard
+
+async function _loadUsername(uid){
+  if(!fbDb||!uid)return;
+  try{
+    const doc=await fbDb.collection('users').doc(uid).get();
+    if(doc.exists&&doc.data().username){
+      _currentUsername=doc.data().username;
+    }else{
+      // Default to the part before @ in email
+      _currentUsername=currentUser?.email?.split('@')[0]||null;
+    }
+    // Refresh any visible labels that show the username
+    const lbl=document.getElementById('intro-user-label');
+    if(lbl&&currentUser)lbl.textContent=_currentUsername||currentUser.email||'Signed in';
+    const ml=document.getElementById('mob-user-label');
+    if(ml&&currentUser)ml.textContent=_currentUsername||currentUser.email||'';
+  }catch(e){_currentUsername=currentUser?.email?.split('@')[0]||null;}
+}
 
 function initFirebase(){
   try{
@@ -3254,10 +3468,12 @@ function initFirebase(){
         if(btn){btn.textContent='SIGN OUT';btn.onclick=fbSignOut;}
         if(saveBtn)saveBtn.style.display='inline-block';
         if(loadBtn)loadBtn.style.display='inline-block';
+        _loadUsername(user.uid); // load cached display name
       }else{
         if(btn){btn.textContent='SIGN IN';btn.onclick=openAuthModal;}
         if(saveBtn)saveBtn.style.display='none';
         if(loadBtn)loadBtn.style.display='none';
+        _currentUsername=null;
       }
     });
   }catch(e){console.warn('Firebase not configured:',e.message);}
@@ -3271,6 +3487,12 @@ function openAuthModal(){
   document.getElementById('auth-error').style.display='none';
   document.getElementById('auth-email-input').value='';
   document.getElementById('auth-pass-input').value='';
+  const urow=document.getElementById('auth-username-row');
+  if(urow)urow.style.display='none';
+  const uInput=document.getElementById('auth-username-input');
+  if(uInput)uInput.value='';
+  const sbtn=document.querySelector('#auth-modal .sbtn');
+  if(sbtn)sbtn.textContent='SIGN IN';
   document.getElementById('auth-modal').style.display='flex';
 }
 function closeAuthModal(){document.getElementById('auth-modal').style.display='none';}
@@ -3281,6 +3503,12 @@ function toggleAuthMode(){
   document.getElementById('auth-toggle-text').textContent=isReg?'Have an account? ':'No account? ';
   document.getElementById('auth-toggle-btn').textContent=isReg?'SIGN IN':'REGISTER';
   document.getElementById('auth-error').style.display='none';
+  // Show username field only during registration
+  const urow=document.getElementById('auth-username-row');
+  if(urow)urow.style.display=isReg?'flex':'none';
+  // Update submit button label
+  const sbtn=document.querySelector('#auth-modal .sbtn');
+  if(sbtn)sbtn.textContent=isReg?'CREATE ACCOUNT':'SIGN IN';
 }
 function showAuthError(msg){
   const el=document.getElementById('auth-error');
@@ -3295,7 +3523,14 @@ async function authSubmit(){
     if(authMode==='signin'){
       await fbAuth.signInWithEmailAndPassword(email,pass);
     }else{
-      await fbAuth.createUserWithEmailAndPassword(email,pass);
+      const cred=await fbAuth.createUserWithEmailAndPassword(email,pass);
+      // Save optional username on registration
+      const uInput=document.getElementById('auth-username-input');
+      const uName=(uInput?.value||'').trim().slice(0,24)||email.split('@')[0];
+      if(fbDb&&cred.user){
+        _currentUsername=uName;
+        await fbDb.collection('users').doc(cred.user.uid).set({username:uName},{merge:true});
+      }
     }
     closeAuthModal();
   }catch(e){showAuthError(e.message||'Authentication failed');}
@@ -3311,6 +3546,86 @@ async function authGoogle(){
 async function fbSignOut(){
   if(!fbAuth)return;
   await fbAuth.signOut();
+}
+
+// ── LEADERBOARD ────────────────────────────────────────────
+async function submitDailyScore(final, label){
+  if(!currentUser||!fbDb)return;
+  try{
+    const uid=currentUser.uid;
+    const username=_currentUsername||currentUser.email?.split('@')[0]||'Anonymous';
+    const nationId=DG.playerNation?.id||'';
+    const nationName=DG.playerNation?.name||'';
+    const dk=getDailyDateKey();
+    const wk=getDailyWeekKey();
+    const entry={
+      score:final, label, username, nationId, nationName,
+      savedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    // Daily: one entry per user per day — keep best score
+    const dailyRef=fbDb.collection('leaderboard').doc('daily').collection(dk).doc(uid);
+    const dSnap=await dailyRef.get();
+    if(!dSnap.exists||dSnap.data().score<final) await dailyRef.set(entry);
+    // Weekly: best daily score per user for the week
+    const weeklyRef=fbDb.collection('leaderboard').doc('weekly').collection(wk).doc(uid);
+    const wSnap=await weeklyRef.get();
+    if(!wSnap.exists||wSnap.data().score<final) await weeklyRef.set(entry);
+    // All-time: personal best per user
+    const alltimeRef=fbDb.collection('leaderboard').doc('alltime').collection('scores').doc(uid);
+    const aSnap=await alltimeRef.get();
+    if(!aSnap.exists||aSnap.data().score<final) await alltimeRef.set(entry);
+  }catch(e){console.warn('Leaderboard submit failed:',e.message);}
+}
+
+let _lbTab='daily';
+function setLbTab(tab){
+  _lbTab=tab;
+  document.querySelectorAll('[data-lb]').forEach(b=>b.classList.toggle('active',b.dataset.lb===tab));
+  renderLeaderboard();
+}
+
+async function renderLeaderboard(){
+  const el=document.getElementById('an-leaderboard');
+  if(!el)return;
+  if(!fbDb||!currentUser){
+    el.innerHTML='<div class="mat-empty">Sign in to view leaderboards</div>';
+    return;
+  }
+  el.innerHTML='<div class="mat-empty" style="color:var(--text-dim);">Loading…</div>';
+  try{
+    let col;
+    if(_lbTab==='daily'){
+      col=fbDb.collection('leaderboard').doc('daily').collection(getDailyDateKey());
+    }else if(_lbTab==='weekly'){
+      col=fbDb.collection('leaderboard').doc('weekly').collection(getDailyWeekKey());
+    }else{
+      col=fbDb.collection('leaderboard').doc('alltime').collection('scores');
+    }
+    const snap=await col.orderBy('score','desc').limit(25).get();
+    if(snap.empty){
+      el.innerHTML='<div class="mat-empty">No scores yet — complete a Daily Challenge to appear here!</div>';
+      return;
+    }
+    const rows=[];
+    snap.forEach(doc=>{
+      const d=doc.data();
+      rows.push({uid:doc.id,score:d.score||0,label:d.label||'',username:d.username||'Anonymous',nationName:d.nationName||'',isMe:doc.id===currentUser.uid});
+    });
+    const medals=['🥇','🥈','🥉'];
+    el.innerHTML=rows.map((r,i)=>`
+      <div style="display:grid;grid-template-columns:28px 1fr 64px 52px;gap:6px;align-items:center;padding:5px 4px;border-bottom:1px solid var(--border);${r.isMe?'background:rgba(0,200,255,0.05);border-radius:2px;':''}">
+        <span style="font-family:var(--font-mono);font-size:${i<3?'13':'9'}px;color:${i===0?'var(--amber)':i===1?'var(--text-mid)':i===2?'var(--amber-dim)':'var(--text-dim)'};text-align:center;">${i<3?medals[i]:'#'+(i+1)}</span>
+        <div style="min-width:0;">
+          <div style="font-family:var(--font-sans);font-size:11px;color:${r.isMe?'var(--cyan)':'var(--text)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.username}${r.isMe?' ◀':''}</div>
+          <div style="font-family:var(--font-mono);font-size:8px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.nationName}</div>
+        </div>
+        <div style="font-family:var(--font-mono);font-size:8px;color:var(--text-dim);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.label}</div>
+        <div style="font-family:var(--font-mono);font-size:12px;color:${r.isMe?'var(--cyan)':'var(--amber)'};text-align:right;font-weight:600;">${r.score}</div>
+      </div>`).join('');
+  }catch(e){
+    el.innerHTML='<div class="mat-empty" style="color:var(--red)">Failed to load. Check your connection.</div>';
+    console.warn('Leaderboard render error:',e);
+  }
 }
 
 // ── SAVE / LOAD ────────────────────────────────────────────
@@ -3338,6 +3653,7 @@ function buildSavePayload(label, useServerTs=true){
     chatHistory: (DG.chatHistory||[]).slice(-12),
     history: DG.history||[],
     surpriseAttacksLeft: DG.surpriseAttacksLeft??3,
+    mode: DG_MODE||'campaign',
   };
 }
 
@@ -3448,6 +3764,7 @@ function _applyLoadData(d){
   DG.chatHistory=d.chatHistory||[];
   DG.history=d.history||[{turn:0,...DG.cs}];
   DG.surpriseAttacksLeft=d.surpriseAttacksLeft??3;
+  DG_MODE=d.mode||'campaign';
   DNS.forEach(n=>{if(!DG.nations[n.id])DG.nations[n.id]={...n,cs:{...n.stats}};});
   DG.nations[nation.id]={...nation,cs:{...DG.cs}};
   return true;
@@ -3517,6 +3834,9 @@ window.addEventListener('load',()=>{
   const tl=document.getElementById('dhtl');if(tl)tl.textContent=DS.turnLimit;
   const it=document.getElementById('intro-turns');if(it)it.textContent=DS.turnLimit||20;
   const it2=document.getElementById('intro-turns2');if(it2)it2.textContent=DS.turnLimit||20;
+  // Set today's date on the mode picker
+  const ddb=document.getElementById('daily-date-badge');
+  if(ddb)ddb.textContent=getDailyDateKey();
   // Try to restore a running session before showing start screen
   if(!lsRestoreSession()){
     syncIntroAuth(null); // show "not signed in" until Firebase resolves

@@ -1,0 +1,127 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────────────────────
+
+    // True if the request comes from a signed-in user
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // True if the signed-in user is the owner of the resource
+    // (uid is the document-ID wildcard, so /users/{uid} and /leaderboard/…/{uid}
+    //  enforce that you can only write your own document)
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Leaderboard entry validation
+    function validLeaderboardEntry() {
+      let d = request.resource.data;
+      return d.score is number
+          && d.score >= 0
+          && d.score <= 10000          // sanity ceiling (adjust if needed)
+          && d.username is string
+          && d.username.size() >= 1
+          && d.username.size() <= 24
+          && d.nationName is string
+          && d.label is string;
+    }
+
+    // Username field validation (used on user-profile writes)
+    function validUsername() {
+      let d = request.resource.data;
+      return !('username' in d)
+          || (d.username is string
+              && d.username.size() >= 1
+              && d.username.size() <= 24);
+    }
+
+
+    // ── User profiles ─────────────────────────────────────────────────────────
+    //
+    // /users/{uid}
+    //   Stores: { username: string }
+    //   Only the account owner may read or update their own profile.
+    //
+    match /users/{uid} {
+      allow read:   if isOwner(uid);
+      allow create: if isOwner(uid) && validUsername();
+      allow update: if isOwner(uid) && validUsername();
+      allow delete: if false;  // profiles are never deleted from the client
+
+
+      // /users/{uid}/saves/{gameId}
+      //   Full game-save documents written by buildSavePayload().
+      //   Only the owner may read, create, update, or delete their own saves.
+      //
+      match /saves/{gameId} {
+        allow read:   if isOwner(uid);
+        allow create: if isOwner(uid);
+        allow update: if isOwner(uid);
+        allow delete: if isOwner(uid);  // pruning old non-starred saves
+      }
+
+
+      // /users/{uid}/directives/{docId}
+      //   Per-turn directive audit log written by saveDirective().
+      //   Append-only from the client (no deletes, no updates).
+      //
+      match /directives/{docId} {
+        allow read:   if isOwner(uid);
+        allow create: if isOwner(uid);
+        allow update: if false;  // directives are immutable once written
+        allow delete: if false;
+      }
+    }
+
+
+    // ── Leaderboard ───────────────────────────────────────────────────────────
+    //
+    // Structure (nested collections under a single top-level "leaderboard" doc):
+    //
+    //   /leaderboard/daily/{YYYY-MM-DD}/{uid}
+    //   /leaderboard/weekly/{YYYY-Www}/{uid}
+    //   /leaderboard/alltime/scores/{uid}
+    //
+    // Reads  — public (no sign-in required) so anyone can view rankings.
+    // Writes — authenticated users may only write their own entry
+    //          (document ID must equal their uid) and the payload must pass
+    //          validLeaderboardEntry().  The "best-score-only" gate is
+    //          enforced in client code; rules simply prevent spoofing another
+    //          user's entry.
+    //
+
+    // Daily leaderboard: one document per user per calendar day
+    match /leaderboard/daily/{dateKey}/{uid} {
+      allow read:   if true;
+      allow create: if isOwner(uid) && validLeaderboardEntry();
+      allow update: if isOwner(uid) && validLeaderboardEntry();
+      allow delete: if false;
+    }
+
+    // Weekly leaderboard: one document per user per ISO week
+    match /leaderboard/weekly/{weekKey}/{uid} {
+      allow read:   if true;
+      allow create: if isOwner(uid) && validLeaderboardEntry();
+      allow update: if isOwner(uid) && validLeaderboardEntry();
+      allow delete: if false;
+    }
+
+    // All-time leaderboard: one document per user (personal best)
+    match /leaderboard/alltime/scores/{uid} {
+      allow read:   if true;
+      allow create: if isOwner(uid) && validLeaderboardEntry();
+      allow update: if isOwner(uid) && validLeaderboardEntry();
+      allow delete: if false;
+    }
+
+
+    // ── Catch-all: deny everything not explicitly matched ─────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+  }
+}

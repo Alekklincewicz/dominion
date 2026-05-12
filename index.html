@@ -469,8 +469,25 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 }
 .sbtn:hover:not(:disabled){background:rgba(224,168,42,0.14);border-color:var(--amber);}
 .sbtn:disabled{background:var(--bg2);color:var(--text-dim);border-color:var(--border);cursor:not-allowed;}
-.fs{font-family:var(--font-mono);font-size:54px;font-weight:400;color:var(--amber);margin:10px 0;letter-spacing:4px;}
+.fs{font-family:var(--font-mono);font-size:54px;font-weight:400;color:var(--amber);margin:10px 0;letter-spacing:4px;text-align:center;}
 .sn{color:var(--text-dim);font-family:var(--font-mono);font-size:10px;line-height:1.85;margin-bottom:14px;letter-spacing:0.5px;}
+
+/* ── DEBRIEF CARD ── */
+.db-section{font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--amber-dim);text-transform:uppercase;margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.db-section:first-child{margin-top:4px;}
+.db-stat-row{display:grid;grid-template-columns:76px 30px 10px 30px 1fr 40px;gap:5px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);}
+.db-stat-row:last-child{border-bottom:none;}
+.db-stat-name{font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-transform:capitalize;}
+.db-val{font-family:var(--font-mono);font-size:10px;color:var(--text-mid);text-align:right;}
+.db-arrow{font-family:var(--font-mono);font-size:8px;color:var(--border2);text-align:center;}
+.db-bar-track{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.db-bar-fill{height:100%;border-radius:3px;}
+.db-delta{font-family:var(--font-mono);font-size:10px;font-weight:600;text-align:right;letter-spacing:.5px;min-width:36px;}
+.db-total-row{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:9px;color:var(--text-dim);padding:8px 0 2px;}
+.db-narrative{font-family:var(--font-serif);font-size:12.5px;color:var(--text-mid);line-height:1.8;padding:12px 14px;background:var(--bg2);border-radius:3px;border-left:2px solid var(--amber-dim);margin-bottom:2px;}
+.db-score-row{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:9px;color:var(--text-dim);padding:4px 0;border-bottom:1px solid var(--border);}
+.db-score-row:last-child{border-bottom:none;}
+.db-score-row.db-score-total{color:var(--amber);font-size:11px;padding-top:8px;margin-top:4px;border-top:1px solid var(--amber-dim);}
 
 /* Thinking dots */
 .thk{display:inline-flex;gap:4px;align-items:center;}
@@ -883,7 +900,7 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       </div>
       <div class="smod-row">
         <label class="smod-label">Turn Limit</label>
-        <div class="smod-ctrl"><input type="range" class="smod-range" id="s-turns" min="10" max="60" value="20" oninput="document.getElementById('turns-val').textContent=this.value"><span class="smod-val" id="turns-val">20</span></div>
+        <div class="smod-ctrl"><input type="range" class="smod-range" id="s-turns" min="10" max="60" value="12" oninput="document.getElementById('turns-val').textContent=this.value"><span class="smod-val" id="turns-val">12</span></div>
       </div>
       <div class="smod-row">
         <label class="smod-label">Stat Cap</label>
@@ -1143,12 +1160,12 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
 
   <!-- Game Over -->
   <div class="overlay" id="dsov" style="display:none;">
-    <div class="ocard">
-      <h2>DEBRIEF</h2>
-      <div id="dslbl" style="font-family:var(--font-mono);color:var(--text-dim);font-size:9px;letter-spacing:3px;margin-bottom:2px;text-transform:uppercase;"></div>
-      <div class="fs" id="dfsc"></div>
-      <div class="sn" id="dsbrk"></div>
-      <button class="sbtn" onclick="location.reload()">New Campaign</button>
+    <div class="ocard" style="max-width:540px;width:96%;text-align:left;max-height:90vh;display:flex;flex-direction:column;gap:0;padding:24px 26px;">
+      <h2 style="text-align:center;margin-bottom:2px;">DEBRIEF</h2>
+      <div id="dslbl" style="font-family:var(--font-mono);color:var(--text-dim);font-size:9px;letter-spacing:3px;margin-bottom:0;text-transform:uppercase;text-align:center;"></div>
+      <div class="fs" id="dfsc" style="margin:8px 0;font-size:48px;"></div>
+      <div id="dsbrk" style="overflow-y:auto;flex:1;min-height:0;padding-right:4px;"></div>
+      <button class="sbtn" style="margin-top:16px;flex-shrink:0;" onclick="location.reload()">New Campaign</button>
     </div>
   </div>
 
@@ -1191,7 +1208,7 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <h1>DOMINION</h1>
     </div>
     <div class="hst">
-      <div class="tb">TURN <span id="dht">1</span>/<span id="dhtl">20</span></div>
+      <div class="tb">TURN <span id="dht">1</span>/<span id="dhtl">12</span></div>
       <div class="sp-divider"></div>
       <div class="sp-info"><span class="sp-key">YEAR</span><b id="dyear">—</b></div>
       <div class="sp-info"><span class="sp-key">STABILITY</span><b id="dstab">—</b></div>
@@ -1710,8 +1727,8 @@ function syncIntroAuth(user){
   const btn=document.getElementById('intro-auth-btn');
   const it=document.getElementById('intro-turns');
   const it2=document.getElementById('intro-turns2');
-  if(it)it.textContent=DS.turnLimit||20;
-  if(it2)it2.textContent=DS.turnLimit||20;
+  if(it)it.textContent=DS.turnLimit||12;
+  if(it2)it2.textContent=DS.turnLimit||12;
   if(!lbl||!btn)return;
   if(user){
     lbl.textContent=_currentUsername||user.email||user.displayName||'Signed in';
@@ -2474,7 +2491,7 @@ function _saAdvanceTurn(){
   DG.history.push({turn:DG.turn,...DG.cs});
   lsSaveSession();
   if(dCheckDefeat())return;
-  if(DG.turn<(DS.turnLimit||20)){
+  if(DG.turn<(DS.turnLimit||12)){
     DG.turn++;dRHeader();dRStats();dUpdateRelations();
     dLog('turn','Turn '+DG.turn);
     if(DG.sel)dInspect(DG.sel);
@@ -2759,8 +2776,13 @@ function dRStats(){
 }
 
 function dRHeader(){
+  const limit=DS.turnLimit||12;
   document.getElementById('dht').textContent=DG.turn;
+  const tl=document.getElementById('dhtl');if(tl)tl.textContent=limit;
   const m=document.getElementById('mob-dht');if(m)m.textContent=DG.turn;
+  // Keep the mob turn badge visible label in sync too
+  const mtb=document.getElementById('mob-turn-badge');
+  if(mtb)mtb.title='Turn '+DG.turn+' of '+limit;
 }
 
 const _LOG_TYPE_MAP={pl:'directive',rs:'directive',ps:'directive',spy:'directive',ev:'events',nt:'info',wn:'info',turn:'turn'};
@@ -3062,7 +3084,7 @@ async function dSubmit(){
     DG.busy=false;el.disabled=false;el.value='';
     dWC(el);document.getElementById('dexb').textContent='EXECUTE →';
     if(dCheckDefeat())return;
-    if(DG.turn<(DS.turnLimit||20)){
+    if(DG.turn<(DS.turnLimit||12)){
       DG.turn++;dRHeader();dRStats();dUpdateRelations();
       dLog('turn','Turn '+DG.turn);
       if(DG.sel)dInspect(DG.sel);
@@ -3101,7 +3123,7 @@ VAGUE DIRECTIVE RULE: If the directive is generic or non-specific (e.g. "collect
 NEVER use markdown. Return ONLY valid JSON. Use only these exact nation IDs: usa,china,russia,germany,india,brazil,uk,france,japan,turkey,iran,australia,saudi,nigeria,s_africa,mexico,indonesia,s_korea,argentina,pakistan,canada,ukraine,poland,italy,spain,netherlands,sweden,romania,greece,israel,uae,iraq,qatar,vietnam,thailand,philippines,malaysia,kazakhstan,bangladesh,taiwan,n_korea,myanmar,ethiopia,kenya,algeria,morocco,d_congo,ghana,angola,colombia,chile,venezuela,peru,norway,finland,denmark,switzerland,belgium,austria,portugal,czech,slovakia,hungary,ireland,croatia,serbia,bulgaria,albania,north_macedonia,montenegro,bosnia,slovenia,lithuania,latvia,estonia,belarus,moldova,iceland,luxembourg,malta,cyprus,kosovo,egypt,syria,lebanon,jordan,kuwait,bahrain,oman,yemen,libya,tunisia,armenia,azerbaijan,georgia,uzbekistan,turkmenistan,kyrgyzstan,tajikistan,afghanistan,singapore,sri_lanka,nepal,mongolia,cambodia,laos,brunei,timor_leste,maldives,bhutan,new_zealand,papua_ng,fiji,sudan,south_sudan,somalia,tanzania,uganda,rwanda,mozambique,zimbabwe,zambia,madagascar,senegal,ivory_coast,cameroon,mali,niger,burkina,chad,guinea,caf,congo_rep,gabon,namibia,botswana,malawi,eritrea,djibouti,togo,benin,mauritania,sierra_leone,liberia,mauritius,eswatini,lesotho,cape_verde,seychelles,comoros,guinea_bissau,gambia,eq_guinea,sao_tome,ecuador,bolivia,paraguay,uruguay,cuba,dom_rep,haiti,guatemala,honduras,el_salvador,nicaragua,costa_rica,panama,jamaica,trinidad,guyana,belize,suriname,barbados. Current world stability: ${DG.stability}% (${dStabilityTier(DG.stability).label}). Tone your narrative accordingly — low stability means cascading consequences, high stability means contained outcomes.`;
   const userPrompt=`PLAYER: ${n.name} (${n.region})
 STATS: Influence:${Math.round(s.influence)}, Economy:${Math.round(s.economy)}, Military:${Math.round(s.military)}, Resources:${Math.round(s.resources)}, Land:${Math.round(s.land)}
-TURN: ${DG.turn}/${DS.turnLimit||20}
+TURN: ${DG.turn}/${DS.turnLimit||12}
 ALLIES: ${DG.allies.map(id=>DG.nations[id]?.name||id).join(', ')||'None'}
 AT WAR: ${DG.enemies.map(id=>DG.nations[id]?.name||id).join(', ')||'None'}
 TERRITORIES: ${DG.territories.map(id=>DG.nations[id]?.name||id).join(', ')||'None'}
@@ -3332,34 +3354,159 @@ function dEndGame(){
 function buildGameSummary(s,st,tot,totSt,terrBonus,allyBonus,stabBonus,final,label,diffMult){
   const n=DG.playerNation;
   const turns=DS.turnLimit||12;
-  const statLines=DSC_KEYS.map(k=>{
-    const d=Math.round(s[k]-st[k]);
-    const dStr=d>0?'+'+d:String(d);
-    return k.charAt(0).toUpperCase()+k.slice(1)+': '+Math.round(st[k])+'→'+Math.round(s[k])+' ('+dStr+')';
-  }).join(' · ');
-  const topAllies=DG.allies.slice(0,3).map(id=>DG.nations[id]?.name||id).join(', ')||'None';
-  const topRivals=DG.enemies.slice(0,3).map(id=>DG.nations[id]?.name||id).join(', ')||'None';
-  const terrs=DG.territories.map(id=>DG.nations[id]?.name||id).join(', ')||'None';
-  const stabArc=DG.stabHistory&&DG.stabHistory.length>1
-    ?DG.stabHistory[0]+'% → '+DG.stabHistory[DG.stabHistory.length-1]+'% ('+dStabilityTier(DG.stability).label+')'
-    :DG.stability+'%';
-  return `<div style="font-family:var(--font-mono);font-size:9px;line-height:1.9;letter-spacing:.5px;">
-<b style="color:var(--text);">CAMPAIGN RECORD</b>
-${n.name} · ${turns} Turns · ${DG.year}
 
-<b style="color:var(--text);">STATS</b>
-${statLines}
+  // ── Per-stat data ─────────────────────────────────────────
+  const deltas=DSC_KEYS.map(k=>({
+    key:k,
+    start:Math.round(st[k]||0),
+    end:Math.round(s[k]||0),
+    delta:Math.round((s[k]||0)-(st[k]||0))
+  }));
+  const netDelta=Math.round(tot-totSt);
+  const netPct=Math.round((tot/Math.max(1,totSt)-1)*100);
+  const sorted=[...deltas].sort((a,b)=>b.delta-a.delta);
+  const best=sorted[0];
+  const worst=sorted[sorted.length-1];
+  const maxAbs=Math.max(...deltas.map(d=>Math.abs(d.delta)),1);
 
-<b style="color:var(--text);">DIPLOMACY</b>
-Allies: ${topAllies}
-Enemies: ${topRivals}
-Territories: ${terrs}
-Stability: ${stabArc}
+  // ── Diplomacy data ────────────────────────────────────────
+  const allyNames=DG.allies.slice(0,4).map(id=>DG.nations[id]?.name||id);
+  const enemyNames=DG.enemies.slice(0,4).map(id=>DG.nations[id]?.name||id);
+  const terrNames=DG.territories.map(id=>DG.nations[id]?.name||id);
+  const stabStart=DG.stabHistory?.[0]??78;
+  const stabEnd=DG.stability;
+  const stabTrend=stabEnd-stabStart;
+  const stabTier=dStabilityTier(stabEnd);
 
-<b style="color:var(--text);">SCORE BREAKDOWN</b>
-Growth: ${Math.round((tot/totSt-1)*100)}%  ×${diffMult.toFixed(2)} difficulty
-Territory: +${terrBonus}  Allies: +${allyBonus}  Stability: +${stabBonus}
-</div>`;
+  // ── Stat performance section ──────────────────────────────
+  const statRows=deltas.map(d=>{
+    const col=DSC[d.key];
+    const pct=Math.min(100,Math.round(Math.abs(d.delta)/maxAbs*100));
+    const barCol=d.delta>0?'var(--green)':d.delta<0?'var(--red)':'var(--border2)';
+    const sign=d.delta>0?'+':'';
+    return `<div class="db-stat-row">
+      <span class="db-stat-name" style="color:${col}">${d.key}</span>
+      <span class="db-val">${d.start}</span>
+      <span class="db-arrow">→</span>
+      <span class="db-val" style="color:${col}">${d.end}</span>
+      <div class="db-bar-track"><div class="db-bar-fill" style="width:${pct}%;background:${barCol};"></div></div>
+      <span class="db-delta" style="color:${barCol}">${sign}${d.delta}</span>
+    </div>`;
+  }).join('');
+
+  const netCol=netDelta>0?'var(--green)':netDelta<0?'var(--red)':'var(--text-dim)';
+  const netSign=netDelta>0?'+':'';
+  const totalRow=`<div class="db-total-row">
+    <span>Total power <span style="color:var(--text)">${Math.round(totSt)}</span> → <span style="color:var(--text)">${Math.round(tot)}</span></span>
+    <span style="color:${netCol};font-size:11px;font-weight:600;">${netSign}${netDelta} (${netPct>0?'+':''}${netPct}%)</span>
+  </div>`;
+
+  // ── Diplomacy section ─────────────────────────────────────
+  const stabLine=`${stabStart}% → ${stabEnd}% <span style="color:${stabTrend>=5?'var(--green)':stabTrend<=-5?'var(--red)':'var(--text-dim)'}">${stabTrend>0?'▲':''}${stabTrend<0?'▼':''} ${stabTier.label}</span>`;
+  function diploRow(label,val,col){
+    return `<div class="db-score-row"><span>${label}</span><span style="color:${col||'var(--text)'};">${val}</span></div>`;
+  }
+  const diplomacySection=
+    diploRow('Allies',allyNames.length>0?allyNames.join(', '):'None','var(--green)')+
+    diploRow('Enemies',enemyNames.length>0?enemyNames.join(', '):'None','var(--red)')+
+    diploRow('Territories',terrNames.length>0?terrNames.join(', '):'None','var(--purple)')+
+    `<div class="db-score-row"><span>Stability</span><span style="font-family:var(--font-mono);font-size:9px;">${stabLine}</span></div>`;
+
+  // ── Score breakdown section ───────────────────────────────
+  const growthScore=final-terrBonus-allyBonus-stabBonus;
+  const scoreSection=
+    `<div class="db-score-row"><span>Growth (${netPct>0?'+':''}${netPct}% × ${diffMult.toFixed(2)} difficulty)</span><span style="color:var(--text)">${growthScore}</span></div>`+
+    (terrBonus?`<div class="db-score-row"><span>Territory control (${terrNames.length} × 10)</span><span style="color:var(--purple)">+${terrBonus}</span></div>`:'')+
+    (allyBonus?`<div class="db-score-row"><span>Alliance network (${allyNames.length} × 3)</span><span style="color:var(--green)">+${allyBonus}</span></div>`:'')+
+    (stabBonus?`<div class="db-score-row"><span>Stability bonus</span><span style="color:var(--cyan)">+${stabBonus}</span></div>`:'')+
+    `<div class="db-score-row db-score-total"><span>FINAL SCORE</span><span>${final}</span></div>`;
+
+  // ── Narrative ─────────────────────────────────────────────
+  const narrative=_buildNarrative(n,turns,label,best,worst,netPct,allyNames,enemyNames,terrNames,stabTrend,stabTier);
+
+  return `
+    <div class="db-section">Stat Performance</div>
+    ${statRows}
+    ${totalRow}
+    <div class="db-section">Campaign Narrative</div>
+    <div class="db-narrative">${narrative}</div>
+    <div class="db-section">Diplomacy &amp; Territory</div>
+    ${diplomacySection}
+    <div class="db-section">Score Breakdown</div>
+    ${scoreSection}
+  `;
+}
+
+function _buildNarrative(n,turns,label,best,worst,netPct,allyNames,enemyNames,terrNames,stabTrend,stabTier){
+  const grew=netPct>0;
+  const isDaily=DG_MODE==='daily';
+  let t='';
+
+  // Opening
+  t+=`${n.name} was led for ${turns} turns`;
+  if(isDaily) t+=' as today\'s Daily Challenge nation';
+  t+=`. `;
+
+  // Overall trajectory
+  if(netPct>=20){
+    t+=`The mandate was a resounding success — total power climbed ${netPct>0?'+':''}${netPct}%, a commanding expansion by any measure. `;
+  }else if(netPct>=5){
+    t+=`The nation grew steadily over the campaign, with total power rising ${netPct}%. `;
+  }else if(netPct>=-5){
+    t+=`Total power remained largely unchanged (${netPct>0?'+':''}${netPct}%), a holding action more than a breakthrough. `;
+  }else if(netPct>=-20){
+    t+=`The campaign ended in contraction — total power fell ${netPct}%, leaving the nation weaker than it started. `;
+  }else{
+    t+=`A difficult chapter. Power collapsed by ${Math.abs(netPct)}%, and the nation exits in a weakened state. `;
+  }
+
+  // Best stat
+  if(best.delta>0){
+    t+=`${best.key.charAt(0).toUpperCase()+best.key.slice(1)} was the standout, gaining +${best.delta} — the clearest result of your directives. `;
+  }
+
+  // Worst stat
+  if(worst.delta<0){
+    t+=`${worst.key.charAt(0).toUpperCase()+worst.key.slice(1)} suffered the most, falling by ${worst.delta}`;
+    if(worst.delta<-20) t+=` — a serious structural weakness that demands attention`;
+    t+=`. `;
+  }
+
+  // Diplomacy
+  if(allyNames.length>=3){
+    t+=`Diplomatically, the tenure was active: alliances with ${allyNames.slice(0,2).join(', ')} and others broadened the nation\'s reach. `;
+  }else if(allyNames.length>0){
+    t+=`${allyNames.join(' and ')} emerged as ${allyNames.length>1?'allies':'an ally'} over the course of the campaign. `;
+  }
+  if(enemyNames.length>0){
+    t+=`${enemyNames.slice(0,2).join(' and ')} became adversaries${enemyNames.length>2?', among others':''}. `;
+  }
+  if(allyNames.length===0&&enemyNames.length===0){
+    t+=`The nation stayed diplomatically isolated — no alliances formed and no formal enemies made. `;
+  }
+
+  // Territories
+  if(terrNames.length>0){
+    t+=`${terrNames.slice(0,2).join(' and ')}${terrNames.length>2?' and others':''} came under your control. `;
+  }
+
+  // Stability
+  if(stabTrend>=12){
+    t+=`World stability improved significantly under your leadership. `;
+  }else if(stabTrend<=-12){
+    t+=`Global stability declined throughout the campaign, a sign of escalating tensions. `;
+  }else{
+    t+=`Stability held at ${stabTier.label.toLowerCase()} levels through the final turn. `;
+  }
+
+  // Closing line keyed to result label
+  if(label==='World Hegemon') t+=`History will record ${n.name} as a hegemon of this era.`;
+  else if(label==='Regional Superpower') t+=`${n.name} cemented itself as the dominant force in its sphere.`;
+  else if(label==='Rising Power') t+=`${n.name} ends stronger than it began — a foundation laid for future dominance.`;
+  else if(label==='Holding Ground') t+=`${n.name} survived the pressures of geopolitics, though little was gained.`;
+  else t+=`The weight of command proved too great — ${n.name} exits this chapter diminished.`;
+
+  return t;
 }
 
 dWC(document.getElementById('dmi'));
@@ -3832,8 +3979,8 @@ document.addEventListener('visibilitychange',()=>{
 window.addEventListener('load',()=>{
   setTimeout(initFirebase,200);
   const tl=document.getElementById('dhtl');if(tl)tl.textContent=DS.turnLimit;
-  const it=document.getElementById('intro-turns');if(it)it.textContent=DS.turnLimit||20;
-  const it2=document.getElementById('intro-turns2');if(it2)it2.textContent=DS.turnLimit||20;
+  const it=document.getElementById('intro-turns');if(it)it.textContent=DS.turnLimit||12;
+  const it2=document.getElementById('intro-turns2');if(it2)it2.textContent=DS.turnLimit||12;
   // Set today's date on the mode picker
   const ddb=document.getElementById('daily-date-badge');
   if(ddb)ddb.textContent=getDailyDateKey();

@@ -822,6 +822,19 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
   .ocard{padding:20px;}
   .ocard h2{font-size:20px;letter-spacing:7px;}
   .modal-content{padding:16px;}
+
+  /* Debrief card — narrower stat grid on small screens */
+  #dsov .ocard{padding:18px 14px;}
+  .db-stat-row{grid-template-columns:60px 24px 8px 24px 1fr 34px;gap:3px;padding:4px 0;}
+  .db-stat-name{font-size:8px;letter-spacing:.5px;}
+  .db-val{font-size:9px;}
+  .db-delta{font-size:9px;min-width:28px;}
+  .db-section{font-size:7px;letter-spacing:2px;margin:12px 0 6px;}
+  .db-narrative{font-size:11.5px;padding:10px 11px;line-height:1.75;}
+  .db-score-row{font-size:8px;}
+  .db-score-row.db-score-total{font-size:10px;}
+  .db-total-row{font-size:8px;}
+  .fs{font-size:38px!important;}
 }
 
 /* ── PWA INSTALL PROMPT ── */
@@ -1164,7 +1177,7 @@ body{margin:0;background:var(--bg0);overflow:hidden;}
       <h2 style="text-align:center;margin-bottom:2px;">DEBRIEF</h2>
       <div id="dslbl" style="font-family:var(--font-mono);color:var(--text-dim);font-size:9px;letter-spacing:3px;margin-bottom:0;text-transform:uppercase;text-align:center;"></div>
       <div class="fs" id="dfsc" style="margin:8px 0;font-size:48px;"></div>
-      <div id="dsbrk" style="overflow-y:auto;flex:1;min-height:0;padding-right:4px;"></div>
+      <div id="dsbrk" style="overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;min-height:0;padding-right:4px;"></div>
       <button class="sbtn" style="margin-top:16px;flex-shrink:0;" onclick="location.reload()">New Campaign</button>
     </div>
   </div>
@@ -3438,75 +3451,118 @@ function buildGameSummary(s,st,tot,totSt,terrBonus,allyBonus,stabBonus,final,lab
 }
 
 function _buildNarrative(n,turns,label,best,worst,netPct,allyNames,enemyNames,terrNames,stabTrend,stabTier){
-  const grew=netPct>0;
-  const isDaily=DG_MODE==='daily';
-  let t='';
+  const dirs=DG.directives||[];
+  const yearStart=DG.yearStart||new Date().getFullYear();
+  const yearEnd=DG.year;
 
-  // Opening
-  t+=`${n.name} was led for ${turns} turns`;
-  if(isDaily) t+=' as today\'s Daily Challenge nation';
-  t+=`. `;
+  // Extract first complete sentence from an AI narrative string
+  function firstSentence(text){
+    if(!text)return'';
+    const m=text.match(/[^.!?]+[.!?]/);
+    return m?m[0].trim():text.slice(0,130).trim();
+  }
+  // Quote + truncate a directive string for inline use
+  function q(move){
+    if(!move)return'';
+    const s=move.trim().replace(/["""]/g,"'");
+    return(s.length>52?s.slice(0,49)+'…':s);
+  }
+  // Resolve a nation id to its display name
+  function nName(id){return DG.nations[id]?.name||id;}
 
-  // Overall trajectory
-  if(netPct>=20){
-    t+=`The mandate was a resounding success — total power climbed ${netPct>0?'+':''}${netPct}%, a commanding expansion by any measure. `;
-  }else if(netPct>=5){
-    t+=`The nation grew steadily over the campaign, with total power rising ${netPct}%. `;
-  }else if(netPct>=-5){
-    t+=`Total power remained largely unchanged (${netPct>0?'+':''}${netPct}%), a holding action more than a breakthrough. `;
-  }else if(netPct>=-20){
-    t+=`The campaign ended in contraction — total power fell ${netPct}%, leaving the nation weaker than it started. `;
-  }else{
-    t+=`A difficult chapter. Power collapsed by ${Math.abs(netPct)}%, and the nation exits in a weakened state. `;
+  // Find key turns
+  let biggestDir=null,biggestAbs=0;
+  let bigGainDir=null,bigGainVal=0;
+  let bigLossDir=null,bigLossVal=0;
+  dirs.forEach(d=>{
+    const sc=d.result?.statChanges||{};
+    const absV=Object.values(sc).reduce((s,v)=>s+Math.abs(v||0),0);
+    const netV=Object.values(sc).reduce((s,v)=>s+(v||0),0);
+    if(absV>biggestAbs){biggestAbs=absV;biggestDir=d;}
+    if(netV>bigGainVal){bigGainVal=netV;bigGainDir=d;}
+    if(netV<bigLossVal){bigLossVal=netV;bigLossDir=d;}
+  });
+  const allyDirs=dirs.filter(d=>(d.result?.newAllies||[]).length>0);
+  const enemyDirs=dirs.filter(d=>(d.result?.newEnemies||[]).length>0);
+  const terrDirs=dirs.filter(d=>(d.result?.territoryGained||[]).length>0);
+
+  const parts=[];
+
+  // 1. Opening context
+  const yearRange=yearStart!==yearEnd?`from ${yearStart} to ${yearEnd}`:`in ${yearStart}`;
+  parts.push(`${n.name} was governed across ${turns} turns — ${yearRange}${DG_MODE==='daily'?', as today\'s Daily Challenge':''}.`);
+
+  // 2. Pivotal directive + its first AI narrative sentence
+  if(biggestDir&&biggestDir.move){
+    const fs=firstSentence(biggestDir.result?.narrative);
+    if(fs){
+      parts.push(`The most consequential directive came in ${biggestDir.year}: "${q(biggestDir.move)}." ${fs}`);
+    }else{
+      parts.push(`The defining move came in turn ${biggestDir.turn}: "${q(biggestDir.move)}."`);
+    }
+  }else if(dirs.length===0){
+    parts.push(netPct>0
+      ?`The campaign concluded with ${n.name} in a stronger position than it began.`
+      :`The campaign left ${n.name} weaker than when it started.`);
   }
 
-  // Best stat
-  if(best.delta>0){
-    t+=`${best.key.charAt(0).toUpperCase()+best.key.slice(1)} was the standout, gaining +${best.delta} — the clearest result of your directives. `;
+  // 3. Alliances formed
+  if(allyDirs.length===1){
+    const fd=allyDirs[0];
+    parts.push(`A formal alliance with ${nName(fd.result.newAllies[0])} was forged through "${q(fd.move)}."`);
+  }else if(allyDirs.length>=2){
+    const names=allyDirs.slice(0,2).map(d=>nName(d.result.newAllies[0]));
+    const extra=allyDirs.length>2?` and ${allyDirs.length-2} others`:'';
+    parts.push(`Alliance ties were built with ${names.join(', ')}${extra} across the campaign.`);
   }
 
-  // Worst stat
-  if(worst.delta<0){
-    t+=`${worst.key.charAt(0).toUpperCase()+worst.key.slice(1)} suffered the most, falling by ${worst.delta}`;
-    if(worst.delta<-20) t+=` — a serious structural weakness that demands attention`;
-    t+=`. `;
+  // 4. Enemies made
+  if(enemyDirs.length===1){
+    const fd=enemyDirs[0];
+    parts.push(`Relations with ${nName(fd.result.newEnemies[0])} deteriorated into open hostility — "${q(fd.move)}" the trigger.`);
+  }else if(enemyDirs.length>=2){
+    parts.push(`${enemyDirs.length} nations became adversaries over the mandate, ${nName(enemyDirs[0].result.newEnemies[0])} among the first.`);
   }
 
-  // Diplomacy
-  if(allyNames.length>=3){
-    t+=`Diplomatically, the tenure was active: alliances with ${allyNames.slice(0,2).join(', ')} and others broadened the nation\'s reach. `;
-  }else if(allyNames.length>0){
-    t+=`${allyNames.join(' and ')} emerged as ${allyNames.length>1?'allies':'an ally'} over the course of the campaign. `;
-  }
-  if(enemyNames.length>0){
-    t+=`${enemyNames.slice(0,2).join(' and ')} became adversaries${enemyNames.length>2?', among others':''}. `;
-  }
-  if(allyNames.length===0&&enemyNames.length===0){
-    t+=`The nation stayed diplomatically isolated — no alliances formed and no formal enemies made. `;
+  // 5. Territory acquired
+  if(terrDirs.length===1){
+    const td=terrDirs[0];
+    parts.push(`${nName(td.result.territoryGained[0])} came under ${n.name}'s control in ${td.year}.`);
+  }else if(terrDirs.length>=2){
+    const tName=nName(terrDirs[0].result.territoryGained[0]);
+    parts.push(`${n.name} expanded its reach — ${tName} and ${terrDirs.length-1} other${terrDirs.length>2?'s':''} brought under control.`);
   }
 
-  // Territories
-  if(terrNames.length>0){
-    t+=`${terrNames.slice(0,2).join(' and ')}${terrNames.length>2?' and others':''} came under your control. `;
+  // 6. Worst setback (only if severe and a different turn)
+  if(bigLossDir&&bigLossVal<-12&&bigLossDir!==biggestDir){
+    const fs=firstSentence(bigLossDir.result?.narrative);
+    if(fs) parts.push(`The sharpest setback arrived in ${bigLossDir.year}: ${fs}`);
   }
 
-  // Stability
+  // 7. Secondary high point if notably different from the biggest event
+  if(bigGainDir&&bigGainVal>8&&bigGainDir!==biggestDir&&bigGainDir!==bigLossDir){
+    const fs=firstSentence(bigGainDir.result?.narrative);
+    if(fs) parts.push(`A secondary breakthrough came in ${bigGainDir.year}: ${fs}`);
+  }
+
+  // 8. Stability arc — only if clearly directional
   if(stabTrend>=12){
-    t+=`World stability improved significantly under your leadership. `;
+    parts.push(`World stability improved under the mandate — a sign of measured, deliberate governance.`);
   }else if(stabTrend<=-12){
-    t+=`Global stability declined throughout the campaign, a sign of escalating tensions. `;
-  }else{
-    t+=`Stability held at ${stabTier.label.toLowerCase()} levels through the final turn. `;
+    parts.push(`Global stability eroded throughout — a reflection of tensions ${n.name} either triggered or failed to contain.`);
   }
 
-  // Closing line keyed to result label
-  if(label==='World Hegemon') t+=`History will record ${n.name} as a hegemon of this era.`;
-  else if(label==='Regional Superpower') t+=`${n.name} cemented itself as the dominant force in its sphere.`;
-  else if(label==='Rising Power') t+=`${n.name} ends stronger than it began — a foundation laid for future dominance.`;
-  else if(label==='Holding Ground') t+=`${n.name} survived the pressures of geopolitics, though little was gained.`;
-  else t+=`The weight of command proved too great — ${n.name} exits this chapter diminished.`;
+  // 9. Closing verdict keyed to result label
+  const closings={
+    'World Hegemon':`History will record ${n.name} as a hegemon of this era — its reach unmatched, its legacy cemented across continents.`,
+    'Regional Superpower':`${n.name} emerged as the dominant force in its sphere. A commanding result by any historical measure.`,
+    'Rising Power':`${n.name} ends this chapter stronger than it began — the groundwork for future dominance has been laid.`,
+    'Holding Ground':`${n.name} endured the pressures of geopolitics, though little was gained beyond survival.`,
+    'Declining Power':`The weight of command proved too great. ${n.name} exits this chapter diminished — a cautionary record of misread opportunity.`
+  };
+  parts.push(closings[label]||'');
 
-  return t;
+  return parts.filter(Boolean).join(' ');
 }
 
 dWC(document.getElementById('dmi'));
